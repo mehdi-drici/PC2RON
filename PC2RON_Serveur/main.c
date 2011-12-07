@@ -50,14 +50,12 @@ void* THREAD_serveur(void *args) {
         */
         
         // Envoi de trame
-        Donnee d = creer_chaine("totoèé");
+        Donnee d = creer_chaine("Salut élève de l'éducation !");
         Donnee d2 = creer_entierSigne1(200);
         Donnee d3 = creer_entierSigne2(33000);
         Donnee d4 = creer_entierNonSigne1(-10);
         Donnee d5 = creer_entierNonSigne2(65639);
         Donnee d6 = creer_entierNonSigne4(-20);
-        
-        
         
         printf("\nTaille (c) = %d\n", d.chaine.taille);
         
@@ -78,9 +76,12 @@ void* THREAD_serveur(void *args) {
         ajouter_donnee(&t2, d2);
         ajouter_donnee(&t2, d3);
  
-        envoyer_trame(csock, t);
-        envoyer_trame(csock, t2);
-
+        //envoyer_trame(csock, t);
+        //envoyer_trame(csock, t2);
+        
+        Trame tRecue;
+        recevoir_trame(csock, &tRecue);
+        afficher_trame(tRecue);
         printf("----------------------\n\n");
         printf("Deconnexion du client\n");
         printf("----------------------\n");

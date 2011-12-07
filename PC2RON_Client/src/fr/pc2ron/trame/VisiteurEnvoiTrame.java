@@ -25,11 +25,12 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 			out.writeByte(trame.getTypeFanion());
 			out.writeByte(trame.getId());
 			out.writeByte(trame.getNbDonnees());
-		
+
 			for (int i=0; i < trame.getNbDonnees(); i++) {
 				trame.getDonnees().get(i).accept(this, out);
 			}
 		} catch (IOException e) {
+                    System.out.println("Erreur Visit Trame !");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -41,8 +42,9 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 	@Override
 	public IVisitable visit(IEntierSigne1 donnee, DataOutputStream out) {
 		try {
-			out.write(ETypeDonnee.ENTIER_SIGNE1.getType());
+			out.writeByte(ETypeDonnee.ENTIER_SIGNE1.getType());
 			out.writeByte(donnee.getEntier());
+                       
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -53,7 +55,7 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 	@Override
 	public IVisitable visit(IEntierSigne2 donnee, DataOutputStream out) {
 		try {
-			out.write(ETypeDonnee.ENTIER_SIGNE2.getType());
+			out.writeByte(ETypeDonnee.ENTIER_SIGNE2.getType());
 			out.writeShort(donnee.getEntier());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -65,7 +67,7 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 	@Override
 	public IVisitable visit(IEntierSigne4 donnee, DataOutputStream out) {
 		try {
-			out.write(ETypeDonnee.ENTIER_SIGNE4.getType());
+			out.writeByte(ETypeDonnee.ENTIER_SIGNE4.getType());
 			out.writeInt(donnee.getEntier());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -151,8 +153,13 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 	@Override
 	public IVisitable visit(IChaine donnee, DataOutputStream out) {
 		try {
+                        System.out.println("Taille chaine visit = " + donnee.getChaine().
+                                                                            getBytes("UTF-8").length);
+                        short taille = (short) donnee.getChaine().getBytes("UTF-8").length;
+                        
 			out.write(ETypeDonnee.CHAINE.getType());
-			out.writeShort(donnee.getChaine().getBytes("UTF-8").length);
+			//out.writeShort(donnee.getChaine().getBytes("UTF-8").length);
+                        out.writeShort(taille);
 			out.write(donnee.getChaine().getBytes());
 			//out.writeUTF(donnee.getChaine());
 		} catch (IOException e) {

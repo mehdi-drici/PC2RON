@@ -1,5 +1,6 @@
 package fr.pc2ron;
 
+import fr.pc2ron.interfaces.IChaine;
 import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
@@ -26,7 +27,7 @@ public class Client {
             ITrameFactory trameFactory = TrameFactory.getInstance();
             IProtocole protocole = Protocole.getInstance();
             
-    		IDonnee chaine = donneeFactory.getChaine("bonjour à toi l'élève");  // OK
+    		IChaine chaine = donneeFactory.getChaine("bonjour à toi l'élève");  // OK
             IDonnee int8 = donneeFactory.getEntierSigne1((byte) 127);		  // OK
             IDonnee int16 = donneeFactory.getEntierSigne2((short) 32767); // OK
             IDonnee int32 = donneeFactory.getEntierSigne4(-2147483648);	      // OK
@@ -37,12 +38,14 @@ public class Client {
             
     		ArrayList<IDonnee> donnees = new ArrayList<IDonnee>();
     		donnees.add(chaine);
-    		donnees.add(int8);
-    		donnees.add(int16);
-    		donnees.add(int32);
-    		donnees.add(uint8);
-    		donnees.add(uint16);
-    		donnees.add(uint32);
+    		//donnees.add(int8);
+                //donnees.add(int8);
+    		//donnees.add(int16);
+                //donnees.add(int16);
+    		//donnees.add(int32);
+    		//donnees.add(uint8);
+    		//donnees.add(uint16);
+    		//donnees.add(uint32);
     		//donnees.add(flottant);
     		
     		ArrayList<IDonnee> donnees2 = new ArrayList<IDonnee>();
@@ -62,12 +65,12 @@ public class Client {
             
             System.out.println("Trame 1 = " + trame.toString());
             System.out.println("Trame 2 = " + trame2.toString());
-            
+            System.out.println("Taille T1 = "  + chaine.getChaine().getBytes().length);
             envoi.visit(trame, out);
             
             Thread.sleep(2000);
             
-            envoi.visit(trame2, out);
+            //envoi.visit(trame2, out);
             
             //Thread.sleep(1000);
             

@@ -115,7 +115,7 @@ Donnee creer_chaine(char texte[]){
     // allocation mémoire pour le stockage 
     // de taille+1 cacractères (caractère '\0')
     //memmove(&d.chaine.texte[0], texte, strlen(texte) + 1);
-    d.chaine.texte = calloc(strlen(texte) + 1, sizeof(char));
+    d.chaine.texte = calloc(strlen(texte), sizeof(char));
     
     strcpy(d.chaine.texte, texte);
     return d;
@@ -150,7 +150,8 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     
     nbOctetsRecus = recv(sock, &octet, 1, 0);
     
-    //printf("nbOctetsRecus = %d\n", nbOctetsRecus);
+    printf("nbOctetsRecus = %d\n", nbOctetsRecus);
+    printf("fanion = %d\n", octet);
     
     if (nbOctetsRecus < 0) {
         //debug
@@ -169,7 +170,7 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
         //printf("Socket fermee !\n");
         //debug
         //fprintf (stderr, "Socket %d fermee\n", sock);
-        close (sock);
+        //close (sock);
         return ERR_RCPT_TRAME;
     }
     
@@ -194,7 +195,10 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
 
     // Recuperation de l'id
     nbOctetsRecus = recv(sock, &octet, 1, 0);
-
+    
+    printf("\nnbOctetsRecus = %d\n", nbOctetsRecus);
+    printf("id = %d\n", octet);
+    
     if (nbOctetsRecus < 0)
     {
         exit(errno);
@@ -204,7 +208,10 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
 
     // Recuperation du nombre de donnees
     nbOctetsRecus = recv(sock, &octet, 1, 0);
-
+    
+    printf("\nnbOctetsRecus = %d\n", nbOctetsRecus);
+    printf("nb de donnees = %d\n", octet);
+    
     if (nbOctetsRecus < 0)
     {
         return ERR_RCPT_NB_DONNEES_TRAME;
@@ -219,6 +226,8 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     // Recuperation des donnees
     for (i=0; i < taille; i++)
     {
+        printf("\ni = %d\n", i);
+        
         recevoir_donnee(sock, &d);
         ajouter_donnee(trameRecue, d);
     }
@@ -228,17 +237,19 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
 
 ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue) {
     ERREUR_DONNEE erreur;
-    char type;
+    unsigned char type;
 
     // Recuperation du type de donnee
     if (recv(sock, &type, 1, 0) < 0)
-    {
+    {   
         return ERR_RCPT_TYPE_DONNEE;
     }
 
     // Ajout du type de donnee
     donneeRecue->type = type;
 
+    printf("TYPE = %x\n", donneeRecue->type);
+    
     switch(type)
     {
     case ENTIER_SIGNE1:
@@ -266,6 +277,7 @@ ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue) {
         break;
 
     case CHAINE:
+        printf("CHAINE\n");
         erreur = recevoir_chaine(sock, donneeRecue);
         break;
 
@@ -387,18 +399,24 @@ ERREUR_DONNEE recevoir_entierNonSigne4(SOCKET sock, Donnee* donneeRecue) {
 
 ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
     unsigned char* chaineRecue;
-    short taille, tailleConvertie;
+    unsigned short taille, tailleConvertie;
 
     int nbOctetsRecus = 0;
 
     // Reception de la taille de la chaine
-    nbOctetsRecus = recv(sock, (char*)&taille, 2, 0);
+    nbOctetsRecus = recv(sock, (char*)&taille, 2, MSG_WAITALL);
     if(nbOctetsRecus < 0)
     {
         return ERR_RCPT_TAILLE_CHAINE;
     }
     tailleConvertie = ntohs(taille);
-
+    
+    //debug
+    printf("Nb d'octets = %d\n", nbOctetsRecus);
+    printf("Taille chaine = %d\n", tailleConvertie);
+    printf("Taille chaine non convertie = %d\n", taille);
+    //debug
+    
     // Reception du contenu de la chaine
     chaineRecue = calloc(tailleConvertie, sizeof(char));
     nbOctetsRecus = recv(sock, chaineRecue, tailleConvertie, 0);
