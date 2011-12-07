@@ -140,7 +140,7 @@ typedef struct Donnee {
                         // on specifie bien que c'est un tableau
                         // de caracteres pour pouvoir connaitre
                         // sa taille par la suite
-			char texte[0]; 
+			unsigned char* texte; 
 		} chaine;
 
 		/* flottant */

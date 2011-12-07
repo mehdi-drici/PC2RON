@@ -110,18 +110,22 @@ public class Chaine implements IChaine {
 //		return ETypeDonnee.CHAINE.getTaille() + nbOctets + 3;
 //	}
 	
+    @Override
 	public String toString() {
         String s = "";
         
         try {
             byte[] octets = this.getChaine().getBytes(CHARSET);
             s = ETypeDonnee.CHAINE.getStringType() + " \"";
+            short octetNonSigne;
             
             for(int i=0; i < octets.length; i++) {
+                octetNonSigne = (short) (octets[i] & 0xff);
+                        
                 if(octets[i] < 32 || octets[i] > 127) {
-                   s += "\\x" + Integer.toHexString(octets[i]).toUpperCase(); 
+                    s += "\\x" + Integer.toHexString(octetNonSigne).toUpperCase(); 
                 } else {
-                   s += (char) (octets[i]); 
+                   s += (char) (octetNonSigne); 
                 }
             }
            

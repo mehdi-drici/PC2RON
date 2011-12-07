@@ -25,6 +25,7 @@ void* THREAD_serveur(void *args) {
         pthread_mutex_unlock(&MUTEX_compteur);
         
         Trame trameRecue;
+        int i = 0;
         int continuer = 1;
         int erreur = 0;
         /*
@@ -49,14 +50,14 @@ void* THREAD_serveur(void *args) {
         */
         
         // Envoi de trame
-        Donnee d = creer_chaine("toto");
+        Donnee d = creer_chaine("totoèé");
         Donnee d2 = creer_entierSigne1(200);
         Donnee d3 = creer_entierSigne2(33000);
         Donnee d4 = creer_entierNonSigne1(-10);
         Donnee d5 = creer_entierNonSigne2(65639);
         Donnee d6 = creer_entierNonSigne4(-20);
         
-        afficher_donnee(d);
+        
         
         printf("\nTaille (c) = %d\n", d.chaine.taille);
         
@@ -72,27 +73,14 @@ void* THREAD_serveur(void *args) {
         ajouter_donnee(&t, d6);
         afficher_trame(t);
         
-        //debug
-        //printf("t.fanion = %d\n", t.fanion);
-
-        //printf("t.id = %d\n", t.id);
-        //printf("t.nbDonnees = %d\n", t.nbDonnees);
-        //debug
-
-
-        //envoyer_donnee(csock, d);
-        //envoyer_donnee(csock, d);
-        //envoyer_donnee(csock, d2);
-        //envoyer_donnee(csock, d2);
-        
+        Trame t2 = creer_trame(15);
+        ajouter_donnee(&t2, d);
+        ajouter_donnee(&t2, d2);
+        ajouter_donnee(&t2, d3);
+ 
         envoyer_trame(csock, t);
-        
-        // Resultat attendu: { 0x0A, string "toto" }
-        //afficher_donnee(d);
-        //afficher_donnee(d2);
-        //afficher_trame(t);
-        
-        //afficher_trame(t);
+        envoyer_trame(csock, t2);
+
         printf("----------------------\n\n");
         printf("Deconnexion du client\n");
         printf("----------------------\n");

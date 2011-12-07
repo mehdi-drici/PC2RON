@@ -114,8 +114,8 @@ Donnee creer_chaine(char texte[]){
     
     // allocation mémoire pour le stockage 
     // de taille+1 cacractères (caractère '\0')
-    memmove(&d.chaine.texte[0], texte, strlen(texte));
-    //d.chaine.texte = calloc(strlen(texte) + 1, sizeof(char));
+    //memmove(&d.chaine.texte[0], texte, strlen(texte) + 1);
+    d.chaine.texte = calloc(strlen(texte) + 1, sizeof(char));
     
     strcpy(d.chaine.texte, texte);
     return d;
@@ -697,8 +697,6 @@ ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
 }
 
 ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine) {
-    char* foo = "bavo";
-    
     int nbOctetsRecus = 0;
     
     // On convertit data en entier big-endian
@@ -827,9 +825,10 @@ void afficher_donnee(Donnee donnee) {
 
     case CHAINE:
         printf("string \"");
+        
         for(i=0; i < donnee.chaine.taille; i++) {
             if(donnee.chaine.texte[i] < 32 || donnee.chaine.texte[i] > 127) {
-                printf("\\x%X", donnee.chaine.texte[i]);
+                printf("\\x%d", donnee.chaine.texte[i]);
             } else {
                 printf("%c", donnee.chaine.texte[i]);
             }
