@@ -38,14 +38,14 @@ public class Client {
             
     		ArrayList<IDonnee> donnees = new ArrayList<IDonnee>();
     		donnees.add(chaine);
-    		//donnees.add(int8);
-                //donnees.add(int8);
-    		//donnees.add(int16);
-                //donnees.add(int16);
-    		//donnees.add(int32);
-    		//donnees.add(uint8);
-    		//donnees.add(uint16);
-    		//donnees.add(uint32);
+    		donnees.add(int8);
+                donnees.add(int8);
+    		donnees.add(int16);
+                donnees.add(int16);
+    		donnees.add(int32);
+    		donnees.add(uint8);
+    		donnees.add(uint16);
+    		donnees.add(uint32);
     		//donnees.add(flottant);
     		
     		ArrayList<IDonnee> donnees2 = new ArrayList<IDonnee>();

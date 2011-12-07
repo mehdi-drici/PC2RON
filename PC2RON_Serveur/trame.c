@@ -143,33 +143,17 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
 
     trameRecue->nbDonnees = 0;
 
-    // Recuperation du fanion
-    //debug
-    //printf("Reception...\n");
-    //debug
-    
     nbOctetsRecus = recv(sock, &octet, 1, 0);
     
     printf("nbOctetsRecus = %d\n", nbOctetsRecus);
     printf("fanion = %d\n", octet);
     
     if (nbOctetsRecus < 0) {
-        //debug
-        //printf("Erreur reception fanion !\n");
-        //debug
-        //debug
-        //printf("Socket fermee !\n");
-        //debug
-        //fprintf (stderr, "Socket %d fermee\n", sock);
         close (sock);
         return ERR_RCPT_FANION_TRAME;
     }
     
     if (nbOctetsRecus == 0) {
-        //debug
-        //printf("Socket fermee !\n");
-        //debug
-        //fprintf (stderr, "Socket %d fermee\n", sock);
         //close (sock);
         return ERR_RCPT_TRAME;
     }
@@ -185,7 +169,6 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     case TRAME_SPECIALE:
         // Fermeture de connexion
         shutdown(sock, SHUT_RDWR);
-        //close(sock);
         return SUCCES;
 
     default:
@@ -219,10 +202,6 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
 
     taille = octet;
     
-    //debug
-    //printf("Taille = %d\n", taille);
-    //debug
-    
     // Recuperation des donnees
     for (i=0; i < taille; i++)
     {
@@ -247,8 +226,6 @@ ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue) {
 
     // Ajout du type de donnee
     donneeRecue->type = type;
-
-    printf("TYPE = %x\n", donneeRecue->type);
     
     switch(type)
     {
@@ -277,7 +254,6 @@ ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue) {
         break;
 
     case CHAINE:
-        printf("CHAINE\n");
         erreur = recevoir_chaine(sock, donneeRecue);
         break;
 
@@ -297,7 +273,7 @@ ERREUR_DONNEE recevoir_entierSigne1(SOCKET sock, Donnee* donneeRecue) {
     int nbOctetsRecus = 0;
 
     // On récupère l'entier
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, 0);
+    nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
 
     if (nbOctetsRecus < 0)
     {
@@ -314,7 +290,7 @@ ERREUR_DONNEE recevoir_entierSigne2(SOCKET sock, Donnee* donneeRecue) {
     int nbOctetsRecus = 0;
 
     // On récupère l'entier en big-endian
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, 0);
+    nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
 
     if (nbOctetsRecus < 0)
     {
@@ -334,7 +310,7 @@ ERREUR_DONNEE recevoir_entierSigne4(SOCKET sock, Donnee* donneeRecue) {
     int nbOctetsRecus = 0;
 
     // On récupère l'entier en big-endian
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, 0);
+    nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
 
     if (nbOctetsRecus < 0)
     {
@@ -351,7 +327,7 @@ ERREUR_DONNEE recevoir_entierNonSigne1(SOCKET sock, Donnee* donneeRecue) {
     int nbOctetsRecus = 0;
 
     // On récupère l'entier en big-endian
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, 0);
+    nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
 
     if (nbOctetsRecus < 0)
     {
@@ -368,7 +344,7 @@ ERREUR_DONNEE recevoir_entierNonSigne2(SOCKET sock, Donnee* donneeRecue) {
     int nbOctetsRecus = 0;
 
     // On récupère l'entier en big-endian
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, 0);
+    nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
 
     if (nbOctetsRecus < 0)
     {
@@ -385,7 +361,7 @@ ERREUR_DONNEE recevoir_entierNonSigne4(SOCKET sock, Donnee* donneeRecue) {
     int nbOctetsRecus = 0;
 
     // On récupère l'entier en big-endian
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, 0);
+    nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
 
     if (nbOctetsRecus < 0)
     {
@@ -411,25 +387,18 @@ ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
     }
     tailleConvertie = ntohs(taille);
     
-    //debug
-    printf("Nb d'octets = %d\n", nbOctetsRecus);
-    printf("Taille chaine = %d\n", tailleConvertie);
-    printf("Taille chaine non convertie = %d\n", taille);
-    //debug
-    
     // Reception du contenu de la chaine
     chaineRecue = calloc(tailleConvertie, sizeof(char));
     nbOctetsRecus = recv(sock, chaineRecue, tailleConvertie, 0);
-
+    
     if (nbOctetsRecus < 0)
     {
         return ERR_RCPT_CHAINE;
     }
 
     (donneeRecue->chaine).taille = tailleConvertie;
-    //(donneeRecue->chaine).texte = chaineRecue;
+    (donneeRecue->chaine).texte = chaineRecue;
     strcpy((donneeRecue->chaine).texte, chaineRecue);
-    
     return SUCCES;
 }
 
@@ -467,51 +436,25 @@ ERREUR_DONNEE recevoir_flottant(SOCKET sock, Donnee* donneeRecue) {
  * Envoi d'une trame
  * @todo implementation
  */
-ERREUR_TRAME envoyer_trame(SOCKET sock, Trame trameEnvoyee) {
-    char buffer = 1;
-    
+ERREUR_TRAME envoyer_trame(SOCKET sock, Trame trameEnvoyee) {    
     int nbOctetsEnvoyes = 0;
     int i = 0;
-
-    //debug
-/*
-    printf("trameEnvoyee.fanion = %d\n", trameEnvoyee.fanion);
-    printf("@trameEnvoyee.fanion = %p\n", &(trameEnvoyee.fanion));
-    printf("trameEnvoyee.id = %d\n", trameEnvoyee.id);
-    printf("trameEnvoyee.nbDonnees = %d\n", trameEnvoyee.nbDonnees);
-*/
-    //debug
     
     // Envoi de l'entête
     nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee.fanion), 1, 0);
     //nbOctetsEnvoyes = send(sock, (char*)&(buffer), 1, 0);
     
-    if (nbOctetsEnvoyes < 0)
-    {
-        //debug
-        printf("ERREUR d'envoi du fanion !!!!\n");
-        //debug
-        
+    if (nbOctetsEnvoyes < 0) {
         return ERR_ENVOI_ENTETE_TRAME;
     }
     
     nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee.id), 1, 0);
-    if (nbOctetsEnvoyes < 0)
-    {
-        //debug
-        printf("ERREUR d'envoi de l'ID !!!!\n");
-        //debug
-        
+    if (nbOctetsEnvoyes < 0) {    
         return ERR_ENVOI_ENTETE_TRAME;
     }
     
     nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee.nbDonnees), 1, 0);
-    if (nbOctetsEnvoyes < 0)
-    {
-        //debug
-        printf("ERREUR d'envoi du nombre de donnees !!!!\n");
-        //debug
-        
+    if (nbOctetsEnvoyes < 0) {
         return ERR_ENVOI_ENTETE_TRAME;
     }
 
@@ -616,17 +559,6 @@ ERREUR_DONNEE envoyer_entierSigne2(SOCKET sock, Donnee entier) {
 
 ERREUR_DONNEE envoyer_entierSigne4(SOCKET sock, Donnee entierEnvoye) {
     int nbOctetsRecus = 0;
-
-    /*
-    char donnees[4];
-
-    dataSend[0] = (data >> 24) & 0xFF;
-    dataSend[1] = (data >> 16) & 0xFF;
-    dataSend[2] = (data >> 8) & 0xFF;
-    dataSend[3] = (data >> 0) & 0xFF;
-
-    send(sock, donnees, 4, 0);
-    */
 
     // On convertit data en entier big-endian
     long donnees = htonl(entierEnvoye.entierSigne4);
@@ -812,7 +744,6 @@ void afficher_trame(Trame trame) {
 }
 
 void afficher_donnee(Donnee donnee) {
-    //printf("TYPE = %#0.2x\n", donnee.type);
     int i=0;
     
     switch(donnee.type)
@@ -846,7 +777,7 @@ void afficher_donnee(Donnee donnee) {
         
         for(i=0; i < donnee.chaine.taille; i++) {
             if(donnee.chaine.texte[i] < 32 || donnee.chaine.texte[i] > 127) {
-                printf("\\x%d", donnee.chaine.texte[i]);
+                printf("\\x%X", donnee.chaine.texte[i]);
             } else {
                 printf("%c", donnee.chaine.texte[i]);
             }
