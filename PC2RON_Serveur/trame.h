@@ -204,20 +204,8 @@ ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier);
 ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine);
 ERREUR_DONNEE envoyer_flottant(SOCKET sock, Donnee flottant);
 
-int taille_trame(Trame trame);
-
 /* Affichage d'une trame ou d'une donnee */
 void afficher_trame(Trame trame);
 void afficher_donnee(Donnee trame);
-/*
-char* entierSigne1_toString(Donnee entier);
-char* entierSigne2_toString(Donnee entier);
-char* entierSigne4_toString(Donnee entier);
-char* entierNonSigne1_toString(Donnee entier);
-char* entierNonSigne2_toString(Donnee entier);
-char* entierNonSigne4_toString(Donnee entier);
-char* chaine_toString(Donnee chaine);
-char* flottant_toString(Donnee flottant);
-*/
 
 #endif /* TRAME_H_ */
