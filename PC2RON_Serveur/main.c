@@ -49,11 +49,11 @@ void* THREAD_serveur(void *args) {
         */
         
         // Envoi de trame
-        Donnee d = creer_chaine("totoé");
+        Donnee d = creer_chaine("toto");
         Donnee d2 = creer_entierSigne1(200);
         Donnee d3 = creer_entierSigne2(33000);
         Donnee d4 = creer_entierNonSigne1(-10);
-        Donnee d5 = creer_entierNonSigne2(70000);
+        Donnee d5 = creer_entierNonSigne2(65639);
         Donnee d6 = creer_entierNonSigne4(-20);
         
         afficher_donnee(d);

@@ -32,22 +32,17 @@ public class ReceptionTrame implements IReceptionTrame {
         byte[] buffer ;
 
 		try {
-            int temp = in.readUnsignedShort();
-            nbOctets = donneeFactory.getEntierNonSigne2(temp);
-            //nbOctets = this.recevoirEntierNonSigne2(in);
-            //debug
-            System.out.println("taille chaine = " + temp);
-            //debug
-            buffer = new byte[nbOctets.getEntier()];
-            in.read(buffer, 0, nbOctets.getEntier());
-            chaine = donneeFactory.getChaine(new String(buffer, IChaine.CHARSET));
+                    int temp = in.readUnsignedShort();
+                    nbOctets = donneeFactory.getEntierNonSigne2(temp);
+                    //nbOctets = this.recevoirEntierNonSigne2(in);
+
+                    buffer = new byte[nbOctets.getEntier()];
+                    in.read(buffer, 0, nbOctets.getEntier());
+                    chaine = donneeFactory.getChaine(new String(buffer, IChaine.CHARSET));
             
-            //debug
-            System.out.println("chaine = " + chaine.getChaine());
-            //debug
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
 		}
 		return chaine;
 	}
@@ -61,15 +56,8 @@ public class ReceptionTrame implements IReceptionTrame {
 		try {
 			type = in.readByte();
             
-            //debug
-            System.out.println("Type donnee = " + type);
-            //debug
-            
 			ETypeDonnee t = ETypeDonnee.getTypeDonnee(type);
-			//debug
-            System.out.println("t.getStringType() = " + t.getStringType());
-            //debug
-                    
+
 			switch (t) {
 				case ENTIER_SIGNE1:
 					donnee = recevoirEntierSigne1(in);
@@ -88,11 +76,7 @@ public class ReceptionTrame implements IReceptionTrame {
 					break;
 					
 				case ENTIER_NON_SIGNE2:
-                    
 					donnee = recevoirEntierNonSigne2(in);
-                    //debug
-                    System.out.println("Entier non signe 2 - OK : " + donnee.getClass());
-                    //debug
 					break;
 					
 				case ENTIER_NON_SIGNE4:
@@ -110,10 +94,7 @@ public class ReceptionTrame implements IReceptionTrame {
 				default:
 					System.out.println("Mauvais type de donnee !");
 			}
-            
-            //debug
-            System.out.println("donnee = " + donnee.toString());
-            //debug
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -227,20 +208,20 @@ public class ReceptionTrame implements IReceptionTrame {
 			trameRecue.setTypeFanion(typeFanion);
 
 			if (typeFanion == ETypeFanion.TrameNormale.getType()) {
-                byte id = in.readByte();
+                            byte id = in.readByte();
             
-				trameRecue.setId(id);
-				
-				byte nbDonnees = in.readByte();
-            
-				//IDonneeFactory donneeFactory = DonneeFactory.getInstance();
-				IDonnee donneeRecue;
-				
-				// Reception des donnees
-				for(int i=0; i < nbDonnees; i++) {  
-					donneeRecue = recevoirDonnee(in);             
-					trameRecue.ajouterDonnee(donneeRecue);   
-				}
+                            trameRecue.setId(id);
+
+                            byte nbDonnees = in.readByte();
+
+                            //IDonneeFactory donneeFactory = DonneeFactory.getInstance();
+                            IDonnee donneeRecue;
+
+                            // Reception des donnees
+                            for(int i=0; i < nbDonnees; i++) {  
+                                    donneeRecue = recevoirDonnee(in);             
+                                    trameRecue.ajouterDonnee(donneeRecue);   
+                            }
 				
 			} else if (typeFanion == ETypeFanion.TrameSpeciale.getType()) {
 				return trameRecue;

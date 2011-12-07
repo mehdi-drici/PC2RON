@@ -23,4 +23,17 @@ public enum ETypeTrame {
 	public byte getType() {
 		return this.type;
 	}
+        
+        public static ETypeTrame getTypeTrame(byte type) {
+            ETypeTrame eTypes[] = ETypeTrame.values();
+            ETypeTrame eType = null;
+
+            for(ETypeTrame typeCourant : eTypes) {
+                if(typeCourant.getType() == type) {
+                    eType = typeCourant;
+                }
+            }
+
+            return eType;
+        }
 }

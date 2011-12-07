@@ -20,7 +20,7 @@ public class TestReception {
 			DataInputStream in = new DataInputStream(socket.getInputStream());        
 			IReceptionTrame reception = new ReceptionTrame();
 			ITrame t = reception.recevoirTrame(in);
-            System.out.println("Trame recue : " + t.toString());
+                        System.out.println("Trame recue : " + t.toString());
             
             /*
             for(int i=0; i < 2; i++) {

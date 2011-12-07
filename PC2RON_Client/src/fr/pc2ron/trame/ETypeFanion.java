@@ -13,4 +13,17 @@ public enum ETypeFanion {
 	public short getType() {
 		return (short)this.type;
 	}
+        
+        public static ETypeFanion getTypeFanion(byte type) {
+            ETypeFanion eTypes[] = ETypeFanion.values();
+            ETypeFanion eType = null;
+
+            for(ETypeFanion typeCourant : eTypes) {
+                if(typeCourant.getType() == type) {
+                    eType = typeCourant;
+                }
+            }
+
+            return eType;
+        }
 }
