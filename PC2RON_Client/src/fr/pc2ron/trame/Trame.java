@@ -12,10 +12,11 @@ public class Trame implements ITrame {
 	private short id;
 	
 	public Trame() {
+        this.donnees = new ArrayList<IDonnee>();
 	}
 	
 	public Trame(short id) {
-		this.donnees = new ArrayList<IDonnee>();
+		this();
 		setTypeFanion(ETypeFanion.TrameNormale.getType());
 		setId(id);
 	}
@@ -27,28 +28,6 @@ public class Trame implements ITrame {
 	public void ajouterDonnees(List<IDonnee> donnees) {
 		this.donnees.addAll(donnees);
 	}
-	
-	/*
-	@Override
-	public ArrayList<Byte> toBytes() {
-		
-		ArrayList<Byte> tab = new ArrayList<Byte>();
-		
-		// Cast du nombre de donnees en byte
-		Byte nbDonnees = new Byte((byte) getDonnees().size());
-		
-		tab.add(type);
-		tab.add(id);
-		tab.add(nbDonnees);
-		
-		for (int i = 0; i < nbDonnees; i++) {
-				tab.addAll(getDonnees().get(i).toBytes());
-				//tab[(i+1) * j] = getDonnees().get(i).toBytes()[j]; 
-		}
-		
-		return tab;
-	}
-	*/
 	
     @Override
 	public List<IDonnee> getDonnees() {
@@ -81,27 +60,9 @@ public class Trame implements ITrame {
 		this.typeFanion = (short) (typeFanion & 0xff);
 	}
 	
-	/*
-	@Override
-	public int taille() {
-		int taille = 0;
-		
-		// Taille de l'entête de la trame
-		// Elle dépend du type de la trame (trame spéciale ou non)
-		taille += this.typeFanion == ETypeFanion.TrameNormale.getType() ? 3 : 1;
-		
-		// Taille des données
-		for (int i=0; i < getNbDonnees(); i++) {
-			taille += getDonnees().get(i).taille();
-		}
-		
-		return taille;
-	}
-	*/
-	
     @Override
 	public String toString() {
-		String s = "{ ";
+		String s = ">>> { ";
 		s += "0x" + Integer.toHexString(getId()).toUpperCase();
 		
 		for (int i = 0; i < getNbDonnees(); i++) {
@@ -109,7 +70,7 @@ public class Trame implements ITrame {
 			s += getDonnees().get(i).toString();
 		}
 		
-		s += " }";
+		s += " }\n";
 		
 		return s;
 	}

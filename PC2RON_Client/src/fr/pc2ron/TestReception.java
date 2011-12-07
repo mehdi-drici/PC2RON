@@ -1,6 +1,7 @@
 package fr.pc2ron;
 
 import fr.pc2ron.interfaces.IChaine;
+import fr.pc2ron.interfaces.IDonnee;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -18,11 +19,16 @@ public class TestReception {
 		
 			DataInputStream in = new DataInputStream(socket.getInputStream());        
 			IReceptionTrame reception = new ReceptionTrame();
-			//ITrame t = reception.recevoirTrame(in);
-			IChaine t = reception.recevoirChaine(in);
-			System.out.println("Trame recue : " + t.toString());
-			//System.out.println("Byte recu = " + in.readByte());
-			
+			ITrame t = reception.recevoirTrame(in);
+            System.out.println("Trame recue : " + t.toString());
+            
+            /*
+            for(int i=0; i < 2; i++) {
+            IDonnee t = reception.recevoirDonnee(in);
+            System.out.println("Trame recue : " + t.toString());
+            }
+            */
+            //t=reception.recevoirDonnee(in);
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

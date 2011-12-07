@@ -22,35 +22,6 @@ public class EntierNonSigne1 implements IEntierNonSigne1 {
 	public short getEntier() {
 		return entier;
 	}
-
-//	@Override
-//	public void setValeur(DataInput in) {
-//		try {
-//			//entier = in.readShort();
-//			entier = (short) in.readUnsignedByte();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-	/*
-	@Override
-	public ArrayList<Byte> toBytes() {
-		short entierNonSigne = (short) (entier & 0xff);
-		ArrayList<Byte> tab=new ArrayList<Byte>();
-		
-		// Entete				
-		tab.add(ETypeDonnee.ENTIER_NON_SIGNE1.getType());
-		
-		// Valeur
-		tab.add((byte)(entierNonSigne));
-		//tab.add((byte)((entierNonSigne >> 8) & 0xff));
-				
-		return tab;
-	}
-	*/
-//	public int taille() {
-//		return ETypeDonnee.ENTIER_NON_SIGNE1.getTaille() + 1;
-//	}
 	
 	public String toString() {
 		return ETypeDonnee.ENTIER_NON_SIGNE1.getStringType() + " " + getEntier();

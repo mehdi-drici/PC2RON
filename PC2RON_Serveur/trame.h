@@ -136,7 +136,11 @@ typedef struct Donnee {
 		/* chaîne de caractères */
 		struct chaine {
 			short taille;
-			unsigned char* texte;
+                        
+                        // on specifie bien que c'est un tableau
+                        // de caracteres pour pouvoir connaitre
+                        // sa taille par la suite
+			char texte[0]; 
 		} chaine;
 
 		/* flottant */

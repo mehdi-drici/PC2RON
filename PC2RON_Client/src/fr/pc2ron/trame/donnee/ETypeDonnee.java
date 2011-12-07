@@ -52,4 +52,17 @@ public enum ETypeDonnee {
 	public String getStringType() {
 		return sType;
 	}
+    
+    public static ETypeDonnee getTypeDonnee(byte type) {
+        ETypeDonnee eTypes[] = ETypeDonnee.values();
+        ETypeDonnee eType = null;
+        
+        for(ETypeDonnee typeCourant : eTypes) {
+            if(typeCourant.getType() == type) {
+                eType = typeCourant;
+            }
+        }
+        
+        return eType;
+    }
 }

@@ -32,11 +32,11 @@ public class ReceptionTrame implements IReceptionTrame {
         byte[] buffer ;
 
 		try {
-            int temps = in.readUnsignedShort();
-            nbOctets = donneeFactory.getEntierNonSigne2(in.readUnsignedShort());
+            int temp = in.readUnsignedShort();
+            nbOctets = donneeFactory.getEntierNonSigne2(temp);
             //nbOctets = this.recevoirEntierNonSigne2(in);
             //debug
-            System.out.println("temps = " + temps);
+            System.out.println("taille chaine = " + temp);
             //debug
             buffer = new byte[nbOctets.getEntier()];
             in.read(buffer, 0, nbOctets.getEntier());
@@ -65,7 +65,7 @@ public class ReceptionTrame implements IReceptionTrame {
             System.out.println("Type donnee = " + type);
             //debug
             
-			ETypeDonnee t = ETypeDonnee.values()[6];
+			ETypeDonnee t = ETypeDonnee.getTypeDonnee(type);
 			//debug
             System.out.println("t.getStringType() = " + t.getStringType());
             //debug
@@ -88,11 +88,15 @@ public class ReceptionTrame implements IReceptionTrame {
 					break;
 					
 				case ENTIER_NON_SIGNE2:
-					donnee = recevoirEntierSigne2(in);
+                    
+					donnee = recevoirEntierNonSigne2(in);
+                    //debug
+                    System.out.println("Entier non signe 2 - OK : " + donnee.getClass());
+                    //debug
 					break;
 					
 				case ENTIER_NON_SIGNE4:
-					donnee = recevoirEntierSigne4(in);
+					donnee = recevoirEntierNonSigne4(in);
 					break;
 					
 				case CHAINE:
@@ -112,9 +116,6 @@ public class ReceptionTrame implements IReceptionTrame {
             //debug
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-            //debug
-                    System.out.println("BATAR");
-                    //debug
 			e.printStackTrace();
 		}
 		
@@ -221,44 +222,24 @@ public class ReceptionTrame implements IReceptionTrame {
 		ITrame trameRecue = trameFactory.getTrame();
 		
 		try {
-					
 			short typeFanion = (short) (in.readByte() & 0xff);
-			//debug
-			System.out.println("typeFanion = " + typeFanion);
-			//debug
 			
 			trameRecue.setTypeFanion(typeFanion);
 
 			if (typeFanion == ETypeFanion.TrameNormale.getType()) {
                 byte id = in.readByte();
-                
-                //debug
-                System.out.println("id = " + id);
-                //debug
             
 				trameRecue.setId(id);
 				
 				byte nbDonnees = in.readByte();
-                
-                //debug
-                System.out.println("nbDonnees = " + nbDonnees);
-                //debug
             
 				//IDonneeFactory donneeFactory = DonneeFactory.getInstance();
 				IDonnee donneeRecue;
 				
 				// Reception des donnees
-				for(int i=0; i < nbDonnees; i++) {
-                    
-					donneeRecue = recevoirDonnee(in);
-                    
-                    //debug
-                    System.out.println("AJOUT");
-                    //debug
-                    
-					trameRecue.ajouterDonnee(donneeRecue);
-                    
-                    
+				for(int i=0; i < nbDonnees; i++) {  
+					donneeRecue = recevoirDonnee(in);             
+					trameRecue.ajouterDonnee(donneeRecue);   
 				}
 				
 			} else if (typeFanion == ETypeFanion.TrameSpeciale.getType()) {
@@ -268,10 +249,6 @@ public class ReceptionTrame implements IReceptionTrame {
 				System.out.println("Erreur de fanion !");
 				return null;
 			}
-			
-            //debug
-            System.out.println("BMABLA");
-            //debug
             
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

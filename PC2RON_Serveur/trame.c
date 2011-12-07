@@ -110,8 +110,14 @@ Donnee creer_chaine(char texte[]){
     Donnee d;
     d.type = CHAINE;
     d.chaine.taille = strlen(texte);
-    d.chaine.texte = texte;
-
+    //d.chaine.texte = texte;
+    
+    // allocation mémoire pour le stockage 
+    // de taille+1 cacractères (caractère '\0')
+    memmove(&d.chaine.texte[0], texte, strlen(texte));
+    //d.chaine.texte = calloc(strlen(texte) + 1, sizeof(char));
+    
+    strcpy(d.chaine.texte, texte);
     return d;
 }
 
@@ -403,8 +409,9 @@ ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
     }
 
     (donneeRecue->chaine).taille = tailleConvertie;
-    (donneeRecue->chaine).texte = chaineRecue;
-
+    //(donneeRecue->chaine).texte = chaineRecue;
+    strcpy((donneeRecue->chaine).texte, chaineRecue);
+    
     return SUCCES;
 }
 
@@ -580,7 +587,7 @@ ERREUR_DONNEE envoyer_entierSigne2(SOCKET sock, Donnee entier) {
     }
 
     // Envoi de l'entier
-    nbOctetsRecus = send(sock, (char*)&donnees, 4, 0);
+    nbOctetsRecus = send(sock, (char*)&donnees, 2, 0);
     if (nbOctetsRecus < 0)
     {
         return ERR_ENVOI_INT16;
@@ -657,7 +664,7 @@ ERREUR_DONNEE envoyer_entierNonSigne2(SOCKET sock, Donnee entier) {
     }
 
     // Envoi de l'entier
-    nbOctetsRecus = send(sock, (char*)&donnees, 4, 0);
+    nbOctetsRecus = send(sock, (char*)&donnees, 2, 0);
     if (nbOctetsRecus < 0)
     {
         return ERR_ENVOI_UINT16;
@@ -690,8 +697,10 @@ ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
 }
 
 ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine) {
+    char* foo = "bavo";
+    
     int nbOctetsRecus = 0;
-
+    
     // On convertit data en entier big-endian
     //unsigned short taille = htons(chaine.chaine.taille);
     unsigned short taille = htons(chaine.chaine.taille);
@@ -711,7 +720,8 @@ ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine) {
     }
 
     // Envoi de la chaine
-    nbOctetsRecus = send(sock, chaine.chaine.texte, taille, 0);
+    
+    nbOctetsRecus = send(sock, chaine.chaine.texte, chaine.chaine.taille, 0);
     if (nbOctetsRecus < 0)
     {
         return ERR_ENVOI_CHAINE;

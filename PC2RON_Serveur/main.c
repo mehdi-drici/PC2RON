@@ -49,26 +49,48 @@ void* THREAD_serveur(void *args) {
         */
         
         // Envoi de trame
-        Donnee d = creer_chaine("toto");
+        Donnee d = creer_chaine("totoé");
+        Donnee d2 = creer_entierSigne1(200);
+        Donnee d3 = creer_entierSigne2(33000);
+        Donnee d4 = creer_entierNonSigne1(-10);
+        Donnee d5 = creer_entierNonSigne2(70000);
+        Donnee d6 = creer_entierNonSigne4(-20);
+        
+        afficher_donnee(d);
+        
+        printf("\nTaille (c) = %d\n", d.chaine.taille);
+        
+        //Donnee d2 = creer_entierNonSigne2(-19);
+        //Donnee d3 = creer_entierNonSigne2(70000);
+        
         Trame t = creer_trame(10);
         ajouter_donnee(&t, d);
-        
+        ajouter_donnee(&t, d2);
+        ajouter_donnee(&t, d3);
+        ajouter_donnee(&t, d4);
+        ajouter_donnee(&t, d5);
+        ajouter_donnee(&t, d6);
+        afficher_trame(t);
         
         //debug
         //printf("t.fanion = %d\n", t.fanion);
-/*
-        printf("t.id = %d\n", t.id);
-        printf("t.nbDonnees = %d\n", t.nbDonnees);
+
+        //printf("t.id = %d\n", t.id);
+        //printf("t.nbDonnees = %d\n", t.nbDonnees);
         //debug
-*/
+
+
+        //envoyer_donnee(csock, d);
+        //envoyer_donnee(csock, d);
+        //envoyer_donnee(csock, d2);
+        //envoyer_donnee(csock, d2);
         
-        
-        envoyer_donnee(csock, d);
-        //envoyer_trame(csock, t);
+        envoyer_trame(csock, t);
         
         // Resultat attendu: { 0x0A, string "toto" }
         //afficher_donnee(d);
-        afficher_trame(t);
+        //afficher_donnee(d2);
+        //afficher_trame(t);
         
         //afficher_trame(t);
         printf("----------------------\n\n");
@@ -76,7 +98,7 @@ void* THREAD_serveur(void *args) {
         printf("----------------------\n");
         
 	/* Fermeture de connexion */
-	//shutdown(csock, SHUT_RDWR);
+	shutdown(csock, SHUT_RDWR);
 
     return NULL;
 }

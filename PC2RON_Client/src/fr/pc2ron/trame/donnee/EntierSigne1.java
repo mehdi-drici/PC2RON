@@ -20,35 +20,6 @@ public class EntierSigne1 implements IEntierSigne1 {
 	public byte getEntier() {
 		return entier;
 	}
-
-//	@Override
-//	public void setValeur(DataInput in) {
-//		try {
-//			this.entier = in.readByte();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-
-	/*
-	@Override
-	
-	public ArrayList<Byte> toBytes() {
-		ArrayList<Byte> tab=new ArrayList<Byte>();
-		
-		// Entete
-		tab.add(ETypeDonnee.ENTIER_SIGNE1.getType());
-		
-		// Valeur
-		tab.add(getEntier());
-				
-		return tab;
-	}
-	*/
-//	@Override
-//	public int taille() {
-//		return ETypeDonnee.ENTIER_SIGNE1.getTaille() + 1;
-//	}
 	
 	public String toString() {
 		return ETypeDonnee.ENTIER_SIGNE1.getStringType() + " " + getEntier();

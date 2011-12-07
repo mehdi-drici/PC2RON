@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import fr.pc2ron.interfaces.IChaine;
 import fr.pc2ron.interfaces.IVisiteur;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Chaine implements IChaine {
 	private short nbOctets;
@@ -109,7 +111,26 @@ public class Chaine implements IChaine {
 //	}
 	
 	public String toString() {
-		return ETypeDonnee.CHAINE.getStringType() + " \"" + getChaine() + "\""; 
+        String s = "";
+        
+        try {
+            byte[] octets = this.getChaine().getBytes(CHARSET);
+            s = ETypeDonnee.CHAINE.getStringType() + " \"";
+            
+            for(int i=0; i < octets.length; i++) {
+                if(octets[i] < 32 || octets[i] > 127) {
+                   s += "\\x" + Integer.toHexString(octets[i]).toUpperCase(); 
+                } else {
+                   s += (char) (octets[i]); 
+                }
+            }
+           
+            s += "\"";
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Chaine.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return s;
 	}
 	
 	@Override
