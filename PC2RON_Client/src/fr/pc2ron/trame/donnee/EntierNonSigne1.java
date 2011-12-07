@@ -1,9 +1,5 @@
 package fr.pc2ron.trame.donnee;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import fr.pc2ron.interfaces.IEntierNonSigne1;
 import fr.pc2ron.interfaces.IVisiteur;
 
@@ -23,6 +19,7 @@ public class EntierNonSigne1 implements IEntierNonSigne1 {
 		return entier;
 	}
 	
+        @Override
 	public String toString() {
 		return ETypeDonnee.ENTIER_NON_SIGNE1.getStringType() + " " + getEntier();
 	}

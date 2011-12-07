@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import fr.pc2ron.interfaces.IDonnee;
 import fr.pc2ron.interfaces.IDonneeFactory;
-import fr.pc2ron.interfaces.IProtocole;
 import fr.pc2ron.interfaces.ITrame;
 import fr.pc2ron.interfaces.ITrameBuilder;
 import fr.pc2ron.interfaces.ITrameFactory;

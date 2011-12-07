@@ -14,22 +14,24 @@ public enum ETypeTrame {
 	TrameWin(0x57),
 	TrameOrder(0x4F);
 	
-	private final byte type;
+	private final short type;
 	
 	ETypeTrame(int type) {
-		this.type = (byte) type;
+            this.type = (short) type;
 	}
 	
-	public byte getType() {
-		return this.type;
+	public short getType() {
+            return this.type;
 	}
         
         public static ETypeTrame getTypeTrame(byte type) {
+            short typeNonSigne = (short) (type & 0xff);
+            
             ETypeTrame eTypes[] = ETypeTrame.values();
             ETypeTrame eType = null;
 
             for(ETypeTrame typeCourant : eTypes) {
-                if(typeCourant.getType() == type) {
+                if(typeCourant.getType() == typeNonSigne) {
                     eType = typeCourant;
                 }
             }

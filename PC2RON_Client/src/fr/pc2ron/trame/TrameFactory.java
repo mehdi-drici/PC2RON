@@ -51,6 +51,6 @@ public class TrameFactory implements ITrameFactory {
 
 	@Override
 	public ITrame getTrameEnd() {
-		return getTrame(ETypeTrame.TrameFin.getType());
+		return getTrame((byte) ETypeTrame.TrameFin.getType());
 	}
 }

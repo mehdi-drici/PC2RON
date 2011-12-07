@@ -8,38 +8,42 @@ import fr.pc2ron.interfaces.ITrame;
 
 public class Trame implements ITrame {
 	private ArrayList<IDonnee> donnees = null;
+        
+        // Entiers non signes 1
 	private short typeFanion;
 	private short id;
 	
 	public Trame() {
-        this.donnees = new ArrayList<IDonnee>();
+            this.donnees = new ArrayList<IDonnee>();
 	}
 	
 	public Trame(short id) {
 		this();
-		setTypeFanion(ETypeFanion.TrameNormale.getType());
-		setId(id);
+                typeFanion = ETypeFanion.TrameNormale.getType();
+		this.setId(id);
 	}
 	
+        @Override
 	public void ajouterDonnee(IDonnee donnee) {
 		this.donnees.add(donnee);
 	}
 
+        @Override
 	public void ajouterDonnees(List<IDonnee> donnees) {
 		this.donnees.addAll(donnees);
 	}
 	
-    @Override
+        @Override
 	public List<IDonnee> getDonnees() {
 		return this.donnees;
 	}
 
-    @Override
+        @Override
 	public short getId() {
 		return id;
 	}
 	
-    @Override
+        @Override
 	public short getTypeFanion() {
 		return typeFanion;
 	}
@@ -49,29 +53,29 @@ public class Trame implements ITrame {
 		return (short) this.donnees.size();
 	}
     
-    //@todo conversion en entier non signe
-    @Override
+        //@todo conversion en entier non signe
+        @Override
 	public void setId(short id) {
 		this.id = (short) (id & 0xff);
 	}
 
-    @Override
+        @Override
 	public void setTypeFanion(short typeFanion) {
 		this.typeFanion = (short) (typeFanion & 0xff);
 	}
 	
-    @Override
+        @Override
 	public String toString() {
-		String s = ">>> { ";
-		s += "0x" + Integer.toHexString(getId()).toUpperCase();
-		
-		for (int i = 0; i < getNbDonnees(); i++) {
-			s += ", ";
-			s += getDonnees().get(i).toString();
-		}
-		
-		s += " }\n";
-		
-		return s;
+            String s = ">>> { ";
+            s += "0x" + Integer.toHexString(getId()).toUpperCase();
+
+            for (int i = 0; i < getNbDonnees(); i++) {
+                    s += ", ";
+                    s += getDonnees().get(i).toString();
+            }
+
+            s += " }\n";
+
+            return s;
 	}
 }

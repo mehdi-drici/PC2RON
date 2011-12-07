@@ -10,8 +10,6 @@ import fr.pc2ron.interfaces.IEntierSigne1;
 import fr.pc2ron.interfaces.IEntierSigne2;
 import fr.pc2ron.interfaces.IEntierSigne4;
 import fr.pc2ron.interfaces.IFlottant;
-import fr.pc2ron.interfaces.ITrameFactory;
-import fr.pc2ron.trame.TrameFactory;
 
 public class DonneeFactory implements IDonneeFactory {
 	private static IDonneeFactory instance;
@@ -22,30 +20,41 @@ public class DonneeFactory implements IDonneeFactory {
 	@Override
 	public IDonnee getDonnee(byte type) {
 		IDonnee donnee = null;
-		
-		if(type == ETypeDonnee.ENTIER_SIGNE1.getType()) {
-			donnee = new EntierSigne1();
-		} else if (type == ETypeDonnee.ENTIER_SIGNE2.getType()) {
-			donnee = new EntierSigne2();
-			
-		} else if (type == ETypeDonnee.ENTIER_SIGNE4.getType()) {
-			donnee = new EntierSigne4();
-			
-		} else if (type == ETypeDonnee.ENTIER_NON_SIGNE1.getType()) {
-			donnee = new EntierNonSigne1();
-			
-		} else if (type == ETypeDonnee.ENTIER_NON_SIGNE2.getType()) {
-			donnee = new EntierNonSigne2();
-			
-		} else if (type == ETypeDonnee.ENTIER_NON_SIGNE4.getType()) {
-			donnee = new EntierNonSigne4();
-			
-		} else if (type == ETypeDonnee.CHAINE.getType()) {
-			donnee = new Chaine();
-			
-		} else if (type == ETypeDonnee.FLOTTANT.getType()) {
-			donnee = new Flottant();
-		}
+		ETypeDonnee eType = ETypeDonnee.getTypeDonnee(type);
+                
+                switch(eType) {
+                    case ENTIER_SIGNE1:
+                        donnee = new EntierSigne1();
+                        break;
+                    
+                    case ENTIER_SIGNE2:
+                        donnee = new EntierSigne2();
+                        break;
+                        
+                    case ENTIER_SIGNE4:
+                        donnee = new EntierSigne4();
+                        break;
+                    
+                    case ENTIER_NON_SIGNE1:
+                        donnee = new EntierNonSigne1();
+                        break;
+                        
+                    case ENTIER_NON_SIGNE2:
+                        donnee = new EntierNonSigne2();
+                        break;
+                        
+                    case ENTIER_NON_SIGNE4:
+                        donnee = new EntierNonSigne4();
+                        break;
+                        
+                    case CHAINE:
+                        donnee = new Chaine();
+                        break;
+                        
+                    case FLOTTANT:
+                        donnee = new Flottant();
+                        break;
+                }
 		
 		return donnee;
 	}

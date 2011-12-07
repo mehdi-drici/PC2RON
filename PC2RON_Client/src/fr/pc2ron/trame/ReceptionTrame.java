@@ -203,33 +203,35 @@ public class ReceptionTrame implements IReceptionTrame {
 		ITrame trameRecue = trameFactory.getTrame();
 		
 		try {
-			short typeFanion = (short) (in.readByte() & 0xff);
-			
+                        byte typeFanion = in.readByte();
 			trameRecue.setTypeFanion(typeFanion);
+                        
+                        ETypeFanion eTypeFanion = ETypeFanion.getTypeFanion(typeFanion);
+                        
+                        switch(eTypeFanion) {
+                            case TrameNormale:
+                                byte id = in.readByte();
+                                trameRecue.setId(id);
 
-			if (typeFanion == ETypeFanion.TrameNormale.getType()) {
-                            byte id = in.readByte();
-            
-                            trameRecue.setId(id);
+                                byte nbDonnees = in.readByte();
 
-                            byte nbDonnees = in.readByte();
+                                //IDonneeFactory donneeFactory = DonneeFactory.getInstance();
+                                IDonnee donneeRecue;
 
-                            //IDonneeFactory donneeFactory = DonneeFactory.getInstance();
-                            IDonnee donneeRecue;
-
-                            // Reception des donnees
-                            for(int i=0; i < nbDonnees; i++) {  
+                                // Reception des donnees
+                                for(int i=0; i < nbDonnees; i++) {  
                                     donneeRecue = recevoirDonnee(in);             
                                     trameRecue.ajouterDonnee(donneeRecue);   
-                            }
-				
-			} else if (typeFanion == ETypeFanion.TrameSpeciale.getType()) {
-				return trameRecue;
-			
-			} else {
-				System.out.println("Erreur de fanion !");
-				return null;
-			}
+                                }
+                                break;
+                             
+                            case TrameSpeciale:
+                                return trameRecue;
+                                
+                            default:
+                                System.out.println("Erreur de fanion !");
+				return null;         
+                        }
             
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
