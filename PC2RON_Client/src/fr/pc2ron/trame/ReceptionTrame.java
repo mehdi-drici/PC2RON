@@ -205,6 +205,7 @@ public class ReceptionTrame implements IReceptionTrame {
 		try {
                         byte typeFanion = in.readByte();
 			trameRecue.setTypeFanion(typeFanion);
+                        short t = 255;
                         
                         ETypeFanion eTypeFanion = ETypeFanion.getTypeFanion(typeFanion);
                         

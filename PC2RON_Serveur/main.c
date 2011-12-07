@@ -51,6 +51,10 @@ void* THREAD_serveur(void *args) {
         
         // Envoi de trame
         Donnee d = creer_chaine("Salut élève de l'éducation !");
+        
+        Donnee ack = creer_chaine("NO");
+        Donnee versionProtocole = creer_chaine("PC2RON2011");
+        
         Donnee d2 = creer_entierSigne1(200);
         Donnee d3 = creer_entierSigne2(33000);
         Donnee d4 = creer_entierNonSigne1(-10);
@@ -69,25 +73,32 @@ void* THREAD_serveur(void *args) {
         ajouter_donnee(&t, d4);
         ajouter_donnee(&t, d5);
         ajouter_donnee(&t, d6);
-        afficher_trame(t);
+        //afficher_trame(t);
         
         Trame t2 = creer_trame(15);
         ajouter_donnee(&t2, d);
         ajouter_donnee(&t2, d2);
         ajouter_donnee(&t2, d3);
- 
-        envoyer_trame(csock, t);
-        envoyer_trame(csock, t2);
         
-        /*
+        Trame t3 = creer_trame(0x41);
+        ajouter_donnee(&t3, ack);
+        ajouter_donnee(&t3, versionProtocole);
+        afficher_trame(t3);
+        
+        //envoyer_trame(csock, t);
+        //envoyer_trame(csock, t2);
+        
         Trame tRecue;
         recevoir_trame(csock, &tRecue);
         afficher_trame(tRecue);
         
+        envoyer_trame(csock, t3);
+        
+        /*
         recevoir_trame(csock, &tRecue);
         afficher_trame(tRecue);
         */
-        
+                
         printf("----------------------\n\n");
         printf("Deconnexion du client\n");
         printf("----------------------\n");

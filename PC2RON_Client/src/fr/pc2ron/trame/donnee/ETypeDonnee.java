@@ -53,7 +53,7 @@ public enum ETypeDonnee {
 		return sType;
 	}
     
-    public static ETypeDonnee getTypeDonnee(byte type) {
+    public static ETypeDonnee getTypeDonnee(short type) {
         ETypeDonnee eTypes[] = ETypeDonnee.values();
         ETypeDonnee eType = null;
         

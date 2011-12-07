@@ -14,7 +14,7 @@ public enum ETypeFanion {
 		return type;
 	}
         
-        public static ETypeFanion getTypeFanion(byte type) {
+        public static ETypeFanion getTypeFanion(short type) {
             short typeNonSigne = (short) (type & 0xff);
             
             ETypeFanion eTypes[] = ETypeFanion.values();

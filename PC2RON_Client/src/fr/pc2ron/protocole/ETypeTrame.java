@@ -24,7 +24,7 @@ public enum ETypeTrame {
             return this.type;
 	}
         
-        public static ETypeTrame getTypeTrame(byte type) {
+        public static ETypeTrame getTypeTrame(short type) {
             short typeNonSigne = (short) (type & 0xff);
             
             ETypeTrame eTypes[] = ETypeTrame.values();

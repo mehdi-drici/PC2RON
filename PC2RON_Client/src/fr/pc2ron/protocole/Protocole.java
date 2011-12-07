@@ -67,12 +67,14 @@ public class Protocole implements IProtocole {
 		ReceptionTrame reception = new ReceptionTrame();
 		ITrame ack = reception.recevoirTrame(in);
 		
-		ETypeTrame typeTrame = ETypeTrame.values()[ack.getId()];
+                ETypeTrame eTypeTrame = ETypeTrame.getTypeTrame(ack.getId());
+                
+		//ETypeTrame typeTrame = ETypeTrame.values()[ack.getId()];
 		
 		IDonnee message = ack.getDonnees().get(0);
 		
 		// ? { 0x41, string "OK", string "PC2R2011" }
-		if(typeTrame == ETypeTrame.TrameAck &&
+		if(eTypeTrame == ETypeTrame.TrameAck &&
 		   message instanceof Chaine) {
 			IChaine chaine = (IChaine) message;
 				
@@ -80,7 +82,7 @@ public class Protocole implements IProtocole {
 				throw new Exception("La version du protocole n'est pas supportee par le serveur !");
 			}
 		} else {
-			throw new Exception("Impossible de lire la reponse du serveur !");
+                    throw new Exception("Impossible de lire la reponse du serveur !");
 		}
 
 	}

@@ -30,7 +30,6 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 				trame.getDonnees().get(i).accept(this, out);
 			}
 		} catch (IOException e) {
-                    System.out.println("Erreur Visit Trame !");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -153,8 +152,6 @@ public class VisiteurEnvoiTrame implements IVisiteur<DataOutputStream, IVisitabl
 	@Override
 	public IVisitable visit(IChaine donnee, DataOutputStream out) {
 		try {
-                        System.out.println("Taille chaine visit = " + donnee.getChaine().
-                                                                            getBytes("UTF-8").length);
                         short taille = (short) donnee.getChaine().getBytes("UTF-8").length;
                         
 			out.write(ETypeDonnee.CHAINE.getType());
