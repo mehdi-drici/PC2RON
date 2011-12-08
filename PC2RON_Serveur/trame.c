@@ -89,7 +89,7 @@ void afficher_donnee(Donnee donnee) {
         break;
 
     case ENTIER_NON_SIGNE1:
-        printf("uint8 %d", donnee.entierNonSigne1);
+        printf("uint8 %u", donnee.entierNonSigne1);
         break;
 
     case ENTIER_NON_SIGNE2:

@@ -35,8 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/serveur.o \
-	${OBJECTDIR}/reception.o \
 	${OBJECTDIR}/trame.o \
+	${OBJECTDIR}/reception.o \
 	${OBJECTDIR}/factory.o \
 	${OBJECTDIR}/envoi.o \
 	${OBJECTDIR}/main.o
@@ -71,15 +71,15 @@ ${OBJECTDIR}/serveur.o: serveur.c
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/serveur.o serveur.c
 
-${OBJECTDIR}/reception.o: reception.c 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/reception.o reception.c
-
 ${OBJECTDIR}/trame.o: trame.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/trame.o trame.c
+
+${OBJECTDIR}/reception.o: reception.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/reception.o reception.c
 
 ${OBJECTDIR}/factory.o: factory.c 
 	${MKDIR} -p ${OBJECTDIR}

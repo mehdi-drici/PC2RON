@@ -68,6 +68,8 @@ public class TestEnvoi {
             System.out.println("Taille T1 = "  + chaine.getChaine().getBytes().length);
             envoi.visit(trame, out);
             
+            envoi.visit(trameFactory.getTrameEnd(), out);
+            
             Thread.sleep(2000);
             
             //envoi.visit(trame2, out);

@@ -83,7 +83,7 @@ void* THREAD_serveur(void *args) {
         Trame t3 = creer_trame(0x41);
         ajouter_donnee(&t3, ack);
         ajouter_donnee(&t3, versionProtocole);
-        afficher_trame(t3);
+        //afficher_trame(t3);
         
         //envoyer_trame(csock, t);
         //envoyer_trame(csock, t2);
@@ -92,12 +92,12 @@ void* THREAD_serveur(void *args) {
         recevoir_trame(csock, &tRecue);
         afficher_trame(tRecue);
         
-        envoyer_trame(csock, t3);
+        //envoyer_trame(csock, t3);
         
-        /*
+        
         recevoir_trame(csock, &tRecue);
         afficher_trame(tRecue);
-        */
+        
                 
         printf("----------------------\n\n");
         printf("Deconnexion du client\n");

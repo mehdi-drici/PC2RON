@@ -68,8 +68,6 @@ public class Protocole implements IProtocole {
 		ITrame ack = reception.recevoirTrame(in);
 		
                 ETypeTrame eTypeTrame = ETypeTrame.getTypeTrame(ack.getId());
-                
-		//ETypeTrame typeTrame = ETypeTrame.values()[ack.getId()];
 		
 		IDonnee message = ack.getDonnees().get(0);
 		
@@ -89,98 +87,97 @@ public class Protocole implements IProtocole {
 
 	@Override
 	public void deconnexion() {
-		try {
-			out.flush();
-			out.close();
-            sock.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            try {
+                out.flush();
+                out.close();
+                sock.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 	}
 
 	@Override
 	public void envoyerOrdre(EOrdre ordre) {
-		// Envoi de la trame Order
-		ITrameBuilder trameBuilder = TrameBuilder.getInstance();
-		ITrame trameOrder = trameBuilder.creerTrameOrder(ordre);
-		
-		VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
-		envoi.visit(trameOrder, out);
+            // Envoi de la trame Order
+            ITrameBuilder trameBuilder = TrameBuilder.getInstance();
+            ITrame trameOrder = trameBuilder.creerTrameOrder(ordre);
+
+            VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
+            envoi.visit(trameOrder, out);
 	}
 
 	@Override
+        //@todo implementer
 	public HashMap<String, Object> getDonneesUser(ITrame trameUser) throws Exception {
-		HashMap<String, Object> hashmapUser = new HashMap<String, Object>();
-		
-		
-		return hashmapUser;
+            HashMap<String, Object> hashmapUser = new HashMap<String, Object>();
+ 
+            return hashmapUser;
 	}
 		
 	@Override
 	public int getGagnant(ITrame trameWin) throws Exception {
-		IDonnee donnee = trameWin.getDonnees().get(0);
-		int idGagnant = -1;
-		
-		if(trameWin.getNbDonnees() == 1 && donnee instanceof EntierNonSigne2) {
-			IEntierNonSigne2 entierNonSigne2 = (IEntierNonSigne2) donnee;
-			idGagnant = entierNonSigne2.getEntier();
-		} else {
-			throw new Exception("La trame Start recue n'est pas correcte !");
-		}
-		
-		return idGagnant;
+            IDonnee donnee = trameWin.getDonnees().get(0);
+            int idGagnant = -1;
+
+            if(trameWin.getNbDonnees() == 1 && donnee instanceof EntierNonSigne2) {
+                    IEntierNonSigne2 entierNonSigne2 = (IEntierNonSigne2) donnee;
+                    idGagnant = entierNonSigne2.getEntier();
+            } else {
+                    throw new Exception("La trame Start recue n'est pas correcte !");
+            }
+
+            return idGagnant;
 	}
 
 
 	@Override
 	public ArrayList getContenuTrame() throws Exception {
-		ReceptionTrame reception = new ReceptionTrame();
-		ITrame trameRecue = reception.recevoirTrame(in);
-		ETypeTrame typeTrame = ETypeTrame.values()[trameRecue.getId()];
-		
-		ArrayList contenuTrame = new ArrayList();
-		contenuTrame.add(typeTrame);
-		
-		switch(typeTrame) {
-		    // @todo implementer
-			case TrameUser:
-				contenuTrame.add(getDonneesUser(trameRecue));
-                
-                trameRecue = reception.recevoirTrame(in);
-                typeTrame = ETypeTrame.values()[trameRecue.getId()];
-                
-                while (typeTrame != ETypeTrame.TrameFin) {
+            ReceptionTrame reception = new ReceptionTrame();
+            ITrame trameRecue = reception.recevoirTrame(in);
+            ETypeTrame typeTrame = ETypeTrame.values()[trameRecue.getId()];
+
+            ArrayList contenuTrame = new ArrayList();
+            contenuTrame.add(typeTrame);
+
+            switch(typeTrame) {
+                // @todo implementer
+                case TrameUser:
                     contenuTrame.add(getDonneesUser(trameRecue));
-                }
-                
-				break;
-			
-			case TrameStart:
-				contenuTrame.add(getMessageStart(trameRecue));
-				break;
-				
-			case TramePause:
-				contenuTrame.add(getMessagePause(trameRecue));
-				break;
-				
-			case TrameTurn:
-				contenuTrame.add(getPositions(trameRecue));
-				break;
-				
-			case TrameDeath:
-				contenuTrame.add(getPerdants(trameRecue));
-				break;
-				
-			case TrameWin:
-				contenuTrame.add(getGagnant(trameRecue));
-				break;
-				
-			default:
-				throw new Exception("Type de trame inconnu !");
-		}
-		
-		return contenuTrame;
+
+                    trameRecue = reception.recevoirTrame(in);
+                    typeTrame = ETypeTrame.values()[trameRecue.getId()];
+
+                    while (typeTrame != ETypeTrame.TrameFin) {
+                        contenuTrame.add(getDonneesUser(trameRecue));
+                    }
+                    break;
+
+                case TrameStart:
+                    contenuTrame.add(getMessageStart(trameRecue));
+                    break;
+
+                case TramePause:
+                    contenuTrame.add(getMessagePause(trameRecue));
+                    break;
+
+                case TrameTurn:
+                    contenuTrame.add(getPositions(trameRecue));
+                    break;
+
+                case TrameDeath:
+                    contenuTrame.add(getPerdants(trameRecue));
+                    break;
+
+                case TrameWin:
+                    contenuTrame.add(getGagnant(trameRecue));
+                    break;
+
+                default:
+                    throw new Exception("Type de trame inconnu !");
+            }
+
+            return contenuTrame;
 	}
 
 	@Override
