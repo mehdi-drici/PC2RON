@@ -49,13 +49,4 @@ public interface IProtocole {
 	public int getGagnant(ITrame trameWin) throws Exception;
 	public HashMap<String, Object> getPositions(ITrame trameTurn) throws Exception;
 	public HashMap<String, Object> getDonneesUser(ITrame trameUser) throws Exception;
-	
-	/*
-	public void envoyerTrameAck(ITrame init, DataOutputStream out);
-	public void envoyerTrameRegistered(ITrame connec,DataOutputStream out,char id);
-	public void envoyerTrameUse(DataOutputStream out,char id,String nom,short r,short v,short b,char x,char y,short dir,short speed );
-	public void envoyerTrameEnd(DataOutputStream out);
-	public void envoyerTramePause(DataOutputStream out);
-	public void envoyerTrameStart(DataOutputStream out);
-	*/
 }
