@@ -11,12 +11,17 @@
 #include "trame.h"
 
 /* Code d'erreurs */
-typedef enum ERREUR_PROTOCOLE {
-	ERREUR_ENTETE_DONNEE = 2,
-	ERREUR_VALEUR_DONNEE = 3
-} ERREUR_PROTOCOLE;
+typedef enum ERR_PROTOCOLE {
+    ERR_INITIATE,
+    ERR_CONNECT,
+    ERR_ENVOI_TURN,
+    ERR_ENVOI_DEATH,
+    ERR_ENVOI_WIN,
+    ERR_ENTETE_DONNEE,
+    ERR_VALEUR_DONNEE
+} ERR_PROTOCOLE;
 
-typedef enum TYPE_TRAME {
+typedef enum TypeTrame {
 	Ack = 0x41,
 	Connect = 0x43,
 	End = 0x45,
@@ -27,13 +32,31 @@ typedef enum TYPE_TRAME {
 	User = 0x55
 } TYPE_TRAME;
 
-ERREUR_PROTOCOLE repondre(SOCKET sock, Trame trameRecue);
-ERREUR_PROTOCOLE repondreInitiate(SOCKET sock, Trame trameRecue);
-ERREUR_PROTOCOLE repondreConnect(SOCKET sock, Trame trameRecue);
+typedef enum Ordre {
+    droit = "idle",
+    gauche = "left",
+    droite = "right",
+    abandon = "abandon"
+} Ordre;
 
-void envoyerUser(SOCKET sock);
-void envoyerEnd(SOCKET sock);
-void envoyerPause(SOCKET sock);
-void envoyerStart(SOCKET sock);
+// Requetes du client
+Ordre get_order(Trame t);
+
+// Reponses au client
+ERR_PROTOCOLE repondre_initiate(Trame t);
+/**
+ * 
+ * @param t
+ * @return informations du nouveau joueur connecté
+ */
+Joueur repondre_connect(Trame t);
+
+// Envoi aux clients
+ERR_PROTOCOLE envoyer_user(Joueur j);
+ERR_PROTOCOLE envoyer_users(Joueur j[]);
+ERR_PROTOCOLE envoyer_end();
+ERR_PROTOCOLE envoyer_pause(char* message);
+ERR_PROTOCOLE envoyer_start(char* message);
+ERR_PROTOCOLE envoyer_turn(Joueur j[]);
 
 #endif /* PROTOCOLE_H_ */

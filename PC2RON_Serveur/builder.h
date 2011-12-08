@@ -16,13 +16,6 @@ extern "C" {
     
 //typedef enum {false, true} bool;
 
-typedef enum Ordre {
-    droit = "idle",
-    gauche = "left",
-    droite = "right",
-    abandon = "abandon"
-} Ordre;
-
 typedef enum Direction {
     haut = 1,
     bas = 2,
