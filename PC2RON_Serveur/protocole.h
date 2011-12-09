@@ -35,10 +35,10 @@ typedef enum Ordre { DROIT, GAUCHE, DROITE, ABANDON } Ordre;
 char* sOrdre[4] = {"idle", "left", "right", "abandon"};
 */
 // Ordres
-#define DROIT "idle"
-#define GAUCHE "left"
-#define DROITE "right"
-#define ABANDON "abandon"
+#define ORDRE_DROIT "idle"
+#define ORDRE_GAUCHE "left"
+#define ORDRE_DROITE "right"
+#define ORDRE_ABANDON "abandon"
 
 // Messages d'erreur pour la trame Registered
 #define MSG_ERR_TRAME "Le format de la trame n'est pas correct"

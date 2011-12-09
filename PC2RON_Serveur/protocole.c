@@ -88,12 +88,6 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
         
         char* nomVersion = t.donnees[1].chaine.texte;
         
-        //debug
-        printf("Taille = %d\n", strlen(nomAppli));
-        printf("appli = %s\n", nomAppli);
-        printf("nomVersion = %s\n", nomVersion);
-        //debug
-        
         if(strcmp(nomAppli, NOM_APPLICATION) != 0) {
             erreur =  ERR_INITIATE;
         }
@@ -124,21 +118,29 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     char* nom;
 
     // @todo Verification du quota de joueurs
-
+        
     // Verification de la trame Init recue
     if(t.nbDonnees != 4) {
+        //debug
+        printf("TOTO 4\n");
+        //debug
         trameReg = creer_trame_registered_no(MSG_ERR_TRAME);
     } 
     
     else if(t.donnees[0].type != ENTIER_NON_SIGNE1 ||
             t.donnees[1].type != ENTIER_NON_SIGNE1 ||
             t.donnees[2].type != ENTIER_NON_SIGNE1) {
+        //debug
+        printf("TOTO Types\n");
+        //debug
         trameReg = creer_trame_registered_no(MSG_ERR_RVB);
     } 
     
     else if(t.donnees[3].type != CHAINE) {
         trameReg = creer_trame_registered_no(MSG_ERR_NOM);
     } else {
+        j = malloc(sizeof(Joueur));
+        
         // Reponse a la requete Connect
         r = t.donnees[0].entierNonSigne1;
         v = t.donnees[1].entierNonSigne1;
@@ -159,10 +161,6 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     
     envoyer_trame(sock, trameReg);
     
-    //debug
-    afficher_trame(trameReg);
-    //debug
-    
     return j;
 }
 
@@ -182,8 +180,9 @@ ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
    
     //debug
     //printf("count(j) = %d\n", count(j));
-    printf("sizeof(j) = %d\n", sizeof(Joueur));
+    printf("sizeof(Joueur) = %d\n", sizeof(Joueur));
     printf("sizeof(*j) = %d\n", sizeof(*j));
+    printf("sizeof(j) = %d\n", sizeof(j));
     printf("nbJoueurs = %d\n", nbJoueurs);
     //debug
     

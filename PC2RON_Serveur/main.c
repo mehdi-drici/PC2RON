@@ -16,9 +16,12 @@ void* THREAD_serveur(void *args) {
         //int idClient = *p_idClient;
         int continuer = 1;
         int erreur = 0;
-        Joueur j1 = {10, "Mehdi Drici", 50, 50, 50, 19, 21, HAUT};
-        Joueur j2 = {11, "Will Smith", 50, 50, 50, 19, 21, BAS};
-        Joueur j[2] = {j1, j2};
+        Joueur j1 = {10, "Mehdi Drici", 50, 50, 50, 19, 21, GAUCHE, 255};
+        Joueur j2 = {11, "Will Smith", 50, 50, 50, 19, 21, BAS, 105};
+        Joueur* j; //= {j1, j2};
+        j = malloc(2 * sizeof(Joueur));
+        j[0] = j1;
+        j[1] = j2;
         
 	pthread_mutex_lock(&MUTEX_compteur);
 	csock = accepter_client(sock);
@@ -44,6 +47,7 @@ void* THREAD_serveur(void *args) {
                 }
 	}
         */
+        get_resultat(csock);
         get_resultat(csock);
         envoyer_start(csock, "Bonjour Monsieur Drici !");
         envoyer_pause(csock, "Ceci est une pause!");
