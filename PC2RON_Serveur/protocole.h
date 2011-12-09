@@ -82,4 +82,8 @@ ERR_PROTOCOLE envoyer_pause(SOCKET sock, char* message);
 ERR_PROTOCOLE envoyer_start(SOCKET sock, char* message);
 ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]);
 
+ERR_PROTOCOLE envoyer_win(SOCKET sock, unsigned short id);
+ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id);
+ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1, unsigned short id2);
+
 #endif /* PROTOCOLE_H_ */

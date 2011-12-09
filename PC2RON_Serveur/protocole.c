@@ -231,3 +231,24 @@ ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
     afficher_trame(trameTurn);
     //debug
 }
+
+ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id) {
+    Trame trameDeath = creer_trame_death(id);
+    envoyer_trame(sock, trameDeath);
+    
+    //debug
+    printf("#Serveur : ");
+    afficher_trame(trameDeath);
+    //debug
+}
+
+ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1, 
+                                          unsigned short id2) {
+    Trame trameDeath = creer_trame_deaths(id1, id2);
+    envoyer_trame(sock, trameDeath);
+    
+    //debug
+    printf("#Serveur : ");
+    afficher_trame(trameDeath);
+    //debug
+}
