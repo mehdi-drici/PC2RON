@@ -13,7 +13,8 @@ extern "C" {
 #endif
 
 #include "trame.h"
-
+#include "factory.h"
+    
 //typedef enum {false, true} bool;
 
 typedef enum Direction {

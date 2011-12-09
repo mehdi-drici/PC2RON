@@ -83,20 +83,37 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
     else {
         // Reponse a la requete Init
         char* nomAppli = t.donnees[0].chaine.texte;
+        // On enlève le '?'
+        nomAppli[strlen(nomAppli) - 1] = '\0';
+        
         char* nomVersion = t.donnees[1].chaine.texte;
-
+        
+        //debug
+        printf("Taille = %d\n", strlen(nomAppli));
+        printf("appli = %s\n", nomAppli);
+        printf("nomVersion = %s\n", nomVersion);
+        //debug
+        
         if(strcmp(nomAppli, NOM_APPLICATION) != 0) {
             erreur =  ERR_INITIATE;
         }
 
-        if(strcmp(nomVersion, NOM_VERSION_PROTOCOLE) != 0) {
+        else if(strcmp(nomVersion, NOM_VERSION_PROTOCOLE) != 0) {
             erreur = ERR_INITIATE;
         }
 
-        trameAck = creer_trame_ack(1);
+        else {
+            trameAck = creer_trame_ack(1);
+        }
     }
     
+    //debug
+    afficher_trame(trameAck);
+    //debug
+    
     envoyer_trame(sock, trameAck);
+    
+    return erreur;
 }
 
 Joueur* repondre_connect(SOCKET sock, Trame t) {   
@@ -105,7 +122,7 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     
     unsigned char r, v, b;
     char* nom;
-            
+
     // @todo Verification du quota de joueurs
 
     // Verification de la trame Init recue
@@ -142,6 +159,10 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     
     envoyer_trame(sock, trameReg);
     
+    //debug
+    afficher_trame(trameReg);
+    //debug
+    
     return j;
 }
 
@@ -149,11 +170,22 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
 ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
     Trame trameUser = creer_trame_user(j);
     envoyer_trame(sock, trameUser);
+    
+    //debug
+    afficher_trame(trameUser);
+    //debug
 }
 
 ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
-    int nbJoueurs = sizeof(j) / sizeof(Joueur);
+    int nbJoueurs = sizeof(*j) / sizeof(Joueur);
     int i;
+   
+    //debug
+    //printf("count(j) = %d\n", count(j));
+    printf("sizeof(j) = %d\n", sizeof(Joueur));
+    printf("sizeof(*j) = %d\n", sizeof(*j));
+    printf("nbJoueurs = %d\n", nbJoueurs);
+    //debug
     
     for(i=0; i < nbJoueurs; i++) {
         envoyer_user(sock, j[i]);
@@ -165,20 +197,36 @@ ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
 ERR_PROTOCOLE envoyer_end(SOCKET sock) {
     Trame trameEnd = creer_trame_end();
     envoyer_trame(sock, trameEnd);
+    
+    //debug
+    afficher_trame(trameEnd);
+    //debug
 }
 
 ERR_PROTOCOLE envoyer_pause(SOCKET sock, char* message) {
     Trame tramePause = creer_trame_pause(message);
     envoyer_trame(sock, tramePause);
+    
+    //debug
+    afficher_trame(tramePause);
+    //debug
 }
 
 ERR_PROTOCOLE envoyer_start(SOCKET sock, char* message) {
-    Trame trameStart = creer_trame_pause(message);
+    Trame trameStart = creer_trame_start(message);
     envoyer_trame(sock, trameStart);
+    
+    //debug
+    afficher_trame(trameStart);
+    //debug
 }
 
 ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
     //@todo gerer le temps
     Trame trameTurn = creer_trame_turn(0, j);
     envoyer_trame(sock, trameTurn);
+    
+    //debug
+    afficher_trame(trameTurn);
+    //debug
 }

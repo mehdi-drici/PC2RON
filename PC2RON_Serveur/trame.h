@@ -159,49 +159,9 @@ typedef struct Trame {
 	Donnee* donnees;
 } Trame;
 
-
-/* Fonctions de la couche transport */
-
-/* Création d'une trame ou d'une donnée */
-Trame creer_trame(char id);
-void ajouter_donnee(Trame* t, Donnee d);
-void ajouter_donnees(Trame* t, Donnee d[]);
-Donnee creer_entierSigne1(char entier);
-Donnee creer_entierSigne2(short entier);
-Donnee creer_entierSigne4(long entier);
-Donnee creer_entierNonSigne1(unsigned char entier);
-Donnee creer_entierNonSigne2(unsigned short entier);
-Donnee creer_entierNonSigne4(unsigned long entier);
-Donnee creer_chaine(char texte[]);
-Donnee creer_flottant(double flottant);
-
-/* Réception d'une trame ou d'une donnée */
-ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue);
-ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_entierSigne1(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_entierSigne2(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_entierSigne4(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_entierNonSigne1(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_entierNonSigne2(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_entierNonSigne4(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue);
-ERREUR_DONNEE recevoir_flottant(SOCKET sock, Donnee* donneeRecue);
-
-/* Envoi d'une trame */
-ERREUR_TRAME envoyer_trame(SOCKET sock, Trame trameEnvoyee);
-//char** convertir_trame_toBytes(Trame trame);
-ERREUR_DONNEE envoyer_donnee(SOCKET sock, Donnee donnee);
-ERREUR_DONNEE envoyer_entierSigne1(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierSigne2(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierSigne4(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierNonSigne1(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierNonSigne2(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine);
-ERREUR_DONNEE envoyer_flottant(SOCKET sock, Donnee flottant);
-
 /* Affichage d'une trame ou d'une donnee */
 void afficher_trame(Trame trame);
 void afficher_donnee(Donnee trame);
 
+int count(void **tab);
 #endif /* TRAME_H_ */

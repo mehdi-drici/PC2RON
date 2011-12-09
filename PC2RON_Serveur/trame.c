@@ -122,4 +122,10 @@ void afficher_donnee(Donnee donnee) {
     }
 }
 
+int count(void** tab) {
+    int i;
+    for (i = 0; tab[i]; i++);
+
+    return (i);
+}
 

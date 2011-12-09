@@ -77,7 +77,7 @@ public class Protocole implements IProtocole {
 			IChaine chaine = (IChaine) message;
 				
 			if(! chaine.getChaine().equals("OK")) {
-				throw new Exception("La version du protocole n'est pas supportee par le serveur !");
+                            throw new Exception("La version du protocole n'est pas supportee par le serveur !");
 			}
 		} else {
                     throw new Exception("Impossible de lire la reponse du serveur !");
@@ -141,7 +141,7 @@ public class Protocole implements IProtocole {
 	public ArrayList getContenuTrame() throws Exception {
             ReceptionTrame reception = new ReceptionTrame();
             ITrame trameRecue = reception.recevoirTrame(in);
-            ETypeTrame typeTrame = ETypeTrame.values()[trameRecue.getId()];
+            ETypeTrame typeTrame = ETypeTrame.getTypeTrame(trameRecue.getId());
 
             ArrayList contenuTrame = new ArrayList();
             contenuTrame.add(typeTrame);
@@ -149,14 +149,16 @@ public class Protocole implements IProtocole {
             switch(typeTrame) {
                 // @todo implementer
                 case TrameUser:
-                    contenuTrame.add(getDonneesUser(trameRecue));
-
-                    trameRecue = reception.recevoirTrame(in);
-                    typeTrame = ETypeTrame.values()[trameRecue.getId()];
-
-                    while (typeTrame != ETypeTrame.TrameFin) {
+                    do {
                         contenuTrame.add(getDonneesUser(trameRecue));
-                    }
+                        //debug
+                        System.out.println(trameRecue.toString());
+                        //debug
+                        
+                        trameRecue = reception.recevoirTrame(in);
+                        typeTrame = ETypeTrame.getTypeTrame(trameRecue.getId());
+                    } while (typeTrame != ETypeTrame.TrameFin);
+                    
                     break;
 
                 case TrameStart:
@@ -182,7 +184,11 @@ public class Protocole implements IProtocole {
                 default:
                     throw new Exception("Type de trame inconnu !");
             }
-
+            
+            //DEBUG
+            System.out.println(trameRecue.toString());
+            //DEBUG
+            
             return contenuTrame;
 	}
 
@@ -200,7 +206,7 @@ public class Protocole implements IProtocole {
 		ReceptionTrame reception = new ReceptionTrame();
 		ITrame ack = reception.recevoirTrame(in);
 		
-		ETypeTrame typeTrame = ETypeTrame.values()[ack.getId()];
+		ETypeTrame typeTrame = ETypeTrame.getTypeTrame(ack.getId());
 		
 		IDonnee message = ack.getDonnees().get(0);
 		IDonnee donnee = ack.getDonnees().get(1);

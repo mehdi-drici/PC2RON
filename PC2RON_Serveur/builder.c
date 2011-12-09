@@ -106,7 +106,7 @@ Trame creer_trame_pause(char* message) {
 }
 
 Trame creer_trame_start(char* message) {
-    Trame trameStart = creer_trame(Pause);
+    Trame trameStart = creer_trame(Start);
     Donnee chaine = creer_chaine(message);
     ajouter_donnee(&trameStart, chaine);
     
