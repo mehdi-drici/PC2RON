@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>builder.h</itemPath>
       <itemPath>envoi.h</itemPath>
       <itemPath>factory.h</itemPath>
       <itemPath>main.h</itemPath>
@@ -19,9 +20,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>builder.c</itemPath>
       <itemPath>envoi.c</itemPath>
       <itemPath>factory.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>protocole.c</itemPath>
       <itemPath>reception.c</itemPath>
       <itemPath>serveur.c</itemPath>
       <itemPath>trame.c</itemPath>

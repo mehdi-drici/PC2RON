@@ -8,7 +8,7 @@
 #ifndef PROTOCOLE_H_
 #define PROTOCOLE_H_
 
-#include "trame.h"
+#include "builder.h"
 
 #define NOM_APPLICATION "PC2RON"
 #define NOM_VERSION_PROTOCOLE "PC2RON2011"
@@ -30,20 +30,29 @@ typedef enum ERR_PROTOCOLE {
     ERR_VALEUR_DONNEE
 } ERR_PROTOCOLE;
 
-typedef enum Ordre {
-    DROIT = "idle",
-    GAUCHE = "left",
-    DROITE = "right",
-    ABANDON = "abandon"
-} Ordre;
+/*
+typedef enum Ordre { DROIT, GAUCHE, DROITE, ABANDON } Ordre;
+char* sOrdre[4] = {"idle", "left", "right", "abandon"};
+*/
+// Ordres
+#define DROIT "idle"
+#define GAUCHE "left"
+#define DROITE "right"
+#define ABANDON "abandon"
 
 // Messages d'erreur pour la trame Registered
-typedef enum MsgErreurReg {
-    MSG_ERR_TRAME = "Le format de la trame n'est pas correct",
-    MSG_ERR_RVB = "Le format RVB n'est pas correct",
-    MSG_ERR_NOM = "Le nom doit etre une chaine de caracteres"
+#define MSG_ERR_TRAME "Le format de la trame n'est pas correct"
+#define MSG_ERR_RVB "Le format RVB n'est pas correct"
+#define MSG_ERR_NOM "Le nom doit etre une chaine de caracteres"
+/*
+typedef enum MsgErreurReg { 
+    MSG_ERR_TRAME, MSG_ERR_RVB, MSG_ERR_NOM 
 } MsgErreurReg;
 
+char* sMsgErreurReg[3] = {"Le format de la trame n'est pas correct", 
+                        "Le format RVB n'est pas correct", 
+                        "Le nom doit etre une chaine de caracteres"};
+*/
 typedef struct Resultat {
     TypeTrame typeTrame;
     void* contenu;
@@ -54,7 +63,7 @@ typedef struct Resultat {
 
 // Requetes du client
 Resultat get_resultat(SOCKET sock);
-Ordre get_order(SOCKET sock, Trame t);
+char* get_order(SOCKET sock, Trame t);
 
 // Reponses au client
 ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t);
@@ -63,7 +72,7 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t);
  * @param t
  * @return informations du nouveau joueur connecté
  */
-Joueur repondre_connect(SOCKET sock, Trame t);
+Joueur* repondre_connect(SOCKET sock, Trame t);
 
 // Envoi aux clients
 ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j);

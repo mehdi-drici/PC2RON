@@ -11,13 +11,13 @@
 unsigned short nbJoueurs = 0;
 
 // Requetes du client
-Ordre* get_order(SOCKET sock, Trame t) {
-    Ordre* o = NULL;
+char* get_order(SOCKET sock, Trame t) {
+    unsigned char* o = NULL;
     
     // Verification de la trame Init recue
     if(t.nbDonnees == 1 &&
        t.donnees[0].type == CHAINE) {
-        *o = t.donnees[0].chaine.texte;
+        o = t.donnees[0].chaine.texte;
     } 
        
     return o;
@@ -25,15 +25,17 @@ Ordre* get_order(SOCKET sock, Trame t) {
 
 // Point d'entree du protocole 
 Resultat get_resultat(SOCKET sock) {
+    Joueur* j;
+    char* o;
     Resultat res = {TYPE_TRAME_INCONNU, NULL};
     Trame trameRecue;
     recevoir_trame(sock, &trameRecue);
     
     switch(trameRecue.id) {      
         case Connect:
-            Joueur* j = repondre_connect(sock, trameRecue);
+            j = repondre_connect(sock, trameRecue);
             if(j != NULL) {
-                res.contenu = &j;
+                res.contenu = j;
                 res.typeTrame = Connect;
             }
             break;
@@ -45,9 +47,9 @@ Resultat get_resultat(SOCKET sock) {
             break;
         
         case Order:
-            Ordre* o = get_order(sock, trameRecue);
+            o = get_order(sock, trameRecue);
             if(o != NULL) {
-                res.contenu = &o;
+                res.contenu = o;
                 res.typeTrame = Order;
             }
             break;
@@ -101,6 +103,9 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     Trame trameReg;
     Joueur* j = NULL;
     
+    unsigned char r, v, b;
+    char* nom;
+            
     // @todo Verification du quota de joueurs
 
     // Verification de la trame Init recue
@@ -118,11 +123,11 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
         trameReg = creer_trame_registered_no(MSG_ERR_NOM);
     } else {
         // Reponse a la requete Connect
-        unsigned char r = t.donnees[0].entierNonSigne1;
-        unsigned char v = t.donnees[1].entierNonSigne1;
-        unsigned char b = t.donnees[2].entierNonSigne1;
+        r = t.donnees[0].entierNonSigne1;
+        v = t.donnees[1].entierNonSigne1;
+        b = t.donnees[2].entierNonSigne1;
         
-        char* nom = t.donnees[3].chaine;
+        nom = t.donnees[3].chaine.texte;
         
         j->r = r;
         j->v = v;
@@ -141,20 +146,20 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
 }
 
 // Envoi aux clients
-ERR_PROTOCOLE envoyer_user(Joueur j) {
+ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
     Trame trameUser = creer_trame_user(j);
     envoyer_trame(sock, trameUser);
 }
 
-ERR_PROTOCOLE envoyer_users(Joueur j[]) {
+ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
     int nbJoueurs = sizeof(j) / sizeof(Joueur);
     int i;
     
     for(i=0; i < nbJoueurs; i++) {
-        envoyer_user(j[i]);
+        envoyer_user(sock, j[i]);
     }
     
-    envoyer_end();
+    envoyer_end(sock);
 }
 
 ERR_PROTOCOLE envoyer_end(SOCKET sock) {
@@ -167,12 +172,13 @@ ERR_PROTOCOLE envoyer_pause(SOCKET sock, char* message) {
     envoyer_trame(sock, tramePause);
 }
 
-ERR_PROTOCOLE envoyer_start(char* message) {
+ERR_PROTOCOLE envoyer_start(SOCKET sock, char* message) {
     Trame trameStart = creer_trame_pause(message);
     envoyer_trame(sock, trameStart);
 }
 
-ERR_PROTOCOLE envoyer_turn(Joueur j[]) {
-    Trame trameTurn = creer_trame_turn(j);
+ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
+    //@todo gerer le temps
+    Trame trameTurn = creer_trame_turn(0, j);
     envoyer_trame(sock, trameTurn);
 }

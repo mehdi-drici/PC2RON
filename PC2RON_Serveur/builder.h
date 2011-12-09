@@ -17,10 +17,10 @@ extern "C" {
 //typedef enum {false, true} bool;
 
 typedef enum Direction {
-    haut = 1,
-    bas = 2,
-    gauche = 3,
-    droite = 4
+    HAUT = 1,
+    BAS = 2,
+    GAUCHE = 3,
+    DROITE = 4
 } Direction;
 
 typedef struct Joueur {

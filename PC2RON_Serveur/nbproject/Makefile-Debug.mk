@@ -39,7 +39,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/reception.o \
 	${OBJECTDIR}/factory.o \
 	${OBJECTDIR}/envoi.o \
-	${OBJECTDIR}/main.o
+	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/builder.o \
+	${OBJECTDIR}/protocole.o
 
 
 # C Compiler Flags
@@ -95,6 +97,16 @@ ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+
+${OBJECTDIR}/builder.o: builder.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/builder.o builder.c
+
+${OBJECTDIR}/protocole.o: protocole.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/protocole.o protocole.c
 
 # Subprojects
 .build-subprojects:

@@ -38,7 +38,6 @@ typedef enum ERREUR_TRAME {
 
 /* Code d'erreurs pour la lecture ou conversion d'une donnée */
 typedef enum ERREUR_DONNEE {
-	SUCCES,
 	ERR_ENVOI_DONNEE,
 	ERR_ENVOI_INT8,
 	ERR_ENVOI_INT16,
@@ -137,10 +136,6 @@ typedef struct Donnee {
 		/* chaîne de caractères */
 		struct chaine {
 			short taille;
-                        
-                        // on specifie bien que c'est un tableau
-                        // de caracteres pour pouvoir connaitre
-                        // sa taille par la suite
 			unsigned char* texte; 
 		} chaine;
 
