@@ -50,6 +50,7 @@ typedef enum TypeTrame {
         Death = 0x44,
 	End = 0x45,
 	Initiate = 0x49,
+        Order = 0x4F,
 	Pause = 0x50,
 	Registered = 0x52,
 	Start = 0x53,

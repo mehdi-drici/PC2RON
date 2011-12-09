@@ -1,11 +1,12 @@
 #include "builder.h"
+#include "protocole.h"
 
 Trame creer_trame_ack(int ok) {
     Trame trameAck = creer_trame(Ack);
     
     Donnee chaineOk = creer_chaine("OK");
     Donnee chaineNo = creer_chaine("NO");
-    Donnee chaineNomVersion = creer_chaine("PC2RON2011");
+    Donnee chaineNomVersion = creer_chaine(NOM_VERSION_PROTOCOLE);
     
     if(ok) {
         ajouter_donnee(&trameAck, chaineOk); 
