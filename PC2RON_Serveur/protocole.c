@@ -31,9 +31,11 @@ Resultat get_resultat(SOCKET sock) {
     
     switch(trameRecue.id) {      
         case Connect:
-            Joueur j = repondre_connect(sock, trameRecue);
-            res.contenu = &j;
-            res.typeTrame = Connect;
+            Joueur* j = repondre_connect(sock, trameRecue);
+            if(j != NULL) {
+                res.contenu = &j;
+                res.typeTrame = Connect;
+            }
             break;
         
         case Initiate:
@@ -43,7 +45,7 @@ Resultat get_resultat(SOCKET sock) {
             break;
         
         case Order:
-            Ordre o = get_order(sock, trameRecue);
+            Ordre* o = get_order(sock, trameRecue);
             if(o != NULL) {
                 res.contenu = &o;
                 res.typeTrame = Order;
@@ -95,9 +97,9 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
     envoyer_trame(sock, trameAck);
 }
 
-Joueur repondre_connect(SOCKET sock, Trame t) {   
+Joueur* repondre_connect(SOCKET sock, Trame t) {   
     Trame trameReg;
-    Joueur j;
+    Joueur* j = NULL;
     
     // @todo Verification du quota de joueurs
 
@@ -122,18 +124,20 @@ Joueur repondre_connect(SOCKET sock, Trame t) {
         
         char* nom = t.donnees[3].chaine;
         
-        j.r = r;
-        j.v = v;
-        j.b = b;
-        j.nom = nom;
+        j->r = r;
+        j->v = v;
+        j->b = b;
+        j->nom = nom;
         
         // Création de l'id du joueur
-        j.id = ++nbJoueurs;
+        j->id = ++nbJoueurs;
         
-        trameReg = creer_trame_registered_ok(j.id);
+        trameReg = creer_trame_registered_ok(j->id);
     }
     
     envoyer_trame(sock, trameReg);
+    
+    return j;
 }
 
 // Envoi aux clients
