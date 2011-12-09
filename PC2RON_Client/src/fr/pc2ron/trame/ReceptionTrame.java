@@ -18,7 +18,6 @@ import fr.pc2ron.interfaces.ITrame;
 import fr.pc2ron.interfaces.ITrameFactory;
 import fr.pc2ron.trame.donnee.DonneeFactory;
 import fr.pc2ron.trame.donnee.ETypeDonnee;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 //@todo Gestion des erreurs
 public class ReceptionTrame implements IReceptionTrame {

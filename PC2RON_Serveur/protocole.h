@@ -21,17 +21,6 @@ typedef enum ERR_PROTOCOLE {
     ERR_VALEUR_DONNEE
 } ERR_PROTOCOLE;
 
-typedef enum TypeTrame {
-	Ack = 0x41,
-	Connect = 0x43,
-	End = 0x45,
-	Initiate = 0x49,
-	Pause = 0x50,
-	Registered = 0x52,
-	Start = 0x53,
-	User = 0x55
-} TYPE_TRAME;
-
 typedef enum Ordre {
     droit = "idle",
     gauche = "left",
