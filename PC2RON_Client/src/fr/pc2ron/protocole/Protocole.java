@@ -117,16 +117,22 @@ public class Protocole implements IProtocole {
 		
 	@Override
 	public int getGagnant(ITrame trameWin) throws Exception {
-            IDonnee donnee = trameWin.getDonnees().get(0);
+            //IDonnee donnee = trameWin.getDonnees().get(0);
             int idGagnant = -1;
+            
+            if(trameWin.getNbDonnees() != 1) {
+                throw new Exception("La trame Start recue n'est pas correcte !");
+            } else {
+                IDonnee donnee = trameWin.getDonnees().get(0);
 
-            if(trameWin.getNbDonnees() == 1 && donnee instanceof EntierNonSigne2) {
+                if(donnee instanceof EntierNonSigne2) {
                     IEntierNonSigne2 entierNonSigne2 = (IEntierNonSigne2) donnee;
                     idGagnant = entierNonSigne2.getEntier();
-            } else {
+                } else {
                     throw new Exception("La trame Start recue n'est pas correcte !");
+                }
             }
-
+            
             return idGagnant;
 	}
 
@@ -251,11 +257,31 @@ public class Protocole implements IProtocole {
 
 	@Override
 	public int[] getPerdants(ITrame trameDeath) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+            int[] perdants = null;
+            int nbDonnees = trameDeath.getNbDonnees();
+            
+            if(nbDonnees == 1 || nbDonnees == 2) {
+                perdants = new int[nbDonnees];
+                IDonnee donnee;
+                
+                for(int i = 0; i < nbDonnees; i++) {
+                    donnee = trameDeath.getDonnees().get(i);
+                    
+                    if(donnee instanceof EntierNonSigne2) {
+                        IEntierNonSigne2 entier = (IEntierNonSigne2) donnee; 
+                        perdants[i] = entier.getEntier();
+                    }  else {
+                        throw new Exception("La trame Death recue n'est pas correcte !");
+                    }
+                }
+                
+            } 
+            
+            return perdants;
 	}
 
 	@Override
+        //@todo implementer
 	public HashMap<String, Object> getPositions(ITrame trameTurn) throws Exception {
 		// TODO Auto-generated method stub
 		return null;

@@ -28,6 +28,7 @@ typedef int SOCKET;
 
 /* Code d'erreurs pour la lecture d'une trame */
 typedef enum ERREUR_TRAME {
+        SUCCES,
 	ERR_ENTETE_TRAME,
 	ERR_ENVOI_ENTETE_TRAME,
 	ERR_RCPT_FANION_TRAME,
