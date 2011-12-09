@@ -47,11 +47,21 @@ void* THREAD_serveur(void *args) {
                 }
 	}
         */
+        // connexion
         get_resultat(csock);
+        
+        // inscription
         get_resultat(csock);
-        envoyer_start(csock, "Bonjour Monsieur Drici !");
+        
+        envoyer_start(csock, "Ceci est une start !");
         envoyer_pause(csock, "Ceci est une pause!");
         envoyer_users(csock, j);
+        
+        // ordre
+        get_resultat(csock);
+        
+        // fin de transmission 
+        get_resultat(csock);
         
 	/* Fermeture de connexion */
 	shutdown(csock, SHUT_RDWR);

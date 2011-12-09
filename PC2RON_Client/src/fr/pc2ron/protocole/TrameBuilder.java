@@ -60,7 +60,7 @@ public class TrameBuilder implements ITrameBuilder {
 		
 		IDonnee chaine = donneeFactory.getChaine(ordre.getStringOrdre());
 		
-		ITrame trame = trameFactory.getTrame(ETypeTrame.TrameInit.getType(), chaine);
+		ITrame trame = trameFactory.getTrame(ETypeTrame.TrameOrder.getType(), chaine);
 		
 		return trame;
 	}

@@ -6,7 +6,7 @@ public enum ETypeTrame {
 	TrameAck(0x41),
 	TrameRegistered(0x52),
 	TrameUser(0x55),
-	TrameFin(0x45),
+	TrameEnd(0x45),
 	TramePause(0x50),
 	TrameStart(0x53),
 	TrameTurn(0x54),

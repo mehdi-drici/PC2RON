@@ -31,6 +31,11 @@ Resultat get_resultat(SOCKET sock) {
     Trame trameRecue;
     recevoir_trame(sock, &trameRecue);
     
+    //debug
+    printf("#Client : ");
+    afficher_trame(trameRecue);
+    //debug
+    
     switch(trameRecue.id) {      
         case Connect:
             j = repondre_connect(sock, trameRecue);
@@ -102,6 +107,7 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
     }
     
     //debug
+    printf("#Serveur : ");
     afficher_trame(trameAck);
     //debug
     
@@ -121,18 +127,12 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
         
     // Verification de la trame Init recue
     if(t.nbDonnees != 4) {
-        //debug
-        printf("TOTO 4\n");
-        //debug
         trameReg = creer_trame_registered_no(MSG_ERR_TRAME);
     } 
     
     else if(t.donnees[0].type != ENTIER_NON_SIGNE1 ||
             t.donnees[1].type != ENTIER_NON_SIGNE1 ||
             t.donnees[2].type != ENTIER_NON_SIGNE1) {
-        //debug
-        printf("TOTO Types\n");
-        //debug
         trameReg = creer_trame_registered_no(MSG_ERR_RVB);
     } 
     
@@ -159,6 +159,11 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
         trameReg = creer_trame_registered_ok(j->id);
     }
     
+    //debug
+    printf("#Serveur : ");
+    afficher_trame(trameReg);
+    //debug
+    
     envoyer_trame(sock, trameReg);
     
     return j;
@@ -170,6 +175,7 @@ ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
     envoyer_trame(sock, trameUser);
     
     //debug
+    printf("#Serveur : ");
     afficher_trame(trameUser);
     //debug
 }
@@ -177,14 +183,6 @@ ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
 ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
     int nbJoueurs = sizeof(*j) / sizeof(Joueur);
     int i;
-   
-    //debug
-    //printf("count(j) = %d\n", count(j));
-    printf("sizeof(Joueur) = %d\n", sizeof(Joueur));
-    printf("sizeof(*j) = %d\n", sizeof(*j));
-    printf("sizeof(j) = %d\n", sizeof(j));
-    printf("nbJoueurs = %d\n", nbJoueurs);
-    //debug
     
     for(i=0; i < nbJoueurs; i++) {
         envoyer_user(sock, j[i]);
@@ -198,6 +196,7 @@ ERR_PROTOCOLE envoyer_end(SOCKET sock) {
     envoyer_trame(sock, trameEnd);
     
     //debug
+    printf("#Serveur : ");
     afficher_trame(trameEnd);
     //debug
 }
@@ -207,6 +206,7 @@ ERR_PROTOCOLE envoyer_pause(SOCKET sock, char* message) {
     envoyer_trame(sock, tramePause);
     
     //debug
+    printf("#Serveur : ");
     afficher_trame(tramePause);
     //debug
 }
@@ -216,6 +216,7 @@ ERR_PROTOCOLE envoyer_start(SOCKET sock, char* message) {
     envoyer_trame(sock, trameStart);
     
     //debug
+    printf("#Serveur : ");
     afficher_trame(trameStart);
     //debug
 }
@@ -226,6 +227,7 @@ ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
     envoyer_trame(sock, trameTurn);
     
     //debug
+    printf("#Serveur : ");
     afficher_trame(trameTurn);
     //debug
 }

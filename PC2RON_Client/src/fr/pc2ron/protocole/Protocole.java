@@ -88,6 +88,11 @@ public class Protocole implements IProtocole {
 	@Override
 	public void deconnexion() {
             try {
+                ITrameFactory trameFactory = TrameFactory.getInstance();
+                ITrame trameFin = trameFactory.getTrameEnd();
+                VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
+                
+                envoi.visit(trameFin, out);
                 out.flush();
                 out.close();
                 sock.close();
@@ -102,7 +107,11 @@ public class Protocole implements IProtocole {
             // Envoi de la trame Order
             ITrameBuilder trameBuilder = TrameBuilder.getInstance();
             ITrame trameOrder = trameBuilder.creerTrameOrder(ordre);
-
+            
+            //debug
+            System.out.println(trameOrder.toString());
+            //debug
+            
             VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
             envoi.visit(trameOrder, out);
 	}
@@ -157,7 +166,7 @@ public class Protocole implements IProtocole {
                         
                         trameRecue = reception.recevoirTrame(in);
                         typeTrame = ETypeTrame.getTypeTrame(trameRecue.getId());
-                    } while (typeTrame != ETypeTrame.TrameFin);
+                    } while (typeTrame != ETypeTrame.TrameEnd);
                     
                     break;
 
@@ -212,6 +221,10 @@ public class Protocole implements IProtocole {
 		IDonnee donnee = ack.getDonnees().get(1);
 		int id = -1;
 		
+                //DEBUG
+                System.out.println(ack.toString());
+                //DEBUG
+                
 		// ? { 0x52, string "OK", uint16 id }
 		if(typeTrame == ETypeTrame.TrameRegistered &&
 		   message instanceof Chaine) {
