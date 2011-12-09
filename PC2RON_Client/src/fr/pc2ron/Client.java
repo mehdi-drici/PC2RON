@@ -16,16 +16,12 @@ import java.util.logging.Logger;
  * @author mehdi
  */
 public class Client {
-    public static void main(String[] argv) {       
-        //Socket socket = new Socket("192.168.1.8", 5555);
-            
-        // Creation de la trame
-        IDonneeFactory donneeFactory = DonneeFactory.getInstance();
-        ITrameFactory trameFactory = TrameFactory.getInstance();
+    public static void main(String[] argv) {                
         IProtocole protocole = Protocole.getInstance();
         
         try {
             protocole.connexion("127.0.0.1", 5555);
+            protocole.inscription((short)50, (short)50, (short)50, "Superman");
             System.out.println("Connexion etablie !");
         } catch (Exception ex) {
             System.out.println("Connexion impossible");

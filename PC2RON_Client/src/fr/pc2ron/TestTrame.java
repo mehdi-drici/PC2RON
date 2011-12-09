@@ -9,7 +9,7 @@ import fr.pc2ron.interfaces.ITrameFactory;
 import fr.pc2ron.trame.TrameFactory;
 import fr.pc2ron.trame.donnee.DonneeFactory;
 
-public class Test {
+public class TestTrame {
 	public static void main(String[] args) {
 		IDonneeFactory donneeFactory = DonneeFactory.getInstance();
 		ITrameFactory trameFactory = TrameFactory.getInstance();

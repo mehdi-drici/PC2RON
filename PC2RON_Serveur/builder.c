@@ -89,7 +89,7 @@ Trame creer_trame_death(unsigned short id1) {
 }
 
 // Personne ne gagne (collision entre deux survivants)
-Trame creer_trame_death(unsigned short id1, unsigned short id2) {
+Trame creer_trame_deaths(unsigned short id1, unsigned short id2) {
     Trame trameDeath = creer_trame(Death);
     Donnee id;
 

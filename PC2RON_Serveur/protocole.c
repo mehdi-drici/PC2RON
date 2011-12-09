@@ -190,15 +190,8 @@ ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
     envoyer_trame(sock, trameTurn);
 }
 
-ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id1) {
-    //@todo gerer le temps
-    Trame trameTurn = creer_trame_turn(0, j);
-    envoyer_trame(sock, trameTurn);
-}
-
 ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1,
                                           unsigned short id2) {
-    //@todo gerer le temps
     Trame trameDeath = creer_trame_deaths(id1, id2);
     envoyer_trame(sock, trameDeath);
     

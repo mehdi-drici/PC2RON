@@ -7,12 +7,6 @@
 
 #include "trame.h"
 
-// Premier octet de la trame
-//const char FANION = 0xFF;
-//const char FIN_TRANSMISSION = 0x00;
-
-
-// @TODO Problèmes de réallocation
 void ajouter_donnee(Trame* t, Donnee d)
 {
     int taille = t->nbDonnees;
@@ -63,8 +57,8 @@ void afficher_trame(Trame trame) {
             printf("END");
             break;
           
-        default:
-            printf("Erreur de trame\n");
+        default:;
+            //printf("Erreur de trame\n");
     }
     
     printf(" }\n");
@@ -116,7 +110,7 @@ void afficher_donnee(Donnee donnee) {
         printf("double %f", donnee.flottant);
         break;
 
-    default:
-        printf("Mauvais type !\n");
+    default:;
+        //printf("Mauvais type !\n");
     }
 }
