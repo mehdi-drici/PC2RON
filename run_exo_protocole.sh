@@ -1,5 +1,7 @@
-gcc -c PC2RON_Serveur/*.c
+#!/bin/bash
 
-gcc PC2RON/*.o -o pc2ron_serveur.exe -lpthread
+cd PC2RON_Serveur
+gcc -c *.c
+gcc *.o -o pc2ron_serveur.exe -lpthread
 
-./PC2RON_Serveur/pc2ron_serveur.exe
+./pc2ron_serveur.exe
