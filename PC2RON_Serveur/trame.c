@@ -45,7 +45,7 @@ void ajouter_donnees(Trame* t, Donnee* d) {
 void afficher_trame(Trame trame) {
     int i = 0;
 
-    printf(">>> { ");
+    printf("{ ");
     
     switch(trame.fanion) {
         case TRAME_NORMALE:
@@ -67,7 +67,6 @@ void afficher_trame(Trame trame) {
             printf("Erreur de trame\n");
     }
     
-
     printf(" }\n");
 }
 
@@ -121,11 +120,3 @@ void afficher_donnee(Donnee donnee) {
         printf("Mauvais type !\n");
     }
 }
-
-int count(void** tab) {
-    int i;
-    for (i = 0; tab[i]; i++);
-
-    return (i);
-}
-

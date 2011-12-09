@@ -77,24 +77,29 @@ Trame creer_trame_win(unsigned short id) {
     return trameWin;
 }
 
-Trame creer_trame_death(unsigned short id[]) {
+// Un participant meurt
+Trame creer_trame_death(unsigned short id1) {
     Trame trameDeath = creer_trame(Death);
-    int nbIds = sizeof(id) / sizeof(short);
-    Donnee dId;
-    
-    // Un participant meurt
-    if(nbIds >= 1) {
-        dId = creer_entierNonSigne2(id[0]);
-        ajouter_donnee(&trameDeath, dId);
-    }
-    
-    // Personne ne gagne (collision entre deux survivants)
-    if(nbIds >= 2) {
-        dId = creer_entierNonSigne2(id[1]);
-        ajouter_donnee(&trameDeath, dId);
-    }
+    Donnee id;
 
-    return trameDeath;    
+    id = creer_entierNonSigne2(id1);
+    ajouter_donnee(&trameDeath, id);
+    
+    return trameDeath;
+}
+
+// Personne ne gagne (collision entre deux survivants)
+Trame creer_trame_death(unsigned short id1, unsigned short id2) {
+    Trame trameDeath = creer_trame(Death);
+    Donnee id;
+
+    id = creer_entierNonSigne2(id1);
+    ajouter_donnee(&trameDeath, id);
+    
+    id = creer_entierNonSigne2(id2);
+    ajouter_donnee(&trameDeath, id);
+    
+    return trameDeath;
 }
 
 Trame creer_trame_pause(char* message) {

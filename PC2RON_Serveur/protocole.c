@@ -55,8 +55,6 @@ Resultat get_resultat(SOCKET sock) {
             break;
         
         default:
-            //res.contenu = NULL;
-            //res.typeTrame = TYPE_TRAME_INCONNU;
             break;
     }
     
@@ -101,10 +99,6 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
         }
     }
     
-    //debug
-    afficher_trame(trameAck);
-    //debug
-    
     envoyer_trame(sock, trameAck);
     
     return erreur;
@@ -121,18 +115,12 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
         
     // Verification de la trame Init recue
     if(t.nbDonnees != 4) {
-        //debug
-        printf("TOTO 4\n");
-        //debug
         trameReg = creer_trame_registered_no(MSG_ERR_TRAME);
     } 
     
     else if(t.donnees[0].type != ENTIER_NON_SIGNE1 ||
             t.donnees[1].type != ENTIER_NON_SIGNE1 ||
             t.donnees[2].type != ENTIER_NON_SIGNE1) {
-        //debug
-        printf("TOTO Types\n");
-        //debug
         trameReg = creer_trame_registered_no(MSG_ERR_RVB);
     } 
     
@@ -168,23 +156,11 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
 ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
     Trame trameUser = creer_trame_user(j);
     envoyer_trame(sock, trameUser);
-    
-    //debug
-    afficher_trame(trameUser);
-    //debug
 }
 
 ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
     int nbJoueurs = sizeof(*j) / sizeof(Joueur);
     int i;
-   
-    //debug
-    //printf("count(j) = %d\n", count(j));
-    printf("sizeof(Joueur) = %d\n", sizeof(Joueur));
-    printf("sizeof(*j) = %d\n", sizeof(*j));
-    printf("sizeof(j) = %d\n", sizeof(j));
-    printf("nbJoueurs = %d\n", nbJoueurs);
-    //debug
     
     for(i=0; i < nbJoueurs; i++) {
         envoyer_user(sock, j[i]);
@@ -196,36 +172,45 @@ ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
 ERR_PROTOCOLE envoyer_end(SOCKET sock) {
     Trame trameEnd = creer_trame_end();
     envoyer_trame(sock, trameEnd);
-    
-    //debug
-    afficher_trame(trameEnd);
-    //debug
 }
 
 ERR_PROTOCOLE envoyer_pause(SOCKET sock, char* message) {
     Trame tramePause = creer_trame_pause(message);
     envoyer_trame(sock, tramePause);
-    
-    //debug
-    afficher_trame(tramePause);
-    //debug
 }
 
 ERR_PROTOCOLE envoyer_start(SOCKET sock, char* message) {
     Trame trameStart = creer_trame_start(message);
     envoyer_trame(sock, trameStart);
-    
-    //debug
-    afficher_trame(trameStart);
-    //debug
 }
 
 ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
     //@todo gerer le temps
     Trame trameTurn = creer_trame_turn(0, j);
     envoyer_trame(sock, trameTurn);
+}
+
+ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id1) {
+    //@todo gerer le temps
+    Trame trameTurn = creer_trame_turn(0, j);
+    envoyer_trame(sock, trameTurn);
+}
+
+ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1,
+                                          unsigned short id2) {
+    //@todo gerer le temps
+    Trame trameDeath = creer_trame_deaths(id1, id2);
+    envoyer_trame(sock, trameDeath);
     
-    //debug
-    afficher_trame(trameTurn);
-    //debug
+    // Fermeture de la connexion
+    shutdown(sock, SHUT_RDWR);
+}
+
+ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id1) {
+    //@todo gerer le temps
+    Trame trameDeath = creer_trame_death(id1);
+    envoyer_trame(sock, trameDeath);
+    
+    // Fermeture de la connexion
+    shutdown(sock, SHUT_RDWR);
 }
