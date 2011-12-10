@@ -26,6 +26,11 @@ public class Client {
         
         try {
             protocole.connexion("127.0.0.1", 5555);
+            protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
+            protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
+            protocole.getContenuTrame();
+            protocole.getContenuTrame();
+            protocole.getContenuTrame();
             System.out.println("Connexion etablie !");
         } catch (Exception ex) {
             System.out.println("Connexion impossible");

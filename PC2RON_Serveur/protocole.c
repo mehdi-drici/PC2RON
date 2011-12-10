@@ -181,6 +181,7 @@ ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
 }
 
 ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
+    //@todo nombre de joueurs ?
     int nbJoueurs = sizeof(*j) / sizeof(Joueur);
     int i;
     

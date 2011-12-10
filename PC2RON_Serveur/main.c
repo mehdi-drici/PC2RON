@@ -7,81 +7,113 @@
 
 #include "main.h"
 
+#define NB_MAX_JOUEURS 3
+
 SOCKET sock;
 pthread_mutex_t MUTEX_compteur;
+pthread_cond_t COND_joueurs_inscrits, COND_instant;
+int nbJoueurs = 0;
+Joueur j[3];
 
 void* THREAD_serveur(void *args) {
-	SOCKET csock;
-        //int* p_idClient = (int*) args;
-        //int idClient = *p_idClient;
-        int continuer = 1;
-        int erreur = 0;
-        Joueur j1 = {10, "Mehdi Drici", 50, 50, 50, 19, 21, GAUCHE, 255};
-        Joueur j2 = {11, "Will Smith", 50, 50, 50, 19, 21, BAS, 105};
-        Joueur* j; //= {j1, j2};
-        j = malloc(2 * sizeof(Joueur));
-        j[0] = j1;
-        j[1] = j2;
+    SOCKET csock;
+    
+    int joueurInscrit = 0;
+    int erreur;
+    Resultat res;
+    int nbJoueurs = 3, i;
+    
+    // init de la socket
+    pthread_mutex_lock(&MUTEX_compteur);
+    csock = accepter_client(sock);
+    pthread_mutex_unlock(&MUTEX_compteur);
         
-	pthread_mutex_lock(&MUTEX_compteur);
-	csock = accepter_client(sock);
-        pthread_mutex_unlock(&MUTEX_compteur);
+    // Inscription du client   
+    do {
+        res = get_resultat(csock);
         
-        /*
-	while (continuer) {
-		erreur = recevoir_trame(csock, &trameRecue);
-                                
-                if(erreur == ERR_RCPT_FANION_TRAME) {
-                    break;
-                }
-                
-                if(erreur == ERR_RCPT_TRAME) {
-                    break;
-                }
-                
-                afficher_trame(trameRecue);
-                
-                // Fin de transmission
-                if(trameRecue.fanion == TRAME_SPECIALE) {
-                    continuer = 0;
-                }
-	}
-        */
-        // connexion
-        get_resultat(csock);
-        
-        // inscription
-        get_resultat(csock);
-        
-        envoyer_start(csock, "Ceci est une start !");
-        envoyer_pause(csock, "Ceci est une pause!");
-        envoyer_users(csock, j);
-        
-        // ordre
-        get_resultat(csock);
-        
-        // fin de transmission 
-        get_resultat(csock);
-        
-	/* Fermeture de connexion */
-	shutdown(csock, SHUT_RDWR);
+        if(res.typeTrame == Connect) {
+            joueurInscrit = 1;
+            nbJoueurs++;
+        }
+    } while (!joueurInscrit);
+    
+    // Attente de l'inscription de tous les joueurs
+    pthread_mutex_lock(&MUTEX_compteur);
+    if(nbJoueurs == NB_MAX_JOUEURS) {
+        pthread_cond_signal(&COND_joueurs_inscrits);
+    } else {
+        pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_compteur);
+    }
+    pthread_mutex_unlock(&MUTEX_compteur);
 
-    return NULL;
+    // Envoi de la trame User
+    envoyer_users(csock, j);
+    
+    // Décompte
+    envoyer_pause(csock, "3");
+    envoyer_pause(csock, "2");
+    envoyer_pause(csock, "1");
+    envoyer_start(csock, "GO!");
+    
+    while(1) {
+        res = get_resultat(csock);
+        if(res.typeTrame == Order) {
+            char* ordre = res.contenu;
+            
+            if(ordre == ORDRE_DROIT) {
+                printf("Tout Droit\n");
+            } else if(ordre == ORDRE_GAUCHE) {
+                printf("Gauche\n");
+            } else if(ordre == ORDRE_DROITE) {
+                printf("Droite\n");
+            } else if(ordre == ORDRE_ABANDON) {
+                printf("Abandon\n");
+            } else {
+                printf("Ordre inconnu");
+            }
+        }
+        
+        pthread_mutex_lock(&MUTEX_compteur);
+        pthread_cond_wait(&COND_instant, &MUTEX_compteur);
+        pthread_mutex_unlock(&MUTEX_compteur);
+    }
+    
+    /* Fermeture de connexion */
+    shutdown(csock, SHUT_RDWR);
+}
+
+void* THREAD_instant(void *args) {
+    while(1) {
+        usleep(200);
+        pthread_mutex_lock(&MUTEX_compteur);
+        pthread_cond_signal(&COND_instant);
+        pthread_mutex_unlock(&MUTEX_compteur);
+    }
 }
 
 int main(void) {
 	pthread_t threads[NB_THREAD];
+        pthread_t thread_instant;
+        
 	void* status;
 	long i;
 
 	// Création d'une socket
 	sock = etablir_connexion();
-
+        
+        // Initialisation du mutex
 	pthread_mutex_init(&MUTEX_compteur,NULL);
+        
+        // Initialisation des conditions
+        pthread_cond_init(&COND_instant, NULL);
+        pthread_cond_init(&COND_joueurs_inscrits, NULL);
+        
+        pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
         for(i=0; i < NB_THREAD; i++) {
             pthread_create(&threads[i], NULL, THREAD_serveur, (long*) i);
         }
-
+        
 	for(i=0;i<NB_THREAD;i++) {
             pthread_join(threads[i], &status);
 	}
