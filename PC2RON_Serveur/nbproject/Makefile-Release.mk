@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/trame.o \
 	${OBJECTDIR}/reception.o \
 	${OBJECTDIR}/factory.o \
+	${OBJECTDIR}/joueur.o \
 	${OBJECTDIR}/envoi.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/builder.o \
@@ -87,6 +88,11 @@ ${OBJECTDIR}/factory.o: factory.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/factory.o factory.c
+
+${OBJECTDIR}/joueur.o: joueur.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/joueur.o joueur.c
 
 ${OBJECTDIR}/envoi.o: envoi.c 
 	${MKDIR} -p ${OBJECTDIR}

@@ -44,8 +44,8 @@ typedef enum ERR_PROTOCOLE {
 #define MSG_ERR_NOM "Le nom doit etre une chaine de caracteres"
 
 // Messages d'erreur pour le serveur
-#define MSG_ERR_CONNECT(sock) "Problème d'inscription de la socket %d", sock
-#define MSG_ERR_ORDER(sock) "L'ordre reçu par la socket %d n'est pas correct", sock
+#define MSG_ERR_CONNECT(sock) printf("Problème d'inscription de la socket %d", sock);
+#define MSG_ERR_ORDER(sock) printf("L'ordre reçu par la socket %d n'est pas correct", sock);
 #define MSG_ERR_TYPE_INCONNU "Le type de la trame reçue est inconnu"
 
 typedef struct Resultat {
@@ -61,14 +61,9 @@ char* get_order(SOCKET sock, Trame t);
 
 // Reponses au client
 ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t);
-/**
- * 
- * @param t
- * @return informations du nouveau joueur connecté
- */
 Joueur* repondre_connect(SOCKET sock, Trame t);
 
-// Envoi aux clients
+// Envoi au client
 ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j);
 ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]);
 ERR_PROTOCOLE envoyer_end(SOCKET sock);

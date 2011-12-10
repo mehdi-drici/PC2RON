@@ -2,13 +2,15 @@
 #include "builder.h"
 #include <sys/types.h>
 
-
-//SOCKET sock = NULL;
-//int estConnecte = 0;
-//int estInsrit = 0;
-
 // Nombre courant de joueurs inscrits
 unsigned short nbJoueursInscrits = 0;
+int nbMaxJoueurs = 0;
+Joueur joueurs[];
+
+void init_protocole(Joueur j[], int nbJoueurs) {
+    joueurs = j;
+    nbMaxJoueurs = nbJoueurs;
+}
 
 // Requetes du client
 char* get_order(SOCKET sock, Trame t) {
@@ -41,7 +43,7 @@ Resultat get_resultat_echange(SOCKET sock) {
         //debug
         printf("Deconnexion du joueur !\n");
         //debug
-        
+       
         return res;
     }
         

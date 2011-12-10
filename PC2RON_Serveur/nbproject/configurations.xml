@@ -7,6 +7,7 @@
       <itemPath>builder.h</itemPath>
       <itemPath>envoi.h</itemPath>
       <itemPath>factory.h</itemPath>
+      <itemPath>joueur.h</itemPath>
       <itemPath>main.h</itemPath>
       <itemPath>protocole.h</itemPath>
       <itemPath>reception.h</itemPath>
@@ -23,6 +24,7 @@
       <itemPath>builder.c</itemPath>
       <itemPath>envoi.c</itemPath>
       <itemPath>factory.c</itemPath>
+      <itemPath>joueur.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>protocole.c</itemPath>
       <itemPath>reception.c</itemPath>

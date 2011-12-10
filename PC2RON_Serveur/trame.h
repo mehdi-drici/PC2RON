@@ -22,10 +22,6 @@
 
 typedef int SOCKET;
 
-/* Premier octet d'une trame */
-//#define FANION 0xFF;
-//#define FIN_TRANSMISSION 0x00;
-
 /* Code d'erreurs pour la lecture d'une trame */
 typedef enum ERREUR_TRAME {
         SUCCES,
@@ -98,39 +94,12 @@ typedef struct Donnee {
 	union {
 		/* entier signés */
 		char entierSigne1;
-
-		/*
-		struct entierSigne2 {
-			short n;
-			unsigned char octets[2];
-		} entierSigne2;
-		*/
 		short entierSigne2;
-
-		/*
-		struct entierSigne4 {
-			long n;
-			unsigned char octets[4];
-		} entierSigne4;
-		*/
 		int entierSigne4;
 
 		/* entiers non signés */
 		unsigned char entierNonSigne1;
-		/*
-		struct entierNonSigne2 {
-			unsigned short n;
-			unsigned char octets[2];
-		} entierNonSigne2;
-		*/
 		unsigned short entierNonSigne2;
-
-		/*
-		struct entierNonSigne4 {
-			unsigned long n;
-			unsigned char octets[4];
-		} entierNonSigne4;
-		*/
 		unsigned int entierNonSigne4;
 
 		/* chaîne de caractères */
@@ -153,10 +122,10 @@ typedef struct Donnee {
 
 /* Structure d'une trame */
 typedef struct Trame {
-        TYPE_FANION fanion;
-	unsigned char id;
-	unsigned char nbDonnees;
-	Donnee* donnees;
+    TYPE_FANION fanion;
+    unsigned char id;
+    unsigned char nbDonnees;
+    Donnee* donnees;
 } Trame;
 
 /* Affichage d'une trame ou d'une donnee */
