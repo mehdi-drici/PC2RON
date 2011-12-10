@@ -5,11 +5,10 @@
 package fr.pc2ron;
 
 import fr.pc2ron.interfaces.*;
+import fr.pc2ron.protocole.EOrdre;
 import fr.pc2ron.protocole.Protocole;
 import fr.pc2ron.trame.TrameFactory;
 import fr.pc2ron.trame.donnee.DonneeFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -27,11 +26,17 @@ public class Client {
         try {
             protocole.connexion("127.0.0.1", 5555);
             protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
-            protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
+            
+            // Trame User
+            //protocole.getContenuTrame();
+            
+            // Decompte
             protocole.getContenuTrame();
             protocole.getContenuTrame();
             protocole.getContenuTrame();
-            System.out.println("Connexion etablie !");
+            protocole.getContenuTrame();
+            
+            protocole.envoyerOrdre(EOrdre.DROIT);
         } catch (Exception ex) {
             System.out.println("Connexion impossible");
             ex.printStackTrace();
