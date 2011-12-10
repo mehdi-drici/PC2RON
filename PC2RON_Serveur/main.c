@@ -16,14 +16,16 @@ pthread_mutex_t MUTEX_instant = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_cond_t COND_joueurs_inscrits = PTHREAD_COND_INITIALIZER;
 pthread_cond_t COND_instant = PTHREAD_COND_INITIALIZER;
+
 int nbJoueursCo = 0;
+int nbJoueurs = 0;
+
 Joueur j[3];
 
 void* THREAD_serveur(void *args) {
     SOCKET csock;
     Joueur* j;
     int joueurInscrit = 0;
-    int erreur;
     Resultat res;
     int i;
     
@@ -33,6 +35,7 @@ void* THREAD_serveur(void *args) {
     
     // Initialisation du protocole
     init_protocole(j, 3);
+    init_joueurs(j, 3);
     
     pthread_mutex_unlock(&MUTEX_accept);
     

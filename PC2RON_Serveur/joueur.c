@@ -22,26 +22,18 @@ void init_joueur(int sock, Joueur* j) {
     j->estInscrit = 0;
 }
 
-void init_joueurs(Joueur j[], int nbJoueurs) {
-    int i;
-    
-    for(i=0; i < nbJoueurs; i++) {
-        init_joueur(-1, j+i);
-    }
-}
-
 // Récupération des informations d'un client à partir de sa socket
-Joueur* get_joueur(int sock, Joueur joueurs[], int nbJoueurs) {
+Joueur* get_joueur(int sock, Joueurs lesJoueurs) {
     int i = 0;
     
-    while (i < nbJoueurs && joueurs[i].sock != sock) {
+    while (i < lesJoueurs.nbJoueurs && lesJoueurs.joueur[i].sock != sock) {
         i++;
     }
     
-    if(i == nbJoueurs) {
+    if(i == lesJoueurs.nbJoueurs) {
         return NULL;
     } else {
-        return &joueurs[i];
+        return &lesJoueurs.joueur[i];
     }
 }
 
