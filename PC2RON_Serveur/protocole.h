@@ -20,49 +20,43 @@
 
 /* Code d'erreurs */
 typedef enum ERR_PROTOCOLE {
-    ERR_SOCKET,
-    ERR_INITIATE,
-    ERR_CONNECT,
-    ERR_ENVOI_TURN,
-    ERR_ENVOI_DEATH,
-    ERR_ENVOI_WIN,
-    ERR_ENTETE_DONNEE,
-    ERR_VALEUR_DONNEE
+    ERR_SOCKET = 1,
+    ERR_INITIATE = 2,
+    ERR_CONNECT = 3,
+    ERR_TURN = 4,
+    ERR_DEATH = 5,
+    ERR_WIN = 6,
+    ERR_ORDER = 7,
+    ERR_ENTETE_DONNEE = 8,
+    ERR_VALEUR_DONNEE = 9,
+    ERR_TYPE_INCONNU = 10
 } ERR_PROTOCOLE;
 
-/*
-typedef enum Ordre { DROIT, GAUCHE, DROITE, ABANDON } Ordre;
-char* sOrdre[4] = {"idle", "left", "right", "abandon"};
-*/
 // Ordres
 #define ORDRE_DROIT "idle"
 #define ORDRE_GAUCHE "left"
 #define ORDRE_DROITE "right"
 #define ORDRE_ABANDON "abandon"
 
-// Messages d'erreur pour la trame Registered
+// Messages d'erreur pour la trame Registered (Client)
 #define MSG_ERR_TRAME "Le format de la trame n'est pas correct"
 #define MSG_ERR_RVB "Le format RVB n'est pas correct"
 #define MSG_ERR_NOM "Le nom doit etre une chaine de caracteres"
-/*
-typedef enum MsgErreurReg { 
-    MSG_ERR_TRAME, MSG_ERR_RVB, MSG_ERR_NOM 
-} MsgErreurReg;
 
-char* sMsgErreurReg[3] = {"Le format de la trame n'est pas correct", 
-                        "Le format RVB n'est pas correct", 
-                        "Le nom doit etre une chaine de caracteres"};
-*/
+// Messages d'erreur pour le serveur
+#define MSG_ERR_CONNECT(sock) "Problème d'inscription de la socket %d", sock
+#define MSG_ERR_ORDER(sock) "L'ordre reçu par la socket %d n'est pas correct", sock
+#define MSG_ERR_TYPE_INCONNU "Le type de la trame reçue est inconnu"
+
 typedef struct Resultat {
     TypeTrame typeTrame;
+    ERR_PROTOCOLE erreur;
+    char* msgErr;
     void* contenu;
 } Resultat;
 
-// Initialisation de la connexion (socket)
-//ERR_PROTOCOLE init(SOCKET socketServeur);
-
 // Requetes du client
-Resultat get_resultat(SOCKET sock);
+Resultat get_resultat_echange(SOCKET sock);
 char* get_order(SOCKET sock, Trame t);
 
 // Reponses au client

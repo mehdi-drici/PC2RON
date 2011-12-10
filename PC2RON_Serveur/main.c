@@ -21,49 +21,47 @@ Joueur j[3];
 
 void* THREAD_serveur(void *args) {
     SOCKET csock;
-    
+    Joueur* j;
     int joueurInscrit = 0;
     int erreur;
     Resultat res;
     int i;
     
     // init de la socket
-    erreur = pthread_mutex_lock(&MUTEX_accept);
+    pthread_mutex_lock(&MUTEX_accept);
     csock = accepter_client(sock);
-    erreur = pthread_mutex_unlock(&MUTEX_accept);
+    pthread_mutex_unlock(&MUTEX_accept);
     
     // Inscription du client   
     do {
-        res = get_resultat(csock);
+        sleep(5);
         
+        res = get_resultat_echange(csock);
+        
+        if(res.erreur != 0) {
+            printf("%s\n", res.msgErr);
+        }
+        else
         if(res.typeTrame == Connect) {
             joueurInscrit = 1;
+            j = (Joueur*) (res.contenu);
+            printf("Id de la socket %d : %d\n", csock, j->id);
             nbJoueursCo++;
         }
     } while (!joueurInscrit);
     
-    printf("&&inscrit !\n");
-    printf("&&nbJoueursCo = %d\n", nbJoueursCo);
-    
     // Attente de l'inscription de tous les joueurs
-    erreur = pthread_mutex_lock(&MUTEX_inscripton);
-    printf("erreur = %d\n", erreur);
-    sched_yield();
-    //pthread_mutex_unlock(&MUTEX_compteur);
-    //printf("salut");
-    sched_yield();
+    pthread_mutex_lock(&MUTEX_inscripton);
     
     if(nbJoueursCo == NB_MAX_JOUEURS) {
         printf("Info: Les joueurs sont tous inscrits !\n");
         pthread_cond_broadcast(&COND_joueurs_inscrits);
         
     } else {
-        printf("attente ! \n");
         pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_inscripton);
     }
-    
-    printf("erreur = %d\n", erreur);
-    erreur = pthread_mutex_unlock(&MUTEX_inscripton);
+
+    pthread_mutex_unlock(&MUTEX_inscripton);
 
     // Envoi de la trame User
     //envoyer_users(csock, j);
@@ -80,8 +78,9 @@ void* THREAD_serveur(void *args) {
     
     envoyer_start(csock, "GO!");
     
+    // Attente de l'ordre du joueur
     while(1) {
-        res = get_resultat(csock);
+        res = get_resultat_echange(csock);
         if(res.typeTrame == Order) {
             char* ordre = res.contenu;
             
@@ -100,6 +99,7 @@ void* THREAD_serveur(void *args) {
             }
         }
         
+        // Attente de l'instant suivant
         pthread_mutex_lock(&MUTEX_instant);
         pthread_cond_wait(&COND_instant, &MUTEX_instant);
         pthread_mutex_unlock(&MUTEX_instant);
@@ -114,43 +114,36 @@ void* THREAD_instant(void *args) {
     while(1) {
         sleep(2);
         printf("---------------- instant %d ------------\n", i);
-        sched_yield();
         pthread_mutex_lock(&MUTEX_instant);
-        sched_yield();
         pthread_cond_broadcast(&COND_instant);
-        sched_yield();
         i++;
         pthread_mutex_unlock(&MUTEX_instant);
     }
 }
 
 int main(void) {
-	pthread_t threads[NB_THREAD];
-        pthread_t thread_instant;
-        
-	void* status;
-	long i;
+    pthread_t threads[NB_THREAD];
+    pthread_t thread_instant;
 
-	// Création d'une socket
-	sock = etablir_connexion();
-        
-        // Initialisation du mutex
-	//pthread_mutex_init(&MUTEX_compteur,NULL);
-        
-        // Initialisation des conditions
-        //pthread_cond_init(&COND_instant, NULL);
-        //pthread_cond_init(&COND_joueurs_inscrits, NULL);
-        
-        pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
-        for(i=0; i < NB_THREAD; i++) {
-            pthread_create(&threads[i], NULL, THREAD_serveur, (long*) i);
-        }
-        
-	for(i=0;i<NB_THREAD;i++) {
-            pthread_join(threads[i], &status);
-	}
+    void* status;
+    long i;
 
-	fermer_connexion(sock);
+    // Création d'une socket
+    sock = etablir_connexion();
+
+    // Traceur d'instant
+    pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
+
+    // Threads serveur
+    for(i=0; i < NB_THREAD; i++) {
+        pthread_create(&threads[i], NULL, THREAD_serveur, (long*) i);
+    }
+
+    for(i=0;i<NB_THREAD;i++) {
+        pthread_join(threads[i], &status);
+    }
+
+    fermer_connexion(sock);
 
     return 0;
 }

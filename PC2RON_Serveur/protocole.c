@@ -8,7 +8,7 @@
 //int estInsrit = 0;
 
 // Nombre courant de joueurs inscrits
-unsigned short nbJoueurs = 0;
+unsigned short nbJoueursInscrits = 0;
 
 // Requetes du client
 char* get_order(SOCKET sock, Trame t) {
@@ -24,10 +24,10 @@ char* get_order(SOCKET sock, Trame t) {
 }
 
 // Point d'entree du protocole 
-Resultat get_resultat(SOCKET sock) {
+Resultat get_resultat_echange(SOCKET sock) {
     Joueur* j;
     char* o;
-    Resultat res = {TYPE_TRAME_INCONNU, NULL};
+    Resultat res = {0};
     Trame trameRecue;
     recevoir_trame(sock, &trameRecue);
     
@@ -36,12 +36,24 @@ Resultat get_resultat(SOCKET sock) {
     afficher_trame(trameRecue);
     //debug
     
+    //@todo Deconnexion du joueur
+    if(trameRecue.fanion == TRAME_SPECIALE) {
+        //debug
+        printf("Deconnexion du joueur !\n");
+        //debug
+        
+        return res;
+    }
+        
     switch(trameRecue.id) {      
         case Connect:
             j = repondre_connect(sock, trameRecue);
+            res.typeTrame = Connect;
             if(j != NULL) {
-                res.contenu = j;
-                res.typeTrame = Connect;
+                res.contenu = j;    
+            } else {
+                res.erreur = ERR_CONNECT;
+                res.msgErr = MSG_ERR_CONNECT(sock);
             }
             break;
         
@@ -53,15 +65,19 @@ Resultat get_resultat(SOCKET sock) {
         
         case Order:
             o = get_order(sock, trameRecue);
+            res.typeTrame = Order;
             if(o != NULL) {
                 res.contenu = o;
-                res.typeTrame = Order;
+            } else {
+                res.erreur = ERR_ORDER;
+                res.msgErr = MSG_ERR_ORDER(sock);
             }
             break;
         
         default:
-            //res.contenu = NULL;
-            //res.typeTrame = TYPE_TRAME_INCONNU;
+            res.erreur = ERR_TYPE_INCONNU;
+            res.typeTrame = -1;
+            res.msgErr = MSG_ERR_TYPE_INCONNU;
             break;
     }
     
@@ -154,7 +170,7 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
         j->nom = nom;
         
         // Création de l'id du joueur
-        j->id = ++nbJoueurs;
+        j->id = ++nbJoueursInscrits;
         
         trameReg = creer_trame_registered_ok(j->id);
     }

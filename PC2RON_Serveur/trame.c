@@ -47,6 +47,10 @@ void afficher_trame(Trame trame) {
 
     printf(">>> { ");
     
+    //debug
+    //printf("TYPE = %x", trame.fanion);
+    //debug
+    
     switch(trame.fanion) {
         case TRAME_NORMALE:
             // Affichage de l'ID au format hexadecimal
@@ -64,7 +68,7 @@ void afficher_trame(Trame trame) {
             break;
           
         default:
-            printf("Erreur de trame\n");
+            printf("Erreur de trame");
     }
     
 
