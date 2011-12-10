@@ -218,7 +218,6 @@ ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine) {
     int nbOctetsRecus = 0;
     
     // On convertit data en entier big-endian
-    //unsigned short taille = htons(chaine.chaine.taille);
     unsigned short taille = htons(chaine.chaine.taille);
     
     // Envoi de l'entête

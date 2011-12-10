@@ -1,11 +1,10 @@
-#include "protocole.h"
-#include "builder.h"
 #include <sys/types.h>
+#include "protocole.h"
 
 // Nombre courant de joueurs inscrits
 unsigned short nbJoueursInscrits = 0;
 int nbMaxJoueurs = 0;
-Joueur joueurs[];
+Joueur* joueurs;
 
 void init_protocole(Joueur j[], int nbJoueurs) {
     joueurs = j;

@@ -127,7 +127,9 @@ int main(void) {
 
     void* status;
     long i;
-
+    
+    //fprintf(stderr, "toto erreur");
+    
     // Création d'une socket
     sock = etablir_connexion();
 

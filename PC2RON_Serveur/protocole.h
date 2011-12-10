@@ -9,6 +9,7 @@
 #define PROTOCOLE_H_
 
 #include "builder.h"
+#include "protocole.h"
 
 #define NOM_APPLICATION "PC2RON"
 #define NOM_VERSION_PROTOCOLE "PC2RON2011"
@@ -44,8 +45,8 @@ typedef enum ERR_PROTOCOLE {
 #define MSG_ERR_NOM "Le nom doit etre une chaine de caracteres"
 
 // Messages d'erreur pour le serveur
-#define MSG_ERR_CONNECT(sock) printf("Problème d'inscription de la socket %d", sock);
-#define MSG_ERR_ORDER(sock) printf("L'ordre reçu par la socket %d n'est pas correct", sock);
+#define MSG_ERR_CONNECT(sock) "Problème d'inscription de la socket %d", sock
+#define MSG_ERR_ORDER(sock) "L'ordre reçu par la socket %d n'est pas correct", sock
 #define MSG_ERR_TYPE_INCONNU "Le type de la trame reçue est inconnu"
 
 typedef struct Resultat {

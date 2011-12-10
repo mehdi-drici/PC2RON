@@ -21,15 +21,23 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>builder.c</itemPath>
-      <itemPath>envoi.c</itemPath>
-      <itemPath>factory.c</itemPath>
-      <itemPath>joueur.c</itemPath>
+      <logicalFolder name="f2" displayName="Couche_Appli" projectFiles="true">
+        <itemPath>builder.c</itemPath>
+        <itemPath>joueur.c</itemPath>
+        <itemPath>protocole.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="Couche_Transport" projectFiles="true">
+        <itemPath>envoi.c</itemPath>
+        <itemPath>factory.c</itemPath>
+        <itemPath>reception.c</itemPath>
+        <itemPath>trame.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f4" displayName="Serveur" projectFiles="true">
+        <itemPath>serveur.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="Traitements" projectFiles="true">
+      </logicalFolder>
       <itemPath>main.c</itemPath>
-      <itemPath>protocole.c</itemPath>
-      <itemPath>reception.c</itemPath>
-      <itemPath>serveur.c</itemPath>
-      <itemPath>trame.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"

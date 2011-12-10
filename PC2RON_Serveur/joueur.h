@@ -12,9 +12,6 @@
 extern "C" {
 #endif
 
-#define NB_MAX_JOUEURS 3
-extern typedef int SOCKET ;
-
 typedef enum Direction {
     HAUT = 1,
     BAS = 2,
@@ -42,15 +39,17 @@ typedef struct Joueur {
     // Nombre de pas de grille en un centieme de seconde
     unsigned char speed;
     
-    SOCKET sock;
+    int sock;
     int estInscrit;
     int estConnecte;
 } Joueur; 
 
-void init_joueur(SOCKET sock, Joueur* j);
-Joueur* get_joueur(SOCKET sock, Joueur joueurs[]);
-int set_inscription_joueur(SOCKET sock, int booleen);
-int set_connexion_joueur(SOCKET sock, int booleen);
+void init_joueur(int sock, Joueur* j);
+Joueur* get_joueur(int sock, Joueur joueurs[], int nbJoueurs);
+int set_inscription_joueur(Joueur* j, int booleen);
+int set_connexion_joueur(Joueur* j, int booleen);
+int est_inscrit(const Joueur j);
+int est_connecte(const Joueur j);
 
 #ifdef	__cplusplus
 }
