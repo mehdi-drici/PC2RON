@@ -30,6 +30,10 @@ void* THREAD_serveur(void *args) {
     // init de la socket
     pthread_mutex_lock(&MUTEX_accept);
     csock = accepter_client(sock);
+    
+    // Initialisation du protocole
+    init_protocole(j, 3);
+    
     pthread_mutex_unlock(&MUTEX_accept);
     
     // Inscription du client   

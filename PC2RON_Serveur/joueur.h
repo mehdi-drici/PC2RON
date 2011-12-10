@@ -45,6 +45,7 @@ typedef struct Joueur {
 } Joueur; 
 
 void init_joueur(int sock, Joueur* j);
+void init_joueurs(Joueur j[], int nbJoueurs);
 Joueur* get_joueur(int sock, Joueur joueurs[], int nbJoueurs);
 int set_inscription_joueur(Joueur* j, int booleen);
 int set_connexion_joueur(Joueur* j, int booleen);

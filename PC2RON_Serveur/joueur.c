@@ -22,6 +22,14 @@ void init_joueur(int sock, Joueur* j) {
     j->estInscrit = 0;
 }
 
+void init_joueurs(Joueur j[], int nbJoueurs) {
+    int i;
+    
+    for(i=0; i < nbJoueurs; i++) {
+        init_joueur(-1, j+i);
+    }
+}
+
 // Récupération des informations d'un client à partir de sa socket
 Joueur* get_joueur(int sock, Joueur joueurs[], int nbJoueurs) {
     int i = 0;
