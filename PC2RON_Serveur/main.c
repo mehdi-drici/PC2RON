@@ -26,7 +26,7 @@ void* THREAD_serveur(void *args) {
     SOCKET csock;
     Joueur* j;
     int joueurInscrit = 0;
-    Resultat res;
+    Resultat* res;
     int i;
     
     // init de la socket
@@ -35,7 +35,7 @@ void* THREAD_serveur(void *args) {
     
     // Initialisation du protocole
     init_protocole(j, 3);
-    init_joueurs(j, 3);
+    init_joueur(csock, &j[nbJoueurs]);
     
     pthread_mutex_unlock(&MUTEX_accept);
     
@@ -45,13 +45,9 @@ void* THREAD_serveur(void *args) {
         
         res = get_resultat_echange(csock);
         
-        if(res.erreur != 0) {
-            printf("%s\n", res.msgErr);
-        }
-        else
-        if(res.typeTrame == Connect) {
+        if(res != NULL && res->typeTrame == Connect) {
             joueurInscrit = 1;
-            j = (Joueur*) (res.contenu);
+            j = (Joueur*) (res->contenu);
             printf("Id de la socket %d : %d\n", csock, j->id);
             nbJoueursCo++;
         }
@@ -88,8 +84,8 @@ void* THREAD_serveur(void *args) {
     // Attente de l'ordre du joueur
     while(1) {
         res = get_resultat_echange(csock);
-        if(res.typeTrame == Order) {
-            char* ordre = res.contenu;
+        if(res->typeTrame == Order) {
+            char* ordre = res->contenu;
             
             printf("\nordre recu : %s\n", ordre);
             

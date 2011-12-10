@@ -25,10 +25,12 @@ char* get_order(SOCKET sock, Trame t) {
 }
 
 // Point d'entree du protocole 
-Resultat get_resultat_echange(SOCKET sock) {
+// Si resultat NULL Alors il y'a eu une erreur lors de l'échange
+// qui sera redirigée dans le flux d'erreurs
+Resultat* get_resultat_echange(SOCKET sock) {
     Joueur* j;
     char* o;
-    Resultat res = {0};
+    Resultat* res = NULL;
     Trame trameRecue;
     recevoir_trame(sock, &trameRecue);
     
@@ -42,43 +44,45 @@ Resultat get_resultat_echange(SOCKET sock) {
         //debug
         printf("Deconnexion du joueur !\n");
         //debug
-       
+        
         return res;
     }
         
     switch(trameRecue.id) {      
         case Connect:
             j = repondre_connect(sock, trameRecue);
-            res.typeTrame = Connect;
+            res->typeTrame = Connect;
             if(j != NULL) {
-                res.contenu = j;    
+                res->contenu = j;    
             } else {
-                res.erreur = ERR_CONNECT;
-                res.msgErr = MSG_ERR_CONNECT(sock);
+                fprintf(stderr, MSG_ERR_CONNECT(sock));
+                //res.erreur = ERR_CONNECT;
+                //res.msgErr = MSG_ERR_CONNECT(sock);
             }
             break;
         
         case Initiate:
             repondre_initiate(sock, trameRecue);
-            res.contenu = NULL;
-            res.typeTrame = Initiate;
+            res->contenu = NULL;
+            res->typeTrame = Initiate;
             break;
         
         case Order:
             o = get_order(sock, trameRecue);
-            res.typeTrame = Order;
+            res->typeTrame = Order;
             if(o != NULL) {
-                res.contenu = o;
+                res->contenu = o;
             } else {
-                res.erreur = ERR_ORDER;
-                res.msgErr = MSG_ERR_ORDER(sock);
+                fprintf(stderr, MSG_ERR_ORDER(sock));
+                //res.erreur = ERR_ORDER;
+                //res.msgErr = MSG_ERR_ORDER(sock);
             }
             break;
         
         default:
-            res.erreur = ERR_TYPE_INCONNU;
-            res.typeTrame = -1;
-            res.msgErr = MSG_ERR_TYPE_INCONNU;
+            //res.erreur = ERR_TYPE_INCONNU;
+            //res.typeTrame = -1;
+            //res.msgErr = MSG_ERR_TYPE_INCONNU;
             break;
     }
     

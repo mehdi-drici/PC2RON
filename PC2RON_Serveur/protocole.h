@@ -51,13 +51,13 @@ typedef enum ERR_PROTOCOLE {
 
 typedef struct Resultat {
     TypeTrame typeTrame;
-    ERR_PROTOCOLE erreur;
-    char* msgErr;
+    //ERR_PROTOCOLE erreur;
+    //char* msgErr;
     void* contenu;
 } Resultat;
 
 // Requetes du client
-Resultat get_resultat_echange(SOCKET sock);
+Resultat* get_resultat_echange(SOCKET sock);
 char* get_order(SOCKET sock, Trame t);
 
 // Reponses au client
