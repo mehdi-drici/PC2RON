@@ -18,6 +18,6 @@
 #include "protocole.h"
 #include "serveur.h"
 
-#define NB_THREAD 100
+#define NB_THREAD 3
 
 #endif /* MAIN_H_ */

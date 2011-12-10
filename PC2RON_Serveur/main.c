@@ -10,7 +10,10 @@
 #define NB_MAX_JOUEURS 3
 
 SOCKET sock;
-pthread_mutex_t MUTEX_compteur = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t MUTEX_accept = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t MUTEX_inscripton = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t MUTEX_instant = PTHREAD_MUTEX_INITIALIZER;
+
 pthread_cond_t COND_joueurs_inscrits = PTHREAD_COND_INITIALIZER;
 pthread_cond_t COND_instant = PTHREAD_COND_INITIALIZER;
 int nbJoueursCo = 0;
@@ -25,11 +28,10 @@ void* THREAD_serveur(void *args) {
     int i;
     
     // init de la socket
-    //pthread_mutex_lock(&MUTEX_compteur);
-    printf("toto tata sd sk\n");
+    erreur = pthread_mutex_lock(&MUTEX_accept);
     csock = accepter_client(sock);
-    //pthread_mutex_unlock(&MUTEX_compteur);
-        
+    erreur = pthread_mutex_unlock(&MUTEX_accept);
+    
     // Inscription du client   
     do {
         res = get_resultat(csock);
@@ -44,7 +46,8 @@ void* THREAD_serveur(void *args) {
     printf("&&nbJoueursCo = %d\n", nbJoueursCo);
     
     // Attente de l'inscription de tous les joueurs
-    pthread_mutex_lock(&MUTEX_compteur);
+    erreur = pthread_mutex_lock(&MUTEX_inscripton);
+    printf("erreur = %d\n", erreur);
     sched_yield();
     //pthread_mutex_unlock(&MUTEX_compteur);
     //printf("salut");
@@ -56,10 +59,11 @@ void* THREAD_serveur(void *args) {
         
     } else {
         printf("attente ! \n");
-        pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_compteur);
+        pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_inscripton);
     }
     
-    pthread_mutex_unlock(&MUTEX_compteur);
+    printf("erreur = %d\n", erreur);
+    erreur = pthread_mutex_unlock(&MUTEX_inscripton);
 
     // Envoi de la trame User
     //envoyer_users(csock, j);
@@ -81,24 +85,24 @@ void* THREAD_serveur(void *args) {
         if(res.typeTrame == Order) {
             char* ordre = res.contenu;
             
-            if(ordre == ORDRE_DROIT) {
+            printf("\nordre recu : %s\n", ordre);
+            
+            if(strcmp(ordre, ORDRE_DROIT) == 0) {
                 printf("Tout Droit\n");
-            } else if(ordre == ORDRE_GAUCHE) {
+            } else if(strcmp(ordre, ORDRE_GAUCHE) == 0) {
                 printf("Gauche\n");
-            } else if(ordre == ORDRE_DROITE) {
+            } else if(strcmp(ordre, ORDRE_DROITE) == 0) {
                 printf("Droite\n");
-            } else if(ordre == ORDRE_ABANDON) {
+            } else if(strcmp(ordre, ORDRE_ABANDON) == 0) {
                 printf("Abandon\n");
             } else {
                 printf("Ordre inconnu");
             }
         }
         
-        pthread_mutex_lock(&MUTEX_compteur);
-        sched_yield();
-        pthread_cond_wait(&COND_instant, &MUTEX_compteur);
-        sched_yield();
-        pthread_mutex_unlock(&MUTEX_compteur);
+        pthread_mutex_lock(&MUTEX_instant);
+        pthread_cond_wait(&COND_instant, &MUTEX_instant);
+        pthread_mutex_unlock(&MUTEX_instant);
     }
     
     /* Fermeture de connexion */
@@ -106,14 +110,17 @@ void* THREAD_serveur(void *args) {
 }
 
 void* THREAD_instant(void *args) {
+    int i = 1;
     while(1) {
         sleep(2);
+        printf("---------------- instant %d ------------\n", i);
         sched_yield();
-        pthread_mutex_lock(&MUTEX_compteur);
+        pthread_mutex_lock(&MUTEX_instant);
         sched_yield();
-        pthread_cond_signal(&COND_instant);
+        pthread_cond_broadcast(&COND_instant);
         sched_yield();
-        pthread_mutex_unlock(&MUTEX_compteur);
+        i++;
+        pthread_mutex_unlock(&MUTEX_instant);
     }
 }
 
@@ -134,7 +141,7 @@ int main(void) {
         //pthread_cond_init(&COND_instant, NULL);
         //pthread_cond_init(&COND_joueurs_inscrits, NULL);
         
-        //pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
+        pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
         for(i=0; i < NB_THREAD; i++) {
             pthread_create(&threads[i], NULL, THREAD_serveur, (long*) i);
         }
