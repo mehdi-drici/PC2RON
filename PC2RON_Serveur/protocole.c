@@ -4,11 +4,10 @@
 // Nombre courant de joueurs inscrits
 unsigned short nbJoueursInscrits = 0;
 int nbMaxJoueurs = 0;
-Joueur* joueurs;
+Joueurs lesJoueurs;
 
-void init_protocole(Joueur j[], int nbJoueurs) {
-    joueurs = j;
-    nbMaxJoueurs = nbJoueurs;
+void init_protocole(Joueurs j) {
+    lesJoueurs = j;
 }
 
 // Requetes du client
@@ -44,6 +43,10 @@ Resultat* get_resultat_echange(SOCKET sock) {
         //debug
         printf("Deconnexion du joueur !\n");
         //debug
+        
+        //Deconnexion du joueur
+        set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
+        set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
         
         return res;
     }
@@ -145,22 +148,32 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     char* nom;
 
     // @todo Verification du quota de joueurs
-        
+    if(nbJoueursInscrits == lesJoueurs.nbJoueurs) {
+        fprintf(stderr, "Le nombre max de joueurs inscrit a été atteint");
+    }    
+    
     // Verification de la trame Init recue
-    if(t.nbDonnees != 4) {
+    else if(t.nbDonnees != 4) {
         trameReg = creer_trame_registered_no(MSG_ERR_TRAME);
+        fprintf(stderr, MSG_ERR_TRAME);
     } 
     
     else if(t.donnees[0].type != ENTIER_NON_SIGNE1 ||
             t.donnees[1].type != ENTIER_NON_SIGNE1 ||
             t.donnees[2].type != ENTIER_NON_SIGNE1) {
         trameReg = creer_trame_registered_no(MSG_ERR_RVB);
+        fprintf(stderr, MSG_ERR_RVB);
     } 
     
     else if(t.donnees[3].type != CHAINE) {
         trameReg = creer_trame_registered_no(MSG_ERR_NOM);
+        fprintf(stderr, MSG_ERR_NOM);
     } else {
-        j = malloc(sizeof(Joueur));
+        //j = malloc(sizeof(Joueur));
+        j = get_joueur_par_sock(sock, lesJoueurs);
+        
+        // Initialisation du joueur
+        init_joueur(sock, j);
         
         // Reponse a la requete Connect
         r = t.donnees[0].entierNonSigne1;
@@ -258,6 +271,9 @@ ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id) {
     Trame trameDeath = creer_trame_death(id);
     envoyer_trame(sock, trameDeath);
     
+    // Deconnexion du joueur
+    set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
+    
     //debug
     printf("#Serveur : ");
     afficher_trame(trameDeath);
@@ -268,6 +284,10 @@ ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1,
                                           unsigned short id2) {
     Trame trameDeath = creer_trame_deaths(id1, id2);
     envoyer_trame(sock, trameDeath);
+    
+    // Deconnexion des 2 joueurs
+    set_inscription_joueur(get_joueur_par_id(id1, lesJoueurs), 0);
+    set_inscription_joueur(get_joueur_par_id(id2, lesJoueurs), 0);
     
     //debug
     printf("#Serveur : ");

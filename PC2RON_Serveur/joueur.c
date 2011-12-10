@@ -23,10 +23,25 @@ void init_joueur(int sock, Joueur* j) {
 }
 
 // Récupération des informations d'un client à partir de sa socket
-Joueur* get_joueur(int sock, Joueurs lesJoueurs) {
+Joueur* get_joueur_par_sock(int sock, Joueurs lesJoueurs) {
     int i = 0;
     
     while (i < lesJoueurs.nbJoueurs && lesJoueurs.joueur[i].sock != sock) {
+        i++;
+    }
+    
+    if(i == lesJoueurs.nbJoueurs) {
+        return NULL;
+    } else {
+        return &lesJoueurs.joueur[i];
+    }
+}
+
+// Récupération des informations d'un client à partir de son id
+Joueur* get_joueur_par_id(int id, Joueurs lesJoueurs) {
+    int i = 0;
+    
+    while (i < lesJoueurs.nbJoueurs && lesJoueurs.joueur[i].id != id) {
         i++;
     }
     

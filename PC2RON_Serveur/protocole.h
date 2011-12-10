@@ -9,7 +9,7 @@
 #define PROTOCOLE_H_
 
 #include "builder.h"
-#include "protocole.h"
+#include "joueur.h"
 
 #define NOM_APPLICATION "PC2RON"
 #define NOM_VERSION_PROTOCOLE "PC2RON2011"
@@ -55,6 +55,8 @@ typedef struct Resultat {
     //char* msgErr;
     void* contenu;
 } Resultat;
+
+void init_protocole(Joueurs j);
 
 // Requetes du client
 Resultat* get_resultat_echange(SOCKET sock);

@@ -20,11 +20,11 @@ pthread_cond_t COND_instant = PTHREAD_COND_INITIALIZER;
 int nbJoueursCo = 0;
 int nbJoueurs = 0;
 
-Joueur j[3];
+Joueurs lesJoueurs;
+Joueur* j;
 
 void* THREAD_serveur(void *args) {
     SOCKET csock;
-    Joueur* j;
     int joueurInscrit = 0;
     Resultat* res;
     int i;
@@ -34,8 +34,10 @@ void* THREAD_serveur(void *args) {
     csock = accepter_client(sock);
     
     // Initialisation du protocole
-    init_protocole(j, 3);
-    init_joueur(csock, &j[nbJoueurs]);
+    lesJoueurs.nbJoueurs = NB_MAX_JOUEURS;
+    lesJoueurs.joueur = malloc(NB_MAX_JOUEURS * sizeof(Joueur));
+    init_protocole(lesJoueurs);
+    init_joueur(csock, &(lesJoueurs.joueur[nbJoueurs]));
     
     pthread_mutex_unlock(&MUTEX_accept);
     
