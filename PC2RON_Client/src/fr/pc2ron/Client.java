@@ -33,7 +33,7 @@ public class Client {
         
         //@fail
         VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
-        //ITrameBuilder tBuilder = TrameBuilder.getInstance();
+        ITrameBuilder tBuilder = TrameBuilder.getInstance();
         
         try {
             Socket socket = new Socket("127.0.0.1", 5555);
@@ -48,11 +48,18 @@ public class Client {
             System.out.println("trameFail : " + trameFail.toString());
             
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            envoi.visit(trameFail, out);
+            //envoi.visit(trameFail, out);
             
+            //debug
+            trameFail = tBuilder.creerTrameConnect((short)50, (short)50, (short)50, "Momo");
+            //System.out.println("trameFail : " + trameFail.toString());
+            //envoi.visit(trameFail, out);
+            //debug
             
             protocole.connexion("127.0.0.1", 5555);
             protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
+            protocole.deconnexion();
+            //protocole.connexion("127.0.0.1", 5555);
             
             // Trame User
             //protocole.getContenuTrame();

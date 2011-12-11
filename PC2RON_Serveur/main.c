@@ -32,18 +32,18 @@ void* THREAD_serveur(void *args) {
     // init de la socket
     pthread_mutex_lock(&MUTEX_accept);
     csock = accepter_client(sock);
-    
-    // Initialisation du protocole
-    lesJoueurs.nbJoueurs = NB_MAX_JOUEURS;
-    lesJoueurs.joueur = malloc(NB_MAX_JOUEURS * sizeof(Joueur));
-    init_protocole(lesJoueurs);
+ 
     init_joueur(csock, &(lesJoueurs.joueur[nbJoueurs]));
+    //lesJoueurs.joueur[nbJoueurs].sock = csock;
+    nbJoueurs++;
     
+    //debug
+    //get_joueur_par_sock(csock, lesJoueurs);
     pthread_mutex_unlock(&MUTEX_accept);
     
     // Inscription du client   
     do {
-        sleep(5);
+        sleep(2);
         
         res = get_resultat_echange(csock);
         
@@ -134,6 +134,11 @@ int main(void) {
     long i;
     
     //fprintf(stderr, "toto erreur");
+    
+    // Initialisation du protocole
+    lesJoueurs.nbJoueurs = NB_MAX_JOUEURS;
+    lesJoueurs.joueur = malloc(NB_MAX_JOUEURS * sizeof(Joueur));
+    init_protocole(lesJoueurs);
     
     // Création d'une socket
     sock = etablir_connexion();

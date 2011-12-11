@@ -14,12 +14,19 @@ void init_protocole(Joueurs j) {
 char* get_order(SOCKET sock, Trame t) {
     unsigned char* o = NULL;
     
+    Joueur* j = get_joueur_par_sock(sock, lesJoueurs);
+    
+    // Un joueur ne peut envoyer d'ordre que s'il est inscrit
+    if (j != NULL && !(j->estInscrit)) {
+        fprintf(stderr, "Le joueur avec la socket %d n'est pas inscrit !\n", sock);
+    }
+    
     // Verification de la trame Init recue
-    if(t.nbDonnees == 1 &&
+    else if(t.nbDonnees == 1 &&
        t.donnees[0].type == CHAINE) {
         o = t.donnees[0].chaine.texte;
     } 
-       
+    
     return o;
 }
 
@@ -54,8 +61,10 @@ Resultat* get_resultat_echange(SOCKET sock) {
     switch(trameRecue.id) {      
         case Connect:
             j = repondre_connect(sock, trameRecue);
-            res->typeTrame = Connect;
+            
             if(j != NULL) {
+                res = malloc(sizeof(Resultat));
+                res->typeTrame = Connect;
                 res->contenu = j;    
             } else {
                 fprintf(stderr, MSG_ERR_CONNECT(sock));
@@ -66,17 +75,19 @@ Resultat* get_resultat_echange(SOCKET sock) {
         
         case Initiate:
             repondre_initiate(sock, trameRecue);
+            res = malloc(sizeof(Resultat));
             res->contenu = NULL;
             res->typeTrame = Initiate;
             break;
         
         case Order:
             o = get_order(sock, trameRecue);
+            res = malloc(sizeof(Resultat));
             res->typeTrame = Order;
             if(o != NULL) {
                 res->contenu = o;
             } else {
-                fprintf(stderr, MSG_ERR_ORDER(sock));
+                //fprintf(stderr, MSG_ERR_ORDER(sock));
                 //res.erreur = ERR_ORDER;
                 //res.msgErr = MSG_ERR_ORDER(sock);
             }
@@ -95,18 +106,26 @@ Resultat* get_resultat_echange(SOCKET sock) {
 // Reponses au client
 ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
     ERR_PROTOCOLE erreur = -1;
+    Joueur* j = get_joueur_par_sock(sock, lesJoueurs);
     
     // init de la trame à renvoyer par un ack negatif
     Trame trameAck = creer_trame_ack(0);
     
+    //@todo un joueur ne peut pas se connecter plus d'une fois
+    if (j != NULL && j->estConnecte) {
+        fprintf(stderr, "Le joueur avec la socket %d est deja connecte !", sock);
+    }
+    
     // Verification de la trame Init recue
-    if(t.nbDonnees != 2) {
+    else if(t.nbDonnees != 2) {
         erreur = ERR_INITIATE;
+        fprintf(stderr, "La trame Init recue n'est pas correcte");
     } 
     
     else if(t.donnees[0].type != CHAINE ||
        t.donnees[1].type != CHAINE) {
         erreur = ERR_INITIATE;
+        fprintf(stderr, "La trame Init recue n'est pas correcte");
     } 
     
     else {
@@ -119,13 +138,16 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
         
         if(strcmp(nomAppli, NOM_APPLICATION) != 0) {
             erreur =  ERR_INITIATE;
+            fprintf(stderr, "Le nom de l'application n'est pas correct");
         }
 
         else if(strcmp(nomVersion, NOM_VERSION_PROTOCOLE) != 0) {
             erreur = ERR_INITIATE;
+            fprintf(stderr, "La version du protocole n'est pas supportee");
         }
 
         else {
+            set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 1);
             trameAck = creer_trame_ack(1);
         }
     }
@@ -146,9 +168,21 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     
     unsigned char r, v, b;
     char* nom;
-
+    
+    //@todo Un joueur doit etre connecte pour s'inscrire
+    j = get_joueur_par_sock(sock, lesJoueurs);
+    if (j != NULL && !(j->estConnecte)) {    
+        fprintf(stderr, "Le joueur avec la socket %d doit etre connecte pour s'inscrire", sock);
+    }
+    
+    //@todo Un joueur ne peut pas s'inscrire plus d'une fois
+    else if (j != NULL && j->estInscrit) {    
+        fprintf(stderr, "Le joueur avec la socket %d est deja connecte !", sock);
+    }
+    
+    
     // @todo Verification du quota de joueurs
-    if(nbJoueursInscrits == lesJoueurs.nbJoueurs) {
+    else if(nbJoueursInscrits == lesJoueurs.nbJoueurs) {
         fprintf(stderr, "Le nombre max de joueurs inscrit a été atteint");
     }    
     

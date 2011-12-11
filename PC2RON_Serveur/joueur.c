@@ -33,7 +33,7 @@ Joueur* get_joueur_par_sock(int sock, Joueurs lesJoueurs) {
     if(i == lesJoueurs.nbJoueurs) {
         return NULL;
     } else {
-        return &lesJoueurs.joueur[i];
+        return lesJoueurs.joueur + i;
     }
 }
 
@@ -48,7 +48,7 @@ Joueur* get_joueur_par_id(int id, Joueurs lesJoueurs) {
     if(i == lesJoueurs.nbJoueurs) {
         return NULL;
     } else {
-        return &lesJoueurs.joueur[i];
+        return lesJoueurs.joueur + i;
     }
 }
 
