@@ -130,6 +130,7 @@ int main(void) {
     long i;
     
     //fprintf(stderr, "toto erreur");
+    fprintf(stderr, "Dans la fonction %s...\n", __func__);
     
     // Initialisation du protocole
     lesJoueurs.nbJoueurs = NB_MAX_JOUEURS;
