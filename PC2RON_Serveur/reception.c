@@ -19,12 +19,14 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     // Probleme de reception
     if (nbOctetsRecus < 0) {
         close (sock);
+        fprintf(stderr, "Erreur de reception du fanion\n");
         return ERR_RCPT_FANION_TRAME;
     }
     
     // Le client s'est deconnecte
     if (nbOctetsRecus == 0) {
         close (sock);
+        fprintf(stderr, "Le client s'est deconnecte\n");
         return ERR_RCPT_TRAME;
     }
     
@@ -42,7 +44,7 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
         return SUCCES;
 
     default:
-        printf("Erreur d'entete\n");
+        fprintf(stderr, "Erreur d'entete\n");
         return ERR_ENTETE_TRAME;
     }
 
@@ -51,7 +53,8 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     
     if (nbOctetsRecus < 0)
     {
-        exit(errno);
+        //exit(errno);
+        fprintf(stderr, "Erreur de recuperation de l'id\n");
         return ERR_RCPT_FANION_TRAME;
     }
     trameRecue->id = octet;
@@ -61,6 +64,7 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation du nombre de donnees\n");
         return ERR_RCPT_NB_DONNEES_TRAME;
     }
 
@@ -83,6 +87,7 @@ ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue) {
     // Recuperation du type de donnee
     if (recv(sock, &type, 1, 0) < 0)
     {   
+        fprintf(stderr, "Erreur de recuperation du type de donnee\n");
         return ERR_RCPT_TYPE_DONNEE;
     }
 
@@ -139,6 +144,7 @@ ERREUR_DONNEE recevoir_entierSigne1(SOCKET sock, Donnee* donneeRecue) {
 
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de l'entier signe 1\n");
         return ERR_RCPT_INT8;
     }
 
@@ -156,6 +162,7 @@ ERREUR_DONNEE recevoir_entierSigne2(SOCKET sock, Donnee* donneeRecue) {
 
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de l'entier signe 2\n");
         return ERR_RCPT_INT16;
     }
 
@@ -176,6 +183,7 @@ ERREUR_DONNEE recevoir_entierSigne4(SOCKET sock, Donnee* donneeRecue) {
 
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de l'entier signe 4\n");
         return ERR_RCPT_INT32;
     }
 
@@ -193,6 +201,7 @@ ERREUR_DONNEE recevoir_entierNonSigne1(SOCKET sock, Donnee* donneeRecue) {
 
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de l'entier non signe 1\n");
         return ERR_RCPT_UINT8;
     }
 
@@ -210,6 +219,7 @@ ERREUR_DONNEE recevoir_entierNonSigne2(SOCKET sock, Donnee* donneeRecue) {
 
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de l'entier non signe 2\n");
         return ERR_RCPT_UINT16;
     }
 
@@ -227,6 +237,7 @@ ERREUR_DONNEE recevoir_entierNonSigne4(SOCKET sock, Donnee* donneeRecue) {
 
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de l'entier non signe 4\n");
         return ERR_RCPT_UINT32;
     }
 
@@ -245,6 +256,7 @@ ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
     nbOctetsRecus = recv(sock, (char*)&taille, 2, MSG_WAITALL);
     if(nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation de la taille de la chaine\n");
         return ERR_RCPT_TAILLE_CHAINE;
     }
     tailleConvertie = ntohs(taille);
@@ -255,6 +267,7 @@ ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
     
     if (nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation du contenu de la chaine\n");
         return ERR_RCPT_CHAINE;
     }
 
@@ -275,6 +288,7 @@ ERREUR_DONNEE recevoir_flottant(SOCKET sock, Donnee* donneeRecue) {
     nbOctetsRecus = recv(sock, (char*)&flottantRecu, 8, 0);
     if(nbOctetsRecus < 0)
     {
+        fprintf(stderr, "Erreur de recuperation du flottant\n");
         return ERR_RCPT_FLOTTANT;
     }
 

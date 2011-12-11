@@ -53,7 +53,7 @@ void* THREAD_serveur(void *args) {
             printf("Id de la socket %d : %d\n", csock, j->id);
             nbJoueursCo++;
         }
-    } while (!joueurInscrit);
+    } while (!joueurInscrit && get_joueur_par_sock(csock, lesJoueurs)->estConnecte);
     
     // Attente de l'inscription de tous les joueurs
     pthread_mutex_lock(&MUTEX_inscripton);
@@ -63,6 +63,7 @@ void* THREAD_serveur(void *args) {
         pthread_cond_broadcast(&COND_joueurs_inscrits);
         
     } else {
+        printf("J'attend");
         pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_inscripton);
     }
 
