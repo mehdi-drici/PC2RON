@@ -1,10 +1,11 @@
 #include "envoi.h"
+#include "erreur.h"
 
 /**
  * Envoi d'une trame
  * @todo implementation
  */
-ERREUR_TRAME envoyer_trame(SOCKET sock, Trame trameEnvoyee) {    
+int envoyer_trame(SOCKET sock, Trame trameEnvoyee) {    
     int nbOctetsEnvoyes = 0;
     int i = 0;
     
@@ -34,8 +35,8 @@ ERREUR_TRAME envoyer_trame(SOCKET sock, Trame trameEnvoyee) {
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_donnee(SOCKET sock, Donnee donneeEnvoyee) {
-    ERREUR_DONNEE erreur;
+int envoyer_donnee(SOCKET sock, Donnee donneeEnvoyee) {
+    int erreur;
 
     switch(donneeEnvoyee.type)
     {
@@ -79,7 +80,7 @@ ERREUR_DONNEE envoyer_donnee(SOCKET sock, Donnee donneeEnvoyee) {
     return erreur;
 }
 
-ERREUR_DONNEE envoyer_entierSigne1(SOCKET sock, Donnee entier) {
+int envoyer_entierSigne1(SOCKET sock, Donnee entier) {
     int nbOctetsRecus = 0;
 
     // On convertit data en entier big-endian
@@ -87,22 +88,22 @@ ERREUR_DONNEE envoyer_entierSigne1(SOCKET sock, Donnee entier) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
-    if (nbOctetsRecus < 0)
-    {
-        return ERR_ENVOI_ENTETE_INT8;
+    if (nbOctetsRecus < 0) {
+        //fprintf(stderr, "%s: Erreur d'envoi d'entete de l'entier signe 1\n", __func__);
+        return ERREUR;
     }
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, &(entier.entierSigne1), 1, 0);
-    if (nbOctetsRecus < 0)
-    {
-        return ERR_ENVOI_INT16;
+    if (nbOctetsRecus < 0) {
+        fprintf(stderr, "%s: Erreur d'envoi de l'entier signe 1\n", __func__);
+        return ERREUR;
     }
 
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_entierSigne2(SOCKET sock, Donnee entier) {
+int envoyer_entierSigne2(SOCKET sock, Donnee entier) {
     int nbOctetsRecus = 0;
 
     // On convertit data en entier big-endian
@@ -125,7 +126,7 @@ ERREUR_DONNEE envoyer_entierSigne2(SOCKET sock, Donnee entier) {
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_entierSigne4(SOCKET sock, Donnee entierEnvoye) {
+int envoyer_entierSigne4(SOCKET sock, Donnee entierEnvoye) {
     int nbOctetsRecus = 0;
 
     // On convertit data en entier big-endian
@@ -148,7 +149,7 @@ ERREUR_DONNEE envoyer_entierSigne4(SOCKET sock, Donnee entierEnvoye) {
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_entierNonSigne1(SOCKET sock, Donnee entier) {
+int envoyer_entierNonSigne1(SOCKET sock, Donnee entier) {
     int nbOctetsRecus = 0;
 
     // Envoi de l'entête
@@ -168,7 +169,7 @@ ERREUR_DONNEE envoyer_entierNonSigne1(SOCKET sock, Donnee entier) {
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_entierNonSigne2(SOCKET sock, Donnee entier) {
+int envoyer_entierNonSigne2(SOCKET sock, Donnee entier) {
     int nbOctetsRecus = 0;
 
     // On convertit data en entier big-endian
@@ -191,7 +192,7 @@ ERREUR_DONNEE envoyer_entierNonSigne2(SOCKET sock, Donnee entier) {
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
+int envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
     int nbOctetsRecus = 0;
 
     // On convertit data en entier big-endian
@@ -214,7 +215,7 @@ ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
     return SUCCES;
 }
 
-ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine) {
+int envoyer_chaine(SOCKET sock, Donnee chaine) {
     int nbOctetsRecus = 0;
     
     // On convertit data en entier big-endian
@@ -246,7 +247,7 @@ ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine) {
 }
 
 // @TODO Conversion Double en Octets
-ERREUR_DONNEE envoyer_flottant(SOCKET sock, Donnee flottantEnvoye) {
+int envoyer_flottant(SOCKET sock, Donnee flottantEnvoye) {
     /*
     int nbOctetsRecus = 0;
     char donnees[8];

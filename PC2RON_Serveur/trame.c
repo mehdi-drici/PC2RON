@@ -1,31 +1,16 @@
-/*
- * trame.c
- *
- *  Created on: 27 nov. 2011
- *      Author: Mehdi Drici
- */
-
 #include "trame.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-// Premier octet de la trame
-//const char FANION = 0xFF;
-//const char FIN_TRANSMISSION = 0x00;
-
-
-// @TODO Problèmes de réallocation
-void ajouter_donnee(Trame* t, Donnee d)
-{
+void ajouter_donnee(Trame* t, Donnee d) {
     int taille = t->nbDonnees;
 
     /* Premier ajout de donnée */
-    if (taille == 0)
-    {
+    if (taille == 0) {
         t->donnees = malloc(sizeof(Donnee));
 
         /* On réalloue à chaque nouvel ajout */
-    }
-    else
-    {
+    } else {
         t->donnees = realloc(t->donnees, (taille+1) * sizeof(Donnee));
     }
 
@@ -46,11 +31,7 @@ void afficher_trame(Trame trame) {
     int i = 0;
 
     printf(">>> { ");
-    
-    //debug
-    //printf("TYPE = %x", trame.fanion);
-    //debug
-    
+
     switch(trame.fanion) {
         case TRAME_NORMALE:
             // Affichage de l'ID au format hexadecimal
@@ -71,7 +52,6 @@ void afficher_trame(Trame trame) {
             printf("Erreur de trame");
     }
     
-
     printf(" }\n");
 }
 
@@ -125,11 +105,3 @@ void afficher_donnee(Donnee donnee) {
         printf("Mauvais type !\n");
     }
 }
-
-int count(void** tab) {
-    int i;
-    for (i = 0; tab[i]; i++);
-
-    return (i);
-}
-

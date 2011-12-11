@@ -15,17 +15,17 @@ extern "C" {
 #include "trame.h"
 
 /* Envoi d'une trame */
-ERREUR_TRAME envoyer_trame(SOCKET sock, Trame trameEnvoyee);
+int envoyer_trame(SOCKET sock, Trame trameEnvoyee);
 //char** convertir_trame_toBytes(Trame trame);
-ERREUR_DONNEE envoyer_donnee(SOCKET sock, Donnee donnee);
-ERREUR_DONNEE envoyer_entierSigne1(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierSigne2(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierSigne4(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierNonSigne1(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierNonSigne2(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_entierNonSigne4(SOCKET sock, Donnee entier);
-ERREUR_DONNEE envoyer_chaine(SOCKET sock, Donnee chaine);
-ERREUR_DONNEE envoyer_flottant(SOCKET sock, Donnee flottant);
+int envoyer_donnee(SOCKET sock, Donnee donnee);
+int envoyer_entierSigne1(SOCKET sock, Donnee entier);
+int envoyer_entierSigne2(SOCKET sock, Donnee entier);
+int envoyer_entierSigne4(SOCKET sock, Donnee entier);
+int envoyer_entierNonSigne1(SOCKET sock, Donnee entier);
+int envoyer_entierNonSigne2(SOCKET sock, Donnee entier);
+int envoyer_entierNonSigne4(SOCKET sock, Donnee entier);
+int envoyer_chaine(SOCKET sock, Donnee chaine);
+int envoyer_flottant(SOCKET sock, Donnee flottant);
 
 #ifdef	__cplusplus
 }

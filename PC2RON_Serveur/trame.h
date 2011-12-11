@@ -8,18 +8,6 @@
 #ifndef TRAME_H_
 #define TRAME_H_
 
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <errno.h>
-
 typedef int SOCKET;
 
 /* Code d'erreurs pour la lecture d'une trame */
@@ -132,5 +120,8 @@ typedef struct Trame {
 void afficher_trame(Trame trame);
 void afficher_donnee(Donnee trame);
 
-int count(void **tab);
+/* Ajout de donnees */
+void ajouter_donnee(Trame* t, Donnee d);
+void ajouter_donnees(Trame* t, Donnee* d);
+
 #endif /* TRAME_H_ */
