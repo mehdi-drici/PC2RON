@@ -1,4 +1,5 @@
 #include "reception.h"
+#include "erreur.h"
 
 /**
  * Réception d'une trame ou d'une donnée
@@ -32,28 +33,25 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     
     trameRecue->fanion = octet;
     
-    switch (octet)
-    {
-    case TRAME_NORMALE:
-        break;
+    switch (octet) {
+        case TRAME_NORMALE:
+            break;
 
-        // Fin de transmission
-    case TRAME_SPECIALE:
-        // Fermeture de connexion
-        shutdown(sock, SHUT_RDWR);
-        return SUCCES;
+            // Fin de transmission
+        case TRAME_SPECIALE:
+            // Fermeture de connexion
+            shutdown(sock, SHUT_RDWR);
+            return SUCCES;
 
-    default:
-        fprintf(stderr, "Erreur d'entete\n");
-        return ERR_ENTETE_TRAME;
+        default:
+            fprintf(stderr, "Erreur d'entete\n");
+            return ERR_ENTETE_TRAME;
     }
 
     // Recuperation de l'id
     nbOctetsRecus = recv(sock, &octet, 1, 0);
     
-    if (nbOctetsRecus < 0)
-    {
-        //exit(errno);
+    if (nbOctetsRecus < 0) {
         fprintf(stderr, "Erreur de recuperation de l'id\n");
         return ERR_RCPT_FANION_TRAME;
     }
@@ -62,8 +60,7 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     // Recuperation du nombre de donnees
     nbOctetsRecus = recv(sock, &octet, 1, 0);
     
-    if (nbOctetsRecus < 0)
-    {
+    if (nbOctetsRecus < 0) {
         fprintf(stderr, "Erreur de recuperation du nombre de donnees\n");
         return ERR_RCPT_NB_DONNEES_TRAME;
     }
@@ -71,8 +68,17 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     taille = octet;
     
     // Recuperation des donnees
-    for (i=0; i < taille; i++)
-    {
+    while (recevoir_donnee(sock, &d) == SUCCES &&
+           i < trameRecue->nbDonnees) {
+        ajouter_donnee(trameRecue, d);
+        i++;
+    }
+
+    if(i == trameRecue->nbDonnees) {
+        return SUCCES;
+    }
+            
+    for (i=0; i < taille; i++) {
         recevoir_donnee(sock, &d);
         ajouter_donnee(trameRecue, d);
     }
@@ -85,51 +91,49 @@ ERREUR_DONNEE recevoir_donnee(SOCKET sock, Donnee* donneeRecue) {
     unsigned char type;
 
     // Recuperation du type de donnee
-    if (recv(sock, &type, 1, 0) < 0)
-    {   
-        fprintf(stderr, "Erreur de recuperation du type de donnee\n");
-        return ERR_RCPT_TYPE_DONNEE;
+    if (recv(sock, &type, 1, 0) < 0) {   
+        AFF_ERR_RCPT_DONNEE();
+        return ERREUR;
     }
 
     // Ajout du type de donnee
     donneeRecue->type = type;
     
-    switch(type)
-    {
-    case ENTIER_SIGNE1:
-        erreur = recevoir_entierSigne1(sock, donneeRecue);
-        break;
+    switch(type) {
+        case ENTIER_SIGNE1:
+            erreur = recevoir_entierSigne1(sock, donneeRecue);
+            break;
 
-    case ENTIER_SIGNE2:
-        erreur = recevoir_entierSigne2(sock, donneeRecue);
-        break;
+        case ENTIER_SIGNE2:
+            erreur = recevoir_entierSigne2(sock, donneeRecue);
+            break;
 
-    case ENTIER_SIGNE4:
-        erreur = recevoir_entierSigne4(sock, donneeRecue);
-        break;
+        case ENTIER_SIGNE4:
+            erreur = recevoir_entierSigne4(sock, donneeRecue);
+            break;
 
-    case ENTIER_NON_SIGNE1:
-        erreur = recevoir_entierNonSigne1(sock, donneeRecue);
-        break;
+        case ENTIER_NON_SIGNE1:
+            erreur = recevoir_entierNonSigne1(sock, donneeRecue);
+            break;
 
-    case ENTIER_NON_SIGNE2:
-        erreur = recevoir_entierNonSigne2(sock, donneeRecue);
-        break;
+        case ENTIER_NON_SIGNE2:
+            erreur = recevoir_entierNonSigne2(sock, donneeRecue);
+            break;
 
-    case ENTIER_NON_SIGNE4:
-        erreur = recevoir_entierNonSigne4(sock, donneeRecue);
-        break;
+        case ENTIER_NON_SIGNE4:
+            erreur = recevoir_entierNonSigne4(sock, donneeRecue);
+            break;
 
-    case CHAINE:
-        erreur = recevoir_chaine(sock, donneeRecue);
-        break;
+        case CHAINE:
+            erreur = recevoir_chaine(sock, donneeRecue);
+            break;
 
-    case FLOTTANT:
-        erreur = recevoir_flottant(sock, donneeRecue);
-        break;
+        case FLOTTANT:
+            erreur = recevoir_flottant(sock, donneeRecue);
+            break;
 
-    default:
-        erreur = ERR_RCPT_DONNEE;
+        default:
+            erreur = ERR_RCPT_DONNEE;
     }
 
     return erreur;
@@ -142,10 +146,9 @@ ERREUR_DONNEE recevoir_entierSigne1(SOCKET sock, Donnee* donneeRecue) {
     // On récupère l'entier
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
 
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de l'entier signe 1\n");
-        return ERR_RCPT_INT8;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_INT8);
+        return ERREUR;
     }
 
     donneeRecue->entierSigne1 = entierRecu;
@@ -160,10 +163,9 @@ ERREUR_DONNEE recevoir_entierSigne2(SOCKET sock, Donnee* donneeRecue) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
 
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de l'entier signe 2\n");
-        return ERR_RCPT_INT16;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_INT16);
+        return ERREUR;
     }
 
     // On convertit l'entier récupéré en little-endian si l'ordinateur
@@ -181,10 +183,9 @@ ERREUR_DONNEE recevoir_entierSigne4(SOCKET sock, Donnee* donneeRecue) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
 
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de l'entier signe 4\n");
-        return ERR_RCPT_INT32;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_INT32);
+        return ERREUR;
     }
 
     donneeRecue->entierSigne4 = ntohl(entierRecu);
@@ -199,10 +200,9 @@ ERREUR_DONNEE recevoir_entierNonSigne1(SOCKET sock, Donnee* donneeRecue) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
 
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de l'entier non signe 1\n");
-        return ERR_RCPT_UINT8;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_UINT8);
+        return ERREUR;
     }
 
     donneeRecue->entierNonSigne1 = entierRecu;
@@ -217,10 +217,9 @@ ERREUR_DONNEE recevoir_entierNonSigne2(SOCKET sock, Donnee* donneeRecue) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
 
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de l'entier non signe 2\n");
-        return ERR_RCPT_UINT16;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_UINT16);
+        return ERREUR;
     }
 
     donneeRecue->entierNonSigne2 = ntohs(entierRecu);
@@ -235,10 +234,9 @@ ERREUR_DONNEE recevoir_entierNonSigne4(SOCKET sock, Donnee* donneeRecue) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
 
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de l'entier non signe 4\n");
-        return ERR_RCPT_UINT32;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_UINT32);
+        return ERREUR;
     }
 
     donneeRecue->entierNonSigne4 = ntohl(entierRecu);
@@ -254,10 +252,9 @@ ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
 
     // Reception de la taille de la chaine
     nbOctetsRecus = recv(sock, (char*)&taille, 2, MSG_WAITALL);
-    if(nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation de la taille de la chaine\n");
-        return ERR_RCPT_TAILLE_CHAINE;
+    if(nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_ENTETE(S_STRING);
+        return ERREUR;
     }
     tailleConvertie = ntohs(taille);
     
@@ -265,15 +262,15 @@ ERREUR_DONNEE recevoir_chaine(SOCKET sock, Donnee* donneeRecue) {
     chaineRecue = calloc(tailleConvertie, sizeof(char));
     nbOctetsRecus = recv(sock, chaineRecue, tailleConvertie, 0);
     
-    if (nbOctetsRecus < 0)
-    {
-        fprintf(stderr, "Erreur de recuperation du contenu de la chaine\n");
-        return ERR_RCPT_CHAINE;
+    if (nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_VALEUR(S_STRING);
+        return ERREUR;
     }
 
     (donneeRecue->chaine).taille = tailleConvertie;
     (donneeRecue->chaine).texte = chaineRecue;
     strcpy((donneeRecue->chaine).texte, chaineRecue);
+    
     return SUCCES;
 }
 
@@ -286,10 +283,10 @@ ERREUR_DONNEE recevoir_flottant(SOCKET sock, Donnee* donneeRecue) {
 
     // On reçoit une suite de 8 octets, le premier octet reçu est toujours l'octet de poids fort
     nbOctetsRecus = recv(sock, (char*)&flottantRecu, 8, 0);
-    if(nbOctetsRecus < 0)
-    {
+    if(nbOctetsRecus < 0) {
+        AFF_ERR_RCPT_ENTETE(S_DOUBLE);
         fprintf(stderr, "Erreur de recuperation du flottant\n");
-        return ERR_RCPT_FLOTTANT;
+        return ERREUR;
     }
 
     // On rassemble les 8 octets séparé en une seul variable de 8 octets

@@ -1,4 +1,5 @@
 #include "trame.h"
+#include "erreur.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -45,7 +46,7 @@ void afficher_trame(Trame trame) {
             break;
             
         case TRAME_SPECIALE:
-            printf("END");
+            printf("%s", S_END);
             break;
           
         default:
@@ -56,52 +57,61 @@ void afficher_trame(Trame trame) {
 }
 
 void afficher_donnee(Donnee donnee) {
-    int i=0;
+    int i = 0;
     
-    switch(donnee.type)
-    {
-    case ENTIER_SIGNE1:
-        printf("int8 %d", donnee.entierSigne1);
-        break;
+    switch(donnee.type) {
+        case ENTIER_SIGNE1:
+            printf("%s %d", S_INT8, donnee.entierSigne1);
+            break;
 
-    case ENTIER_SIGNE2:
-        printf("int16 %d", donnee.entierSigne2);
-        break;
+        case ENTIER_SIGNE2:
+            printf("%s %d", S_INT16, donnee.entierSigne2);
+            break;
 
-    case ENTIER_SIGNE4:
-        printf("int32 %d", donnee.entierSigne4);
-        break;
+        case ENTIER_SIGNE4:
+            printf("%s %d", S_INT32, donnee.entierSigne4);
+            break;
 
-    case ENTIER_NON_SIGNE1:
-        printf("uint8 %u", donnee.entierNonSigne1);
-        break;
+        case ENTIER_NON_SIGNE1:
+            printf("%s %u", S_UINT8, donnee.entierNonSigne1);
+            break;
 
-    case ENTIER_NON_SIGNE2:
-        printf("uint16 %u", donnee.entierNonSigne2);
-        break;
+        case ENTIER_NON_SIGNE2:
+            printf("%s %u", S_UINT16, donnee.entierNonSigne2);
+            break;
 
-    case ENTIER_NON_SIGNE4:
-        printf("uint32 %u", donnee.entierNonSigne4);
-        break;
+        case ENTIER_NON_SIGNE4:
+            printf("%s %u", S_UINT32, donnee.entierNonSigne4);
+            break;
 
-    case CHAINE:
-        printf("string \"");
-        
-        for(i=0; i < donnee.chaine.taille; i++) {
-            if(donnee.chaine.texte[i] < 32 || donnee.chaine.texte[i] > 127) {
-                printf("\\x%X", donnee.chaine.texte[i]);
-            } else {
-                printf("%c", donnee.chaine.texte[i]);
+        case CHAINE:
+            printf("%s \"", S_STRING);
+
+            for(i=0; i < donnee.chaine.taille; i++) {
+                if(donnee.chaine.texte[i] < 32 || donnee.chaine.texte[i] > 127) {
+                    printf("\\x%X", donnee.chaine.texte[i]);
+                } else {
+                    printf("%c", donnee.chaine.texte[i]);
+                }
             }
-        }
-        printf("\"");
-        break;
+            printf("\"");
+            break;
 
-    case FLOTTANT:
-        printf("double %f", donnee.flottant);
-        break;
+        case FLOTTANT:
+            printf("%s %f", S_DOUBLE, donnee.flottant);
+            break;
 
-    default:
-        printf("Mauvais type !\n");
+        default:
+            AFF_ERR_TYPE_DONNEE(donnee.type);
     }
+}
+
+void free_trame(Trame* t) {
+    int i;
+    
+    for(i=0; i < t->nbDonnees; i++) {
+        free(t->donnees[i]);
+    }
+    
+    free(t);
 }

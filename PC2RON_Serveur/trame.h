@@ -78,7 +78,8 @@ typedef enum TYPE_DONNEE {
 #define S_UINT32 "uint32"
 #define S_STRING "string"
 #define S_DOUBLE "double"
-        
+#define S_END "END"
+
 /* Types de fanion */
 typedef enum TYPE_FANION {
     TRAME_NORMALE = 0xFF,
@@ -133,5 +134,8 @@ void afficher_donnee(Donnee trame);
 /* Ajout de donnees */
 void ajouter_donnee(Trame* t, Donnee d);
 void ajouter_donnees(Trame* t, Donnee* d);
+
+/* Libération de l'espace mémoire alloué à une trame et ses données */
+void free_trame(Trame* t);
 
 #endif /* TRAME_H_ */
