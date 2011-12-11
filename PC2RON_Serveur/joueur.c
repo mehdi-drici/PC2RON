@@ -38,7 +38,7 @@ Joueur* get_joueur_par_sock(int sock, Joueurs lesJoueurs) {
 }
 
 // Récupération des informations d'un client à partir de son id
-Joueur* get_joueur_par_id(int id, Joueurs lesJoueurs) {
+Joueur* get_joueur_par_id(unsigned short id, Joueurs lesJoueurs) {
     int i = 0;
     
     while (i < lesJoueurs.nbJoueurs && lesJoueurs.joueur[i].id != id) {

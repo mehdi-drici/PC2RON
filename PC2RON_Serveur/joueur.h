@@ -50,7 +50,7 @@ typedef struct Joueurs {
 } Joueurs;
 
 void init_joueur(int sock, Joueur* j);
-Joueur* get_joueur_par_id(int id, Joueurs lesJoueurs);
+Joueur* get_joueur_par_id(unsigned short id, Joueurs lesJoueurs);
 Joueur* get_joueur_par_sock(int sock, const Joueurs lesJoueurs);
 int set_inscription_joueur(Joueur* j, int booleen);
 int set_connexion_joueur(Joueur* j, int booleen);
