@@ -87,19 +87,22 @@ public class Protocole implements IProtocole {
 
 	@Override
 	public void deconnexion() {
-            try {
+            //try {
                 ITrameFactory trameFactory = TrameFactory.getInstance();
                 ITrame trameFin = trameFactory.getTrameEnd();
                 VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
                 
                 envoi.visit(trameFin, out);
+                /*
                 out.flush();
                 out.close();
                 sock.close();
+                
+                 
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
+            }*/
 	}
 
 	@Override

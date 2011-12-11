@@ -38,8 +38,10 @@ Resultat* get_resultat_echange(SOCKET sock) {
     char* o;
     Resultat* res = NULL;
     Trame trameRecue;
+  
     recevoir_trame(sock, &trameRecue);
     
+    printf("Type trame recue = %d\n", trameRecue.fanion);
     //debug
     printf("#Client : ");
     afficher_trame(trameRecue);
@@ -47,7 +49,7 @@ Resultat* get_resultat_echange(SOCKET sock) {
     
     //@todo Deconnexion du joueur
     if(trameRecue.fanion == TRAME_SPECIALE) {
-        //debug
+        //debug @todo deconnexion de la socket
         printf("Deconnexion du joueur !\n");
         //debug
         
@@ -165,25 +167,29 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
 Joueur* repondre_connect(SOCKET sock, Trame t) {   
     Trame trameReg;
     Joueur* j = NULL;
+    Joueur* j2 = NULL;
     
     unsigned char r, v, b;
     char* nom;
     
     //@todo Un joueur doit etre connecte pour s'inscrire
-    j = get_joueur_par_sock(sock, lesJoueurs);
-    if (j != NULL && !(j->estConnecte)) {    
-        fprintf(stderr, "Le joueur avec la socket %d doit etre connecte pour s'inscrire", sock);
+    j2 = get_joueur_par_sock(sock, lesJoueurs);
+    if (j2 != NULL && !(j2->estConnecte)) {
+        trameReg = creer_trame_registered_no("Vous n'etes pas connecte");
+        fprintf(stderr, "Le joueur avec la socket %d doit etre connecte pour s'inscrire\n", sock);
     }
     
     //@todo Un joueur ne peut pas s'inscrire plus d'une fois
-    else if (j != NULL && j->estInscrit) {    
-        fprintf(stderr, "Le joueur avec la socket %d est deja connecte !", sock);
+    else if (j2 != NULL && j2->estInscrit) {
+        trameReg = creer_trame_registered_no("Vous etes deja inscrit");
+        fprintf(stderr, "Le joueur avec la socket %d est deja connecte\n", sock);
     }
     
     
     // @todo Verification du quota de joueurs
     else if(nbJoueursInscrits == lesJoueurs.nbJoueurs) {
-        fprintf(stderr, "Le nombre max de joueurs inscrit a été atteint");
+        trameReg = creer_trame_registered_no("Le quota de joueurs a ete atteint");
+        fprintf(stderr, "Le nombre max de joueurs inscrit a été atteint\n");
     }    
     
     // Verification de la trame Init recue
@@ -202,6 +208,7 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     else if(t.donnees[3].type != CHAINE) {
         trameReg = creer_trame_registered_no(MSG_ERR_NOM);
         fprintf(stderr, MSG_ERR_NOM);
+        
     } else {
         //j = malloc(sizeof(Joueur));
         j = get_joueur_par_sock(sock, lesJoueurs);

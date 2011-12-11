@@ -29,90 +29,85 @@ void* THREAD_serveur(void *args) {
     Resultat* res;
     int i;
     
-    // init de la socket
-    pthread_mutex_lock(&MUTEX_accept);
-    csock = accepter_client(sock);
- 
-    init_joueur(csock, &(lesJoueurs.joueur[nbJoueurs]));
-    //lesJoueurs.joueur[nbJoueurs].sock = csock;
-    nbJoueurs++;
-    
-    //debug
-    //get_joueur_par_sock(csock, lesJoueurs);
-    pthread_mutex_unlock(&MUTEX_accept);
-    
-    // Inscription du client   
-    do {
-        sleep(2);
-        
-        res = get_resultat_echange(csock);
-        
-        if(res != NULL && res->typeTrame == Connect) {
-            joueurInscrit = 1;
-            j = (Joueur*) (res->contenu);
-            printf("Id de la socket %d : %d\n", csock, j->id);
-            nbJoueursCo++;
-        }
-    } while (!joueurInscrit && get_joueur_par_sock(csock, lesJoueurs)->estConnecte);
-    
-    // Attente de l'inscription de tous les joueurs
-    pthread_mutex_lock(&MUTEX_inscripton);
-    
-    if(nbJoueursCo == NB_MAX_JOUEURS) {
-        printf("Info: Les joueurs sont tous inscrits !\n");
-        pthread_cond_broadcast(&COND_joueurs_inscrits);
-        
-    } else {
-        printf("J'attend");
-        pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_inscripton);
-    }
+    // Déroulement d'une partie
+    while (1) {
+        // init de la socket
+        pthread_mutex_lock(&MUTEX_accept);
+        csock = accepter_client(sock);
+        init_joueur(csock, &(lesJoueurs.joueur[nbJoueurs]));
+        nbJoueurs++;
+        pthread_mutex_unlock(&MUTEX_accept);
 
-    pthread_mutex_unlock(&MUTEX_inscripton);
+        // Inscription du client   
+        do {
+            sleep(2);
+            res = get_resultat_echange(csock);
 
-    // Envoi de la trame User
-    //envoyer_users(csock, j);
-    
-    // Décompte
-    envoyer_pause(csock, "3");
-    sleep(1);
-    
-    envoyer_pause(csock, "2");
-    sleep(1);
-    
-    envoyer_pause(csock, "1");
-    sleep(1);
-    
-    envoyer_start(csock, "GO!");
-    
-    // Attente de l'ordre du joueur
-    while(1) {
-        res = get_resultat_echange(csock);
-        if(res->typeTrame == Order) {
-            char* ordre = res->contenu;
-            
-            printf("\nordre recu : %s\n", ordre);
-            
-            if(strcmp(ordre, ORDRE_DROIT) == 0) {
-                printf("Tout Droit\n");
-            } else if(strcmp(ordre, ORDRE_GAUCHE) == 0) {
-                printf("Gauche\n");
-            } else if(strcmp(ordre, ORDRE_DROITE) == 0) {
-                printf("Droite\n");
-            } else if(strcmp(ordre, ORDRE_ABANDON) == 0) {
-                printf("Abandon\n");
-            } else {
-                printf("Ordre inconnu");
+            if(res != NULL && res->typeTrame == Connect) {
+                joueurInscrit = 1;
+                j = (Joueur*) (res->contenu);
+                printf("Id de la socket %d : %d\n", csock, j->id);
+                nbJoueursCo++;
             }
+        } while (!joueurInscrit  && get_joueur_par_sock(csock, lesJoueurs)->estConnecte);
+
+        // Attente de l'inscription de tous les joueurs
+        pthread_mutex_lock(&MUTEX_inscripton);
+
+        if(nbJoueursCo == NB_MAX_JOUEURS) {
+            printf("Info: Les joueurs sont tous inscrits !\n");
+            pthread_cond_broadcast(&COND_joueurs_inscrits);
+
+        } else {
+            pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_inscripton);
         }
-        
-        // Attente de l'instant suivant
-        pthread_mutex_lock(&MUTEX_instant);
-        pthread_cond_wait(&COND_instant, &MUTEX_instant);
-        pthread_mutex_unlock(&MUTEX_instant);
-    }
-    
-    /* Fermeture de connexion */
-    shutdown(csock, SHUT_RDWR);
+        pthread_mutex_unlock(&MUTEX_inscripton);
+
+        // Envoi de la trame User
+        //envoyer_users(csock, j);
+
+        // Décompte
+        envoyer_pause(csock, "3");
+        sleep(1);
+
+        envoyer_pause(csock, "2");
+        sleep(1);
+
+        envoyer_pause(csock, "1");
+        sleep(1);
+
+        envoyer_start(csock, "GO!");
+
+        // Attente de l'ordre du joueur
+        while(1) {
+            res = get_resultat_echange(csock);
+            if(res->typeTrame == Order) {
+                char* ordre = res->contenu;
+
+                printf("\nordre recu : %s\n", ordre);
+
+                if(strcmp(ordre, ORDRE_DROIT) == 0) {
+                    printf("Tout Droit\n");
+                } else if(strcmp(ordre, ORDRE_GAUCHE) == 0) {
+                    printf("Gauche\n");
+                } else if(strcmp(ordre, ORDRE_DROITE) == 0) {
+                    printf("Droite\n");
+                } else if(strcmp(ordre, ORDRE_ABANDON) == 0) {
+                    printf("Abandon\n");
+                } else {
+                    printf("Ordre inconnu");
+                }
+            }
+
+            // Attente de l'instant suivant
+            pthread_mutex_lock(&MUTEX_instant);
+            pthread_cond_wait(&COND_instant, &MUTEX_instant);
+            pthread_mutex_unlock(&MUTEX_instant);
+        }
+
+        /* Fermeture de connexion */
+        shutdown(csock, SHUT_RDWR);
+    } //Fin Partie
 }
 
 void* THREAD_instant(void *args) {
@@ -128,7 +123,7 @@ void* THREAD_instant(void *args) {
 }
 
 int main(void) {
-    pthread_t threads[NB_THREAD];
+    pthread_t threads[NB_MAX_JOUEURS];
     pthread_t thread_instant;
 
     void* status;
@@ -148,11 +143,11 @@ int main(void) {
     pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
 
     // Threads serveur
-    for(i=0; i < NB_THREAD; i++) {
+    for(i=0; i < NB_MAX_JOUEURS; i++) {
         pthread_create(&threads[i], NULL, THREAD_serveur, (long*) i);
     }
 
-    for(i=0;i<NB_THREAD;i++) {
+    for(i=0;i<NB_MAX_JOUEURS;i++) {
         pthread_join(threads[i], &status);
     }
 

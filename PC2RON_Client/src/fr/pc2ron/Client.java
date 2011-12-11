@@ -13,6 +13,7 @@ import fr.pc2ron.trame.ReceptionTrame;
 import fr.pc2ron.trame.TrameFactory;
 import fr.pc2ron.trame.VisiteurEnvoiTrame;
 import fr.pc2ron.trame.donnee.DonneeFactory;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -33,44 +34,24 @@ public class Client {
         
         //@fail
         VisiteurEnvoiTrame envoi = new VisiteurEnvoiTrame();
+        IReceptionTrame recept = new ReceptionTrame();
         ITrameBuilder tBuilder = TrameBuilder.getInstance();
         
-        try {
-            Socket socket = new Socket("127.0.0.1", 5555);
-            ITrame trameFail = trameFactory.getTrame(ETypeTrame.TrameOrder.getType(),
-                                      donneeFactory.getEntierSigne1((byte) 56));
-            
-            /*
-            IDonnee chaine = donneeFactory.getChaine("toto");
-             */
-            //ITrame trameFail = trameFactory.getTrame(ETypeTrame.TrameOrder.getType(), chaine);
-            
-            System.out.println("trameFail : " + trameFail.toString());
-            
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            //envoi.visit(trameFail, out);
-            
-            //debug
-            trameFail = tBuilder.creerTrameConnect((short)50, (short)50, (short)50, "Momo");
-            //System.out.println("trameFail : " + trameFail.toString());
-            //envoi.visit(trameFail, out);
-            //debug
-            
+        try {          
             protocole.connexion("127.0.0.1", 5555);
             protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
             protocole.deconnexion();
-            //protocole.connexion("127.0.0.1", 5555);
-            
+          
             // Trame User
             //protocole.getContenuTrame();
             
             // Decompte
-            protocole.getContenuTrame();
-            protocole.getContenuTrame();
-            protocole.getContenuTrame();
-            protocole.getContenuTrame();
+            //protocole.getContenuTrame();
+            //protocole.getContenuTrame();
+            //protocole.getContenuTrame();
+            //protocole.getContenuTrame();
             
-            protocole.envoyerOrdre(EOrdre.DROIT);
+            //protocole.envoyerOrdre(EOrdre.DROIT);
         } catch (Exception ex) {
             System.out.println("Connexion impossible");
             ex.printStackTrace();

@@ -13,7 +13,7 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     Donnee d;
 
     trameRecue->nbDonnees = 0;
-
+    
     nbOctetsRecus = recv(sock, &octet, 1, 0);
     
     // Probleme de reception
@@ -26,7 +26,7 @@ ERREUR_TRAME recevoir_trame(SOCKET sock, Trame* trameRecue){
     // Le client s'est deconnecte
     if (nbOctetsRecus == 0) {
         close (sock);
-        fprintf(stderr, "Le client s'est deconnecte\n");
+        fprintf(stderr, "Le client s'est deconnecte %d\n", sock);
         return ERR_RCPT_TRAME;
     }
     
