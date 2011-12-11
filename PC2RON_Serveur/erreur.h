@@ -20,7 +20,7 @@ extern "C" {
 #define AFF_ERR_ENVOI_ENTETE(typeDonnee) fprintf("%s >> %s: Erreur d'envoi \
                                d'entete du type %s\n", __FILE__, __func__, msg);
 #define AFF_ERR_ENVOI_VALEUR(typeDonnee) fprintf("%s >> %s: Erreur d'envoi de \
-                             "la valeur du type %s\n", __FILE__, __func__, msg);
+                              la valeur du type %s\n", __FILE__, __func__, msg);
 
 #define AFF_ERR_RCPT_ENTETE(typeDonnee) fprintf("%s >> %s: Erreur de reception \
                                d'entete du type %s\n", __FILE__, __func__, msg);

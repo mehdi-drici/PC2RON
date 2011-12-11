@@ -69,6 +69,16 @@ typedef enum TYPE_DONNEE {
 	FLOTTANT = 0x30
 } TYPE_DONNEE;
 
+/* Chaines de caracteres correspondant aux types de donnee */
+#define S_INT8 "int8"
+#define S_INT16 "int16"
+#define S_INT32 "int32"
+#define S_UINT8 "uint8"
+#define S_UINT16 "uint16"
+#define S_UINT32 "uint32"
+#define S_STRING "string"
+#define S_DOUBLE "double"
+        
 /* Types de fanion */
 typedef enum TYPE_FANION {
     TRAME_NORMALE = 0xFF,
@@ -80,30 +90,30 @@ typedef struct Donnee {
 	TYPE_DONNEE type;
         
 	union {
-		/* entier signés */
-		char entierSigne1;
-		short entierSigne2;
-		int entierSigne4;
+            /* entier signés */
+            char entierSigne1;
+            short entierSigne2;
+            int entierSigne4;
 
-		/* entiers non signés */
-		unsigned char entierNonSigne1;
-		unsigned short entierNonSigne2;
-		unsigned int entierNonSigne4;
+            /* entiers non signés */
+            unsigned char entierNonSigne1;
+            unsigned short entierNonSigne2;
+            unsigned int entierNonSigne4;
 
-		/* chaîne de caractères */
-		struct chaine {
-			short taille;
-			unsigned char* texte; 
-		} chaine;
+            /* chaîne de caractères */
+            struct chaine {
+                    short taille;
+                    unsigned char* texte; 
+            } chaine;
 
-		/* flottant */
-		/*
-		struct flottant {
-			double f;
-			unsigned char octets[8];
-		} flottant;
-		*/
-		double flottant;
+            /* flottant */
+            /*
+            struct flottant {
+                    double f;
+                    unsigned char octets[8];
+            } flottant;
+            */
+            double flottant;
 	};
 } Donnee;
 

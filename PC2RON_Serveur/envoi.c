@@ -89,6 +89,7 @@ int envoyer_entierSigne1(SOCKET sock, Donnee entier) {
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
     if (nbOctetsRecus < 0) {
+        AFF_ERR_ENVOI_ENTETE("int8");
         //fprintf(stderr, "%s: Erreur d'envoi d'entete de l'entier signe 1\n", __func__);
         return ERREUR;
     }
@@ -96,7 +97,8 @@ int envoyer_entierSigne1(SOCKET sock, Donnee entier) {
     // Envoi de l'entier
     nbOctetsRecus = send(sock, &(entier.entierSigne1), 1, 0);
     if (nbOctetsRecus < 0) {
-        fprintf(stderr, "%s: Erreur d'envoi de l'entier signe 1\n", __func__);
+        AFF_ERR_ENVOI_VALEUR("int8");
+        //fprintf(stderr, "%s: Erreur d'envoi de l'entier signe 1\n", __func__);
         return ERREUR;
     }
 
