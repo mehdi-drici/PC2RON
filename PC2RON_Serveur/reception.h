@@ -14,16 +14,16 @@ extern "C" {
 
 #include "trame.h"
     
-Trame* recevoir_trame(SOCKET sock);
-Donnee* recevoir_donnee(SOCKET sock);
-Donnee* recevoir_entierSigne1(SOCKET sock);
-Donnee* recevoir_entierSigne2(SOCKET sock);
-Donnee* recevoir_entierSigne4(SOCKET sock);
-Donnee* recevoir_entierNonSigne1(SOCKET sock);
-Donnee* recevoir_entierNonSigne2(SOCKET sock);
-Donnee* recevoir_entierNonSigne4(SOCKET sock);
-Donnee* recevoir_chaine(SOCKET sock);
-Donnee* recevoir_flottant(SOCKET sock);
+Trame recevoir_trame(SOCKET sock);
+Donnee recevoir_donnee(SOCKET sock);
+Donnee recevoir_entierSigne1(SOCKET sock);
+Donnee recevoir_entierSigne2(SOCKET sock);
+Donnee recevoir_entierSigne4(SOCKET sock);
+Donnee recevoir_entierNonSigne1(SOCKET sock);
+Donnee recevoir_entierNonSigne2(SOCKET sock);
+Donnee recevoir_entierNonSigne4(SOCKET sock);
+Donnee recevoir_chaine(SOCKET sock);
+Donnee recevoir_flottant(SOCKET sock);
 
 #ifdef	__cplusplus
 }

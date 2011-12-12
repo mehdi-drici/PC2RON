@@ -19,9 +19,9 @@ int etablir_connexion() {
     sin.sin_family = AF_INET;
     sin.sin_port = htons(PORT);
 
-    // lose the pesky "Address already in use" error message
+       /*   lose the pesky "Address already in use" error message  */ 
     if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &valeur_option, sizeof(int)) == -1) {
-    	//logger_errno("setsockopt");
+    	   /*  logger_errno("setsockopt");  */ 
         pthread_exit(NULL);
     }
 
@@ -32,7 +32,7 @@ int etablir_connexion() {
     	printf("La socket %d est maintenant ouverte en mode TCP/IP\n", sock);
     }
 
-    // Ecoute sur le port PORT
+       /*   Ecoute sur le port PORT  */ 
     printf("Listage du port %d...\n", PORT);
 
     if(listen(sock, NB_MAX_CLIENTS) == SOCKET_ERROR) {
@@ -48,13 +48,13 @@ int accepter_client(int sock) {
     int csock;
     int sinsize = sizeof csin;
 
-    // Connexion du client
+       /*   Connexion du client  */ 
     /* Attente pendant laquelle le client se connecte */
-    //printf("Patientez pendant que le client se connecte sur le port %d...\n", PORT);
+       /*  printf("Patientez pendant que le client se connecte sur le port %d...\n", PORT);  */ 
     csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
-    //printf("Un client se connecte avec la socket %d de %s:%d\n", csock, \
+       /*  printf("Un client se connecte avec la socket %d de %s:%d\n", csock, 
                 inet_ntoa(csin.sin_addr), htons(csin.sin_port));
-
+       */
     if(csock == INVALID_SOCKET) {
         perror("accept()");
         exit(errno);

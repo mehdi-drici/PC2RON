@@ -8,6 +8,8 @@
 #ifndef PROTOCOLE_H_
 #define PROTOCOLE_H_
 
+#include "builder.h"
+
 #define NOM_APPLICATION "PC2RON"
 #define NOM_VERSION_PROTOCOLE "PC2RON2011"
 
@@ -28,7 +30,7 @@
 #define S_TURN "TURN"
 #define S_WIN "WIN"
 
-// Ordres
+   /*   Ordres  */ 
 #define ORDRE_DROIT "idle"
 #define ORDRE_GAUCHE "left"
 #define ORDRE_DROITE "right"
@@ -41,24 +43,28 @@ typedef struct Resultat {
 
 void init_protocole(Joueurs j);
 
-// Requetes du client
-Resultat* get_resultat_echange(SOCKET sock);
-char* get_order(SOCKET sock, Trame t);
+   /*   Requetes du client  */ 
+Resultat* get_resultat_echange(SOCKET sock, Joueurs lesJoueurs);
+char* get_order(SOCKET sock, Trame t, Joueurs lesJoueurs);
 
-// Reponses au client
-int repondre_initiate(SOCKET sock, Trame t);
-Joueur* repondre_connect(SOCKET sock, Trame t);
+   /*   Reponses au client  */ 
+int repondre_initiate(SOCKET sock, Trame t, Joueurs lesJoueurs);
+Joueur repondre_connect(SOCKET sock, Trame t, Joueurs lesJoueurs);
 
-// Envoi au client
+   /*   Envoi au client  */ 
+
+/* @todo modifier*/
 int envoyer_user(SOCKET sock, Joueur j);
-int envoyer_users(SOCKET sock, Joueurs j);
-int envoyer_end(SOCKET sock);
-int envoyer_pause(SOCKET sock, char* message);
-int envoyer_start(SOCKET sock, char* message);
-int envoyer_turn(SOCKET sock, Joueur j[]);
+int envoyer_users(SOCKET sock, Joueurs lesJoueurs);
 
-int envoyer_win(SOCKET sock, unsigned short id);
-int envoyer_death(SOCKET sock, unsigned short id);
-int envoyer_deaths(SOCKET sock, unsigned short id1, unsigned short id2);
+int envoyer_end(SOCKET sock, Joueurs lesJoueurs);
+int envoyer_pause(SOCKET sock, const char* message, Joueurs lesJoueurs);
+int envoyer_start(SOCKET sock, const char* message, Joueurs lesJoueurs);
+int envoyer_turn(SOCKET sock, Joueurs lesJoueurs);
+
+int envoyer_win(SOCKET sock, unsigned short id, Joueurs lesJoueurs);
+int envoyer_death(SOCKET sock, unsigned short id, Joueurs lesJoueurs);
+int envoyer_deaths(SOCKET sock, unsigned short id1, unsigned short id2, 
+                                                    Joueurs lesJoueurs);
 
 #endif /* PROTOCOLE_H_ */

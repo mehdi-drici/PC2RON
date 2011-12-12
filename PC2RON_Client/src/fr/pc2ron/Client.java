@@ -25,8 +25,6 @@ import java.net.Socket;
 public class Client {
     public static void main(String[] argv) {       
         //@fail
-        
-            
         // Creation de la trame
         IDonneeFactory donneeFactory = DonneeFactory.getInstance();
         ITrameFactory trameFactory = TrameFactory.getInstance();
@@ -39,8 +37,9 @@ public class Client {
         
         try {          
             protocole.connexion("127.0.0.1", 5555);
-            protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
-            protocole.deconnexion();
+            //protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
+            
+            //protocole.deconnexion();
           
             // Trame User
             //protocole.getContenuTrame();

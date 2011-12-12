@@ -56,8 +56,8 @@ typedef struct Donnee {
 
             /* chaîne de caractères */
             struct chaine {
-                    short taille;
-                    unsigned char* texte; 
+                    unsigned short taille;
+                    char* texte; 
             } chaine;
 
             /* flottant */
@@ -69,7 +69,7 @@ typedef struct Donnee {
             */
             double flottant;
 	};
-} Donnee;
+} *Donnee;
 
 
 /* Structure d'une trame */
@@ -78,17 +78,17 @@ typedef struct Trame {
     unsigned char id;
     unsigned char nbDonnees;
     Donnee* donnees;
-} Trame;
+} *Trame;
 
 /* Affichage d'une trame ou d'une donnee */
 void afficher_trame(Trame trame);
 void afficher_donnee(Donnee trame);
 
 /* Ajout de donnees */
-void ajouter_donnee(Trame* t, Donnee d);
-void ajouter_donnees(Trame* t, Donnee* d);
+void ajouter_donnee(Trame t, Donnee d);
+void ajouter_donnees(Trame t, Donnee d);
 
 /* Libération de l'espace mémoire alloué à une trame et ses données */
-void free_trame(Trame* t);
+void free_trame(Trame t);
 
 #endif /* TRAME_H_ */

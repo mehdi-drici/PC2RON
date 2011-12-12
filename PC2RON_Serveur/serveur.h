@@ -13,6 +13,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,13 +21,12 @@
 #define PORT 5555
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-//typedef int SOCKET;
+   /*  typedef int SOCKET;  */ 
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
-int etablir_connexion();
+int etablir_connexion(void);
 int accepter_client(int sock);
 void fermer_connexion(int sock);
-
 #endif /* SERVEUR_H_ */

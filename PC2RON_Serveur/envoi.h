@@ -16,7 +16,7 @@ extern "C" {
 
 /* Envoi d'une trame */
 int envoyer_trame(SOCKET sock, Trame trameEnvoyee);
-//char** convertir_trame_toBytes(Trame trame);
+   /*  char** convertir_trame_toBytes(Trame trame);  */ 
 int envoyer_donnee(SOCKET sock, Donnee donnee);
 int envoyer_entierSigne1(SOCKET sock, Donnee entier);
 int envoyer_entierSigne2(SOCKET sock, Donnee entier);

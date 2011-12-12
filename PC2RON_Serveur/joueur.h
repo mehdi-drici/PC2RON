@@ -23,37 +23,40 @@ typedef struct Joueur {
     unsigned short id;
     char* nom;
 
-    // Couleur
+       /*   Couleur  */ 
     unsigned char r;
     unsigned char v;
     unsigned char b;
 
-    // Positions
+       /*   Positions  */ 
     unsigned short x;
     unsigned short y;
 
-    // direction
-    //unsigned short dir;
+       /*   direction  */ 
+       /*  unsigned short dir;  */ 
     Direction dir;
 
-    // Nombre de pas de grille en un centieme de seconde
+       /*   Nombre de pas de grille en un centieme de seconde  */ 
     unsigned char speed;
     
     int sock;
     int estInscrit;
     int estConnecte;
-} Joueur; 
+} *Joueur; 
 
 typedef struct Joueurs {
     Joueur* joueur;
     int nbJoueurs;
-} Joueurs;
+    int nbMaxJoueurs;
+} *Joueurs;
 
-void init_joueur(int sock, Joueur* j);
-Joueur* get_joueur_par_id(unsigned short id, Joueurs lesJoueurs);
-Joueur* get_joueur_par_sock(int sock, const Joueurs lesJoueurs);
-int set_inscription_joueur(Joueur* j, int booleen);
-int set_connexion_joueur(Joueur* j, int booleen);
+/*void init_joueur(int sock, Joueur j);*/
+int ajouter_joueur(Joueurs lesJoueurs, Joueur j);
+Joueur creer_joueur(int sock);
+Joueur get_joueur_par_id(unsigned short id, Joueurs lesJoueurs);
+Joueur get_joueur_par_sock(int sock, const Joueurs lesJoueurs);
+void set_inscription_joueur(Joueur j, int booleen);
+void set_connexion_joueur(Joueur j, int booleen);
 int est_inscrit(const Joueur j);
 int est_connecte(const Joueur j);
 

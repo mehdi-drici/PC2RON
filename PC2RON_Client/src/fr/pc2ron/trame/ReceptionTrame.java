@@ -27,18 +27,20 @@ public class ReceptionTrame implements IReceptionTrame {
 		IDonneeFactory donneeFactory = DonneeFactory.getInstance();
         
 		IChaine chaine = null;
-        IEntierNonSigne2 nbOctets;
-        byte[] buffer ;
+                IEntierNonSigne2 nbOctets;
+                byte[] buffer ;
 
 		try {
                     int temp = in.readUnsignedShort();
                     nbOctets = donneeFactory.getEntierNonSigne2(temp);
+                    
                     //nbOctets = this.recevoirEntierNonSigne2(in);
 
                     buffer = new byte[nbOctets.getEntier()];
                     in.read(buffer, 0, nbOctets.getEntier());
+                    
                     chaine = donneeFactory.getChaine(new String(buffer, IChaine.CHARSET));
-            
+                    
 		} catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -54,7 +56,9 @@ public class ReceptionTrame implements IReceptionTrame {
 		
 		try {
 			type = in.readByte();
-            
+                        
+                        System.out.println("type = " + type);
+                        
 			ETypeDonnee t = ETypeDonnee.getTypeDonnee(type);
 
 			switch (t) {
@@ -83,6 +87,7 @@ public class ReceptionTrame implements IReceptionTrame {
 					break;
 					
 				case CHAINE:
+                                        System.out.println("Chaine");
 					donnee = recevoirChaine(in);
 					break;
 					
@@ -203,6 +208,7 @@ public class ReceptionTrame implements IReceptionTrame {
 		
 		try {
                         byte typeFanion = in.readByte();
+                        
 			trameRecue.setTypeFanion(typeFanion);
                         short t = 255;
                         
@@ -214,7 +220,8 @@ public class ReceptionTrame implements IReceptionTrame {
                                 trameRecue.setId(id);
 
                                 byte nbDonnees = in.readByte();
-
+                                
+                                
                                 //IDonneeFactory donneeFactory = DonneeFactory.getInstance();
                                 IDonnee donneeRecue;
 
@@ -237,7 +244,7 @@ public class ReceptionTrame implements IReceptionTrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+                
 		return trameRecue;
 	}
 

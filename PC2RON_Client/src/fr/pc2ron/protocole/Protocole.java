@@ -67,6 +67,8 @@ public class Protocole implements IProtocole {
 		ReceptionTrame reception = new ReceptionTrame();
 		ITrame ack = reception.recevoirTrame(in);
 		
+                
+                
                 ETypeTrame eTypeTrame = ETypeTrame.getTypeTrame(ack.getId());
 		
 		IDonnee message = ack.getDonnees().get(0);
@@ -82,7 +84,6 @@ public class Protocole implements IProtocole {
 		} else {
                     throw new Exception("Impossible de lire la reponse du serveur !");
 		}
-
 	}
 
 	@Override
@@ -207,6 +208,8 @@ public class Protocole implements IProtocole {
 	@Override
 	public int inscription(short r, short v, short b, String nom)
 			throws Exception {
+                System.out.println("Inscription...");
+                
 		// Envoi de la trame Connect
 		ITrameBuilder trameBuilder = TrameBuilder.getInstance();
 		ITrame trameConnect = trameBuilder.creerTrameConnect(r, v, b, nom);

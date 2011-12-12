@@ -12,11 +12,11 @@
 extern "C" {
 #endif
 
-// Code d'échec et de réussite d'une fonction
+/* Code d'échec et de réussite d'une fonction */
 #define ERROR -1
 #define SUCCESS 0
     
-// Messages d'erreur pour la trame Registered (Client)
+/* Messages d'erreur pour la trame Registered (Client) */
 #define WRONG_FRAME_FORMAT "Le format de la trame n'est pas correct"
 #define WRONG_RGB_FORMAT "Le format RVB n'est pas correct"
 #define WRONG_NAME_FORMAT "Le nom doit etre une chaine de caracteres"
@@ -24,7 +24,10 @@ extern "C" {
 #define ALREADY_CONNECTED "Vous etes deja connecte"
 #define LIMIT_PLAYERS_REGISTERED_REACHED "Le quota de joueurs inscrits a ete atteint"
     
-// Messages d'erreur pour le serveur
+   /*   Messages d'erreur pour le serveur  */
+#define PRINT_LIMIT_PLAYERS_CONNECTED_REACHED() \
+    fprintf(stderr, "Le nombre max de joueurs connectes a ete atteint\n");
+    
 #define PRINT_UNSUPPORTED_VERSION(sVersion) \
     fprintf(stderr, "La version %s n'est pas supportee\n", sVersion);
 
@@ -62,8 +65,7 @@ extern "C" {
             return NULL;  \
         } else if (p_iNbBytes == 0) { \
             close (p_sock); \
-            fprintf(stderr, "%s >> %s: Deconnexion brutale \
-            du joueur (socket: %d)\n", \
+            fprintf(stderr, "%s >> %s: Deconnexion brutale du joueur (socket: %d)\n", \
             __FILE__, __func__, p_sock); \
             free(data); \
             return NULL; \
@@ -78,8 +80,7 @@ extern "C" {
                 return NULL;  \
         } else if (p_iNbBytes == 0) { \
             close (p_sock); \
-            fprintf(stderr, "%s >> %s: Deconnexion brutale \
-            du client (socket: %d)\n", \
+            fprintf(stderr, "%s >> %s: Deconnexion brutale du client (socket: %d)\n", \
             __FILE__, __func__, p_sock); \
             free_trame(frame); \
             return NULL; \
@@ -93,8 +94,7 @@ extern "C" {
         return ERROR;  \
     } else if (p_iNbBytes == 0) { \
         close (p_sock); \
-        fprintf(stderr, "%s >> %s: Deconnexion brutale \
-        du client (socket: %d)\n", \
+        fprintf(stderr, "%s >> %s: Deconnexion brutale du client (socket: %d)\n", \
         __FILE__, __func__, p_sock); \
         return ERROR; \
     };
@@ -102,7 +102,7 @@ extern "C" {
 #define PRINT_UNKNOWN_PENNANT(fanion) fprintf(stderr, "%s >> %s : Le fanion %2.2x est \
                                                   inconnu\n", __FILE__, __func__, fanion);
 #define PRINT_UNKNOWN_DATA_TYPE(datatype) fprintf(stderr, "%s >> %s : Le type de donnee %2.2x \
-                                       est inconnu\n", __FILE__, __func__, datatype); 
+est inconnu\n", __FILE__, __func__, datatype); 
     
 #ifdef	__cplusplus
 }

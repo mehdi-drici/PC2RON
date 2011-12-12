@@ -22,7 +22,7 @@ Donnee creer_entierSigne4(long entier);
 Donnee creer_entierNonSigne1(unsigned char entier);
 Donnee creer_entierNonSigne2(unsigned short entier);
 Donnee creer_entierNonSigne4(unsigned long entier);
-Donnee creer_chaine(char texte[]);
+Donnee creer_chaine(const char* texte);
 Donnee creer_flottant(double flottant);
 
 #ifdef	__cplusplus

@@ -20,4 +20,7 @@
 
 #define NB_THREAD 3
 
+void* THREAD_serveur(void *args) __attribute__((noreturn));
+void* THREAD_instant(void *args) __attribute__((noreturn));
+
 #endif /* MAIN_H_ */

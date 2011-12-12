@@ -6,6 +6,7 @@
  */
 
 #include "main.h"
+#include "string.h"
 
 #define NB_MAX_JOUEURS 3
 
@@ -21,37 +22,46 @@ int nbJoueursCo = 0;
 int nbJoueurs = 0;
 
 Joueurs lesJoueurs;
-Joueur* j;
+Joueur j;
 
 void* THREAD_serveur(void *args) {
     SOCKET csock;
-    int joueurInscrit = 0;
+    int joueurInscrit = 0, estConnecte = 0;
     Resultat* res;
-    int i;
     
-    // Déroulement d'une partie
+       /*   Déroulement d'une partie  */ 
     while (1) {
-        // init de la socket
+           /*   init de la socket  */ 
         pthread_mutex_lock(&MUTEX_accept);
         csock = accepter_client(sock);
-        init_joueur(csock, &(lesJoueurs.joueur[nbJoueurs]));
+        /*init_joueur(csock, lesJoueurs->joueur[nbJoueurs]);*/
         nbJoueurs++;
         pthread_mutex_unlock(&MUTEX_accept);
-
-        // Inscription du client   
+        
+        /* Connexion du joueur */
         do {
             sleep(2);
-            res = get_resultat_echange(csock);
-
+            res = get_resultat_echange(csock, lesJoueurs);
+            
+            if(res != NULL && res->typeTrame == Initiate) {
+                estConnecte = 1;
+            }
+        } while (!estConnecte);
+        
+        /*   Inscription du joueur */ 
+        do {
+            sleep(2);
+            res = get_resultat_echange(csock, lesJoueurs);
+            
             if(res != NULL && res->typeTrame == Connect) {
                 joueurInscrit = 1;
-                j = (Joueur*) (res->contenu);
+                j = (Joueur) (res->contenu);
                 printf("Id de la socket %d : %d\n", csock, j->id);
                 nbJoueursCo++;
             }
-        } while (!joueurInscrit  && get_joueur_par_sock(csock, lesJoueurs)->estConnecte);
+        } while (!joueurInscrit);
 
-        // Attente de l'inscription de tous les joueurs
+           /*   Attente de l'inscription de tous les joueurs  */ 
         pthread_mutex_lock(&MUTEX_inscripton);
 
         if(nbJoueursCo == NB_MAX_JOUEURS) {
@@ -63,24 +73,24 @@ void* THREAD_serveur(void *args) {
         }
         pthread_mutex_unlock(&MUTEX_inscripton);
 
-        // Envoi de la trame User
-        //envoyer_users(csock, j);
+           /*   Envoi de la trame User  */ 
+           /*  envoyer_users(csock, j);  */ 
 
-        // Décompte
-        envoyer_pause(csock, "3");
+           /*   Décompte  */ 
+        envoyer_pause(csock, "3", lesJoueurs);
         sleep(1);
 
-        envoyer_pause(csock, "2");
+        envoyer_pause(csock, "2", lesJoueurs);
         sleep(1);
 
-        envoyer_pause(csock, "1");
+        envoyer_pause(csock, "1", lesJoueurs);
         sleep(1);
 
-        envoyer_start(csock, "GO!");
+        envoyer_start(csock, "GO!", lesJoueurs);
 
-        // Attente de l'ordre du joueur
+           /*   Attente de l'ordre du joueur  */ 
         while(1) {
-            res = get_resultat_echange(csock);
+            res = get_resultat_echange(csock, lesJoueurs);
             if(res->typeTrame == Order) {
                 char* ordre = res->contenu;
 
@@ -99,7 +109,7 @@ void* THREAD_serveur(void *args) {
                 }
             }
 
-            // Attente de l'instant suivant
+               /*   Attente de l'instant suivant  */ 
             pthread_mutex_lock(&MUTEX_instant);
             pthread_cond_wait(&COND_instant, &MUTEX_instant);
             pthread_mutex_unlock(&MUTEX_instant);
@@ -107,10 +117,10 @@ void* THREAD_serveur(void *args) {
 
         /* Fermeture de connexion */
         shutdown(csock, SHUT_RDWR);
-    } //Fin Partie
+    }    /*  Fin Partie  */ 
 }
 
-void* THREAD_instant(void *args) {
+void*  THREAD_instant(void *args) {
     int i = 1;
     while(1) {
         sleep(2);
@@ -129,21 +139,22 @@ int main(void) {
     void* status;
     long i;
     
-    //fprintf(stderr, "toto erreur");
+       /*  fprintf(stderr, "toto erreur");  */ 
     fprintf(stderr, "Dans la fonction %s...\n", __func__);
     
-    // Initialisation du protocole
-    lesJoueurs.nbJoueurs = NB_MAX_JOUEURS;
-    lesJoueurs.joueur = malloc(NB_MAX_JOUEURS * sizeof(Joueur));
-    init_protocole(lesJoueurs);
+       /*   Initialisation du protocole  */
+    lesJoueurs = malloc(sizeof(struct Joueurs));
+    lesJoueurs->nbMaxJoueurs = NB_MAX_JOUEURS;
+    lesJoueurs->joueur = malloc(NB_MAX_JOUEURS * sizeof(struct Joueur));
+    /*init_protocole(lesJoueurs);*/
     
-    // Création d'une socket
+       /*   Création d'une socket  */ 
     sock = etablir_connexion();
 
-    // Traceur d'instant
+       /*   Traceur d'instant  */ 
     pthread_create(&thread_instant, NULL, THREAD_instant, NULL);
 
-    // Threads serveur
+       /*   Threads serveur  */ 
     for(i=0; i < NB_MAX_JOUEURS; i++) {
         pthread_create(&threads[i], NULL, THREAD_serveur, (long*) i);
     }
