@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "envoi.h"
 #include "erreur.h"
 
@@ -11,79 +12,54 @@ int envoyer_trame(SOCKET sock, Trame trameEnvoyee) {
     
     // Envoi de l'entête
     nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee.fanion), 1, 0);
-    
-    if (nbOctetsEnvoyes < 0) {
-        //@todo personnaliser l'erreur
-        AFF_ERR_ENVOI_ENTETE_TRAME();
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
     
     nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee.id), 1, 0);
-    if (nbOctetsEnvoyes < 0) {    
-        AFF_ERR_ENVOI_ENTETE_TRAME();
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
     
     nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee.nbDonnees), 1, 0);
-    if (nbOctetsEnvoyes < 0) {
-        AFF_ERR_ENVOI_ENTETE_TRAME();
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi des donnees tant qu'il n'y a pas d'erreur
-    while (envoyer_donnee(sock, trameEnvoyee.donnees[i]) == SUCCES &&
-           i < trameEnvoyee.nbDonnees) {
+    while (i < trameEnvoyee.nbDonnees) {
+        if(envoyer_donnee(sock, trameEnvoyee.donnees[i]) == ERROR) {
+            return ERROR;
+        }
         i++;
     }
-
-    if(i == trameEnvoyee.nbDonnees) {
-        return SUCCES;
-    }
     
-    return ERREUR;
+    return SUCCESS;
 }
 
 int envoyer_donnee(SOCKET sock, Donnee donneeEnvoyee) {
-    int erreur;
-
     switch(donneeEnvoyee.type) {
         case ENTIER_SIGNE1:
-            erreur = envoyer_entierSigne1(sock, donneeEnvoyee);
-            break;
+            return envoyer_entierSigne1(sock, donneeEnvoyee);
 
         case ENTIER_SIGNE2:
-            erreur = envoyer_entierSigne2(sock, donneeEnvoyee);
-            break;
+            return envoyer_entierSigne2(sock, donneeEnvoyee);
 
         case ENTIER_SIGNE4:
-            erreur = envoyer_entierSigne4(sock, donneeEnvoyee);
-            break;
+            return envoyer_entierSigne4(sock, donneeEnvoyee);
 
         case ENTIER_NON_SIGNE1:
-            erreur = envoyer_entierNonSigne1(sock, donneeEnvoyee);
-            break;
+            return envoyer_entierNonSigne1(sock, donneeEnvoyee);
 
         case ENTIER_NON_SIGNE2:
-            erreur = envoyer_entierNonSigne2(sock, donneeEnvoyee);
-            break;
+            return envoyer_entierNonSigne2(sock, donneeEnvoyee);
 
         case ENTIER_NON_SIGNE4:
-            erreur = envoyer_entierNonSigne4(sock, donneeEnvoyee);
-            break;
+            return envoyer_entierNonSigne4(sock, donneeEnvoyee);
 
         case CHAINE:
-            erreur = envoyer_chaine(sock, donneeEnvoyee);
-            break;
+            return envoyer_chaine(sock, donneeEnvoyee);
 
         case FLOTTANT:
-            erreur = envoyer_flottant(sock, donneeEnvoyee);
-            break;
+            return  envoyer_flottant(sock, donneeEnvoyee);
 
         default:
-            erreur = ERR_ENVOI_DONNEE;
+            return ERR_ENVOI_DONNEE;
     }
-
-    return erreur;
 }
 
 int envoyer_entierSigne1(SOCKET sock, Donnee entier) {
@@ -94,17 +70,11 @@ int envoyer_entierSigne1(SOCKET sock, Donnee entier) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_INT8);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, &(entier.entierSigne1), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_VALEUR(S_INT8);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     return SUCCES;
 }
@@ -117,17 +87,11 @@ int envoyer_entierSigne2(SOCKET sock, Donnee entier) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_INT16);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, (char*)&donnees, 2, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_VALEUR(S_INT16);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     return SUCCES;
 }
@@ -140,17 +104,11 @@ int envoyer_entierSigne4(SOCKET sock, Donnee entierEnvoye) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)entierEnvoye.type, 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_INT8);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, (char*)&donnees, 4, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_VALEUR(S_INT8);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     return SUCCES;
 }
@@ -160,17 +118,11 @@ int envoyer_entierNonSigne1(SOCKET sock, Donnee entier) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_UINT8);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, &(entier.entierNonSigne1), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_UINT8);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     return SUCCES;
 }
@@ -183,18 +135,11 @@ int envoyer_entierNonSigne2(SOCKET sock, Donnee entier) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_UINT16);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, (char*)&donnees, 2, 0);
-    if (nbOctetsRecus < 0)
-    {
-        AFF_ERR_ENVOI_VALEUR(S_UINT16);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     return SUCCES;
 }
@@ -207,17 +152,11 @@ int envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
 
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(entier.type), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_UINT32);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de l'entier
     nbOctetsRecus = send(sock, (char*)&donnees, 4, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_VALEUR(S_UINT32);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     return SUCCES;
 }
@@ -230,26 +169,16 @@ int envoyer_chaine(SOCKET sock, Donnee chaine) {
     
     // Envoi de l'entête
     nbOctetsRecus = send(sock, (char*)&(chaine.type), 1, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_STRING);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de la taille de la chaine
     nbOctetsRecus = send(sock, (char*)&taille, 2, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_ENTETE(S_STRING);
-        return ERREUR;
-    }
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
 
     // Envoi de la chaine
-    
     nbOctetsRecus = send(sock, chaine.chaine.texte, chaine.chaine.taille, 0);
-    if (nbOctetsRecus < 0) {
-        AFF_ERR_ENVOI_VALEUR(S_STRING);
-        return ERREUR;
-    }
-    
+    EXIT_IF_ERROR_SEND(sock, nbOctetsRecus);
+        
     return SUCCES;
 }
 
@@ -281,5 +210,5 @@ int envoyer_flottant(SOCKET sock, Donnee flottantEnvoye) {
     	return ERR_ENVOI_FLOTTANT;
     }
     */
-    return SUCCES;
+    return SUCCESS;
 }

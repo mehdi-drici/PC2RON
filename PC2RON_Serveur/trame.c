@@ -50,7 +50,7 @@ void afficher_trame(Trame trame) {
             break;
           
         default:
-            printf("Erreur de trame");
+            PRINT_UNKNOWN_PENNANT(trame.fanion);
     }
     
     printf(" }\n");
@@ -102,7 +102,7 @@ void afficher_donnee(Donnee donnee) {
             break;
 
         default:
-            AFF_ERR_TYPE_DONNEE(donnee.type);
+            PRINT_UNKNOWN_DATA_TYPE(donnee.type);
     }
 }
 
