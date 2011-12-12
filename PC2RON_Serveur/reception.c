@@ -1,7 +1,11 @@
 #include "reception.h"
 #include "erreur.h"
+#include <string.h>
+#include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 /**
  * Réception d'une trame ou d'une donnée
@@ -13,7 +17,7 @@ Trame* recevoir_trame(SOCKET sock){
     unsigned char octet;
     int i = 0;
     int nbOctetsRecus = 0;
-    Donnee d;
+    Donnee* d;
 
     trameRecue->nbDonnees = 0;
     
@@ -29,7 +33,7 @@ Trame* recevoir_trame(SOCKET sock){
         case TRAME_SPECIALE:
             // Fermeture de connexion
             shutdown(sock, SHUT_RDWR);
-            return SUCCES;
+            return SUCCESS;
 
         default:
             PRINT_UNKNOWN_PENNANT(octet);
@@ -53,7 +57,7 @@ Trame* recevoir_trame(SOCKET sock){
             free_trame(trameRecue);
             return NULL;
         }
-        ajouter_donnee(trameRecue, d);
+        ajouter_donnee(trameRecue, *d);
         i++;
     }
     
@@ -61,39 +65,39 @@ Trame* recevoir_trame(SOCKET sock){
 }
 
 Donnee* recevoir_donnee(SOCKET sock) {
-    Donnee* donneeRecue = malloc(sizeof(Donnee));
+    //Donnee* donneeRecue = malloc(sizeof(Donnee));
     unsigned char type;
 
     // Recuperation du type de donnee
-    EXIT_IF_ERROR_SEND(sock, recv(sock, &type, 1, 0), donneeRecue);
+    EXIT_IF_ERROR_SEND(sock, recv(sock, &type, 1, 0));
 
     // Ajout du type de donnee
-    donneeRecue->type = type;
+    //donneeRecue->type = type;
     
     switch(type) {
         case ENTIER_SIGNE1:
-            return recevoir_entierSigne1(sock, donneeRecue);
+            return recevoir_entierSigne1(sock);
 
         case ENTIER_SIGNE2:
-            return recevoir_entierSigne2(sock, donneeRecue);
+            return recevoir_entierSigne2(sock);
 
         case ENTIER_SIGNE4:
-            return recevoir_entierSigne4(sock, donneeRecue);
+            return recevoir_entierSigne4(sock);
 
         case ENTIER_NON_SIGNE1:
-            return recevoir_entierNonSigne1(sock, donneeRecue);
+            return recevoir_entierNonSigne1(sock);
 
         case ENTIER_NON_SIGNE2:
-            return recevoir_entierNonSigne2(sock, donneeRecue);
+            return recevoir_entierNonSigne2(sock);
 
         case ENTIER_NON_SIGNE4:
-            return recevoir_entierNonSigne4(sock, donneeRecue);
+            return recevoir_entierNonSigne4(sock);
 
         case CHAINE:
-            return recevoir_chaine(sock, donneeRecue);
+            return recevoir_chaine(sock);
 
         case FLOTTANT:
-            return recevoir_flottant(sock, donneeRecue);
+            return recevoir_flottant(sock);
 
         default:
             PRINT_UNKNOWN_DATA_TYPE(type);
@@ -110,6 +114,7 @@ Donnee* recevoir_entierSigne1(SOCKET sock) {
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
 
+    donneeRecue->type = ENTIER_SIGNE1;
     donneeRecue->entierSigne1 = entierRecu;
 
     return donneeRecue;
@@ -124,6 +129,7 @@ Donnee* recevoir_entierSigne2(SOCKET sock) {
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
 
+    donneeRecue->type = ENTIER_SIGNE2;
     // On convertit l'entier récupéré en little-endian si l'ordinateur
     // stock les entiers en mémoire en little-endian, sinon s'il les
     // stock en big-endian l'entier est convertit en big-endian
@@ -140,7 +146,8 @@ Donnee* recevoir_entierSigne4(SOCKET sock) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
-
+    
+    donneeRecue->type = ENTIER_SIGNE4;
     donneeRecue->entierSigne4 = ntohl(entierRecu);
 
     return donneeRecue;
@@ -154,7 +161,8 @@ Donnee* recevoir_entierNonSigne1(SOCKET sock) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
-
+    
+    donneeRecue->type = ENTIER_NON_SIGNE1;
     donneeRecue->entierNonSigne1 = entierRecu;
 
     return donneeRecue;
@@ -168,7 +176,8 @@ Donnee* recevoir_entierNonSigne2(SOCKET sock) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
-
+    
+    donneeRecue->type = ENTIER_NON_SIGNE2;
     donneeRecue->entierNonSigne2 = ntohs(entierRecu);
 
     return donneeRecue;
@@ -182,7 +191,8 @@ Donnee* recevoir_entierNonSigne4(SOCKET sock) {
     // On récupère l'entier en big-endian
     nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
-
+    
+    donneeRecue->type = ENTIER_NON_SIGNE4;
     donneeRecue->entierNonSigne4 = ntohl(entierRecu);
 
     return donneeRecue;
@@ -204,7 +214,8 @@ Donnee* recevoir_chaine(SOCKET sock) {
     chaineRecue = calloc(tailleConvertie, sizeof(char));
     nbOctetsRecus = recv(sock, chaineRecue, tailleConvertie, 0);
     EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
-
+    
+    donneeRecue->type = CHAINE;
     (donneeRecue->chaine).taille = tailleConvertie;
     (donneeRecue->chaine).texte = chaineRecue;
     strcpy((donneeRecue->chaine).texte, chaineRecue);
@@ -235,6 +246,7 @@ Donnee* recevoir_flottant(SOCKET sock) {
     
     // On fini par copier le résultat dans la donnee
     //donneeRecue->flottant = resultat;
+    donneeRecue->type = FLOTTANT;
     donneeRecue->flottant = flottantRecu;
             
     return donneeRecue;

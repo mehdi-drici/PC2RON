@@ -110,7 +110,7 @@ void free_trame(Trame* t) {
     int i;
     
     for(i=0; i < t->nbDonnees; i++) {
-        free(t->donnees[i]);
+        free(t->donnees + i);
     }
     
     free(t);

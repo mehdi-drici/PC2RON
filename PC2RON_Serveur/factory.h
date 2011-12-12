@@ -15,9 +15,7 @@ extern "C" {
 #include "trame.h"
     
 /* Création d'une trame ou d'une donnée */
-Trame creer_trame(char id);
-void ajouter_donnee(Trame* t, Donnee d);
-void ajouter_donnees(Trame* t, Donnee d[]);
+Trame creer_trame(unsigned char id);
 Donnee creer_entierSigne1(char entier);
 Donnee creer_entierSigne2(short entier);
 Donnee creer_entierSigne4(long entier);

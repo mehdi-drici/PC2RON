@@ -1,5 +1,12 @@
 #include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "erreur.h"
 #include "protocole.h"
+#include "builder.h"
+#include "joueur.h"
 
 // Nombre courant de joueurs inscrits
 unsigned short nbJoueursInscrits = 0;
@@ -32,16 +39,26 @@ char* get_order(SOCKET sock, Trame t) {
 
 // Point d'entree du protocole 
 // Si resultat NULL Alors il y'a eu une erreur lors de l'échange
-// qui sera redirigée dans le flux d'erreurs
+// qui sera redirigée vers le flux d'erreurs
 Resultat* get_resultat_echange(SOCKET sock) {
     Joueur* j;
     char* o;
-    Resultat* res = NULL;
+    Resultat* res = (Resultat*) malloc(sizeof(Resultat));
+    Trame* pTrameRecue;
+    pTrameRecue = recevoir_trame(sock);
     Trame trameRecue;
-  
-    recevoir_trame(sock, &trameRecue);
+    //recevoir_trame(sock, &trameRecue);
     
-    printf("Type trame recue = %d\n", trameRecue.fanion);
+    // Deconnexion brutale du joueur
+    if(pTrameRecue == NULL) {
+        set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
+        set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
+        free(res);
+        return NULL;
+    } else {
+        trameRecue = *pTrameRecue;
+    }
+    
     //debug
     printf("#Client : ");
     afficher_trame(trameRecue);
@@ -49,17 +66,13 @@ Resultat* get_resultat_echange(SOCKET sock) {
     
     //@todo Deconnexion du joueur
     if(trameRecue.fanion == TRAME_SPECIALE) {
-        //debug @todo deconnexion de la socket
-        printf("Deconnexion du joueur !\n");
-        //debug
-        
-        //Deconnexion du joueur
         set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
         set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
+        free(res);
         
-        return res;
+        return NULL;
     }
-        
+    
     switch(trameRecue.id) {      
         case Connect:
             j = repondre_connect(sock, trameRecue);
@@ -69,9 +82,7 @@ Resultat* get_resultat_echange(SOCKET sock) {
                 res->typeTrame = Connect;
                 res->contenu = j;    
             } else {
-                fprintf(stderr, MSG_ERR_CONNECT(sock));
-                //res.erreur = ERR_CONNECT;
-                //res.msgErr = MSG_ERR_CONNECT(sock);
+                PRINT_CONNECT_ERROR(sock);
             }
             break;
         
@@ -89,16 +100,12 @@ Resultat* get_resultat_echange(SOCKET sock) {
             if(o != NULL) {
                 res->contenu = o;
             } else {
-                //fprintf(stderr, MSG_ERR_ORDER(sock));
-                //res.erreur = ERR_ORDER;
-                //res.msgErr = MSG_ERR_ORDER(sock);
+                PRINT_ORDER_ERROR(sock);
             }
             break;
         
         default:
-            //res.erreur = ERR_TYPE_INCONNU;
-            //res.typeTrame = -1;
-            //res.msgErr = MSG_ERR_TYPE_INCONNU;
+            PRINT_UNKNOWN_FRAME_TYPE(trameRecue.id);
             break;
     }
     
@@ -106,50 +113,49 @@ Resultat* get_resultat_echange(SOCKET sock) {
 }
 
 // Reponses au client
-ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
-    ERR_PROTOCOLE erreur = -1;
+int repondre_initiate(SOCKET sock, Trame t) {
     Joueur* j = get_joueur_par_sock(sock, lesJoueurs);
+    //char* sAppName, sAppVersion;
+    int error = ERROR;
     
     // init de la trame à renvoyer par un ack negatif
     Trame trameAck = creer_trame_ack(0);
     
     //@todo un joueur ne peut pas se connecter plus d'une fois
     if (j != NULL && j->estConnecte) {
-        fprintf(stderr, "Le joueur avec la socket %d est deja connecte !", sock);
+        PRINT_ALREADY_CONNECTED(j);
     }
     
     // Verification de la trame Init recue
     else if(t.nbDonnees != 2) {
-        erreur = ERR_INITIATE;
-        fprintf(stderr, "La trame Init recue n'est pas correcte");
+        PRINT_WRONG_DATA_SIZE(sock, S_INITIATE);
     } 
     
     else if(t.donnees[0].type != CHAINE ||
        t.donnees[1].type != CHAINE) {
-        erreur = ERR_INITIATE;
-        fprintf(stderr, "La trame Init recue n'est pas correcte");
+        PRINT_WRONG_FORMAT(S_INITIATE);
     } 
     
     else {
         // Reponse a la requete Init
-        char* nomAppli = t.donnees[0].chaine.texte;
+        char* sAppName = t.donnees[0].chaine.texte;
         // On enlève le '?'
-        nomAppli[strlen(nomAppli) - 1] = '\0';
+        sAppName[strlen(sAppName) - 1] = '\0';
         
-        char* nomVersion = t.donnees[1].chaine.texte;
+        char* sAppVersion = t.donnees[1].chaine.texte;
         
-        if(strcmp(nomAppli, NOM_APPLICATION) != 0) {
-            erreur =  ERR_INITIATE;
-            fprintf(stderr, "Le nom de l'application n'est pas correct");
-        }
-
-        else if(strcmp(nomVersion, NOM_VERSION_PROTOCOLE) != 0) {
-            erreur = ERR_INITIATE;
-            fprintf(stderr, "La version du protocole n'est pas supportee");
-        }
-
-        else {
+        if(strcmp(sAppName, NOM_APPLICATION) != 0) {
+            PRINT_WRONG_APPNAME(sAppName);
+            
+        } else if(strcmp(sAppVersion, NOM_VERSION_PROTOCOLE) != 0) {
+            PRINT_UNSUPPORTED_VERSION(sAppVersion);
+            
+        } else {
+            error = SUCCESS;
+            
+            // Connexion du nouveau joueur
             set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 1);
+            free_trame(&trameAck);
             trameAck = creer_trame_ack(1);
         }
     }
@@ -161,7 +167,7 @@ ERR_PROTOCOLE repondre_initiate(SOCKET sock, Trame t) {
     
     envoyer_trame(sock, trameAck);
     
-    return erreur;
+    return error;
 }
 
 Joueur* repondre_connect(SOCKET sock, Trame t) {   
@@ -175,39 +181,36 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
     //@todo Un joueur doit etre connecte pour s'inscrire
     j2 = get_joueur_par_sock(sock, lesJoueurs);
     if (j2 != NULL && !(j2->estConnecte)) {
-        trameReg = creer_trame_registered_no("Vous n'etes pas connecte");
-        fprintf(stderr, "Le joueur avec la socket %d doit etre connecte pour s'inscrire\n", sock);
+        trameReg = creer_trame_registered_no(NOT_CONNECTED);
+        //fprintf(stderr, "Le joueur avec la socket %d doit etre connecte pour s'inscrire\n", sock);
     }
     
     //@todo Un joueur ne peut pas s'inscrire plus d'une fois
     else if (j2 != NULL && j2->estInscrit) {
-        trameReg = creer_trame_registered_no("Vous etes deja inscrit");
-        fprintf(stderr, "Le joueur avec la socket %d est deja connecte\n", sock);
+        trameReg = creer_trame_registered_no(ALREADY_CONNECTED);
+        //fprintf(stderr, "Le joueur avec la socket %d est deja connecte\n", sock);
     }
-    
     
     // @todo Verification du quota de joueurs
     else if(nbJoueursInscrits == lesJoueurs.nbJoueurs) {
-        trameReg = creer_trame_registered_no("Le quota de joueurs a ete atteint");
-        fprintf(stderr, "Le nombre max de joueurs inscrit a été atteint\n");
-    }    
+        trameReg = creer_trame_registered_no(LIMIT_PLAYERS_REGISTERED_REACHED);
+        //fprintf(stderr, "Le nombre max de joueurs inscrit a été atteint\n");
+    }
     
     // Verification de la trame Init recue
     else if(t.nbDonnees != 4) {
-        trameReg = creer_trame_registered_no(MSG_ERR_TRAME);
-        fprintf(stderr, MSG_ERR_TRAME);
-    } 
-    
-    else if(t.donnees[0].type != ENTIER_NON_SIGNE1 ||
+        trameReg = creer_trame_registered_no(WRONG_FRAME_FORMAT);
+        //fprintf(stderr, MSG_ERR_TRAME);
+        
+    } else if(t.donnees[0].type != ENTIER_NON_SIGNE1 ||
             t.donnees[1].type != ENTIER_NON_SIGNE1 ||
             t.donnees[2].type != ENTIER_NON_SIGNE1) {
-        trameReg = creer_trame_registered_no(MSG_ERR_RVB);
-        fprintf(stderr, MSG_ERR_RVB);
-    } 
-    
-    else if(t.donnees[3].type != CHAINE) {
-        trameReg = creer_trame_registered_no(MSG_ERR_NOM);
-        fprintf(stderr, MSG_ERR_NOM);
+        trameReg = creer_trame_registered_no(WRONG_RGB_FORMAT);
+        //fprintf(stderr, MSG_ERR_RVB);
+        
+    }  else if(t.donnees[3].type != CHAINE) {
+        trameReg = creer_trame_registered_no(WRONG_NAME_FORMAT);
+        //fprintf(stderr, MSG_ERR_NOM);
         
     } else {
         //j = malloc(sizeof(Joueur));
@@ -245,72 +248,92 @@ Joueur* repondre_connect(SOCKET sock, Trame t) {
 }
 
 // Envoi aux clients
-ERR_PROTOCOLE envoyer_user(SOCKET sock, Joueur j) {
+//@todo modifier
+int envoyer_user(SOCKET sock, Joueur j) {
     Trame trameUser = creer_trame_user(j);
-    envoyer_trame(sock, trameUser);
+    int error = envoyer_trame(sock, trameUser);
     
     //debug
     printf("#Serveur : ");
     afficher_trame(trameUser);
     //debug
+    
+    return error;
 }
 
-ERR_PROTOCOLE envoyer_users(SOCKET sock, Joueur j[]) {
+//@todo modifier
+int envoyer_users(SOCKET sock, Joueurs j) {
     //@todo nombre de joueurs ?
-    int nbJoueurs = sizeof(*j) / sizeof(Joueur);
+    //int nbJoueurs = sizeof(*j) / sizeof(Joueur);
     int i;
     
-    for(i=0; i < nbJoueurs; i++) {
-        envoyer_user(sock, j[i]);
+    while (i < j.nbJoueurs) {
+        if(envoyer_user(sock, j.joueur[i]) == ERROR) {
+            return ERROR;
+        }
+        i++;
     }
-    
+       
     envoyer_end(sock);
 }
 
-ERR_PROTOCOLE envoyer_end(SOCKET sock) {
+//@todo modifier
+int envoyer_end(SOCKET sock) {
     Trame trameEnd = creer_trame_end();
-    envoyer_trame(sock, trameEnd);
+    int error = envoyer_trame(sock, trameEnd);
     
     //debug
     printf("#Serveur : ");
     afficher_trame(trameEnd);
     //debug
+    
+    return error;
 }
 
-ERR_PROTOCOLE envoyer_pause(SOCKET sock, char* message) {
+//@todo modifier
+int envoyer_pause(SOCKET sock, char* message) {
     Trame tramePause = creer_trame_pause(message);
-    envoyer_trame(sock, tramePause);
+    int error = envoyer_trame(sock, tramePause);
     
     //debug
     printf("#Serveur : ");
     afficher_trame(tramePause);
     //debug
+    
+    return error;
 }
 
-ERR_PROTOCOLE envoyer_start(SOCKET sock, char* message) {
+//@todo modifier
+int envoyer_start(SOCKET sock, char* message) {
     Trame trameStart = creer_trame_start(message);
-    envoyer_trame(sock, trameStart);
+    int error = envoyer_trame(sock, trameStart);
     
     //debug
     printf("#Serveur : ");
     afficher_trame(trameStart);
     //debug
+    
+    return error;
 }
 
-ERR_PROTOCOLE envoyer_turn(SOCKET sock, Joueur j[]) {
+//@todo modifier
+int envoyer_turn(SOCKET sock, Joueur j[]) {
     //@todo gerer le temps
     Trame trameTurn = creer_trame_turn(0, j);
-    envoyer_trame(sock, trameTurn);
+    int error = envoyer_trame(sock, trameTurn);
     
     //debug
     printf("#Serveur : ");
     afficher_trame(trameTurn);
     //debug
+    
+    return error;
 }
 
-ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id) {
+//@todo modifier
+int envoyer_death(SOCKET sock, unsigned short id) {
     Trame trameDeath = creer_trame_death(id);
-    envoyer_trame(sock, trameDeath);
+    int error = envoyer_trame(sock, trameDeath);
     
     // Deconnexion du joueur
     set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
@@ -319,12 +342,15 @@ ERR_PROTOCOLE envoyer_death(SOCKET sock, unsigned short id) {
     printf("#Serveur : ");
     afficher_trame(trameDeath);
     //debug
+    
+    return error;
 }
 
-ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1, 
-                                          unsigned short id2) {
+//@todo modifier
+int envoyer_deaths(SOCKET sock, unsigned short id1, 
+                                unsigned short id2) {
     Trame trameDeath = creer_trame_deaths(id1, id2);
-    envoyer_trame(sock, trameDeath);
+    int error = envoyer_trame(sock, trameDeath);
     
     // Deconnexion des 2 joueurs
     set_inscription_joueur(get_joueur_par_id(id1, lesJoueurs), 0);
@@ -334,4 +360,6 @@ ERR_PROTOCOLE envoyer_deaths(SOCKET sock, unsigned short id1,
     printf("#Serveur : ");
     afficher_trame(trameDeath);
     //debug
+    
+    return error;
 }
