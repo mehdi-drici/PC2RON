@@ -147,7 +147,6 @@ int repondre_initiate(SOCKET sock, Trame t, Joueurs lesJoueurs) {
         } else {            
             /* Connexion du nouveau joueur  */ 
             if(ajouter_joueur(lesJoueurs, creer_joueur(sock)) == SUCCESS) {
-                printf("cool\n");
                 error = SUCCESS;
                 set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 1);
                 free_trame(trameAck);

@@ -15,6 +15,7 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+#define NO_CONNECTED -1
 
 /* Chaines de caracteres correspondant aux types de donnee */
 #define S_ACK "ACK"
@@ -37,7 +38,7 @@
 #define ORDRE_ABANDON "abandon"
 
 typedef struct Resultat {
-    TypeTrame typeTrame;
+    int typeTrame;
     void* contenu;
 } Resultat;
 
