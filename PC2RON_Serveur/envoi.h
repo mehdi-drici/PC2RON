@@ -15,6 +15,7 @@ extern "C" {
 #include "trame.h"
 
 /* Envoi d'une trame */
+int envoyer_fin_transmission(SOCKET sock);
 int envoyer_trame(SOCKET sock, Trame trameEnvoyee);
    /*  char** convertir_trame_toBytes(Trame trame);  */ 
 int envoyer_donnee(SOCKET sock, Donnee donnee);

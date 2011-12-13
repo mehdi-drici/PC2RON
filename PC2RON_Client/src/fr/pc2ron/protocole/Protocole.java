@@ -154,20 +154,21 @@ public class Protocole implements IProtocole {
 	public ArrayList getContenuTrame() throws Exception {
             ReceptionTrame reception = new ReceptionTrame();
             ITrame trameRecue = reception.recevoirTrame(in);
+            
+            //debug
+            System.out.println(trameRecue.toString());
+            //debug
+                        
             ETypeTrame typeTrame = ETypeTrame.getTypeTrame(trameRecue.getId());
-
+            
             ArrayList contenuTrame = new ArrayList();
             contenuTrame.add(typeTrame);
-
+            
             switch(typeTrame) {
                 // @todo implementer
                 case TrameUser:
                     do {
                         contenuTrame.add(getDonneesUser(trameRecue));
-                        //debug
-                        System.out.println(trameRecue.toString());
-                        //debug
-                        
                         trameRecue = reception.recevoirTrame(in);
                         typeTrame = ETypeTrame.getTypeTrame(trameRecue.getId());
                     } while (typeTrame != ETypeTrame.TrameEnd);
@@ -197,10 +198,6 @@ public class Protocole implements IProtocole {
                 default:
                     throw new Exception("Type de trame inconnu !");
             }
-            
-            //DEBUG
-            System.out.println(trameRecue.toString());
-            //DEBUG
             
             return contenuTrame;
 	}

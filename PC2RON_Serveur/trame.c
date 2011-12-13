@@ -31,7 +31,7 @@ void ajouter_donnees(Trame t, Donnee d) {
 void afficher_trame(Trame trame) {
     int i = 0;
 
-    printf(">>> { ");
+    printf("{ ");
 
     switch(trame->fanion) {
         case TRAME_NORMALE:

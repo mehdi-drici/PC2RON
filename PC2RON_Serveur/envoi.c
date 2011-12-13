@@ -7,6 +7,16 @@
 #include "envoi.h"
 #include "erreur.h"
 
+int envoyer_fin_transmission(SOCKET sock) {
+    int nbOctetsEnvoyes = 0;
+    int trameSpeciale = TRAME_SPECIALE;
+    
+    nbOctetsEnvoyes = send(sock, (char*)&(trameSpeciale), 1, 0);
+    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    
+    return SUCCESS;
+}
+
 /**
  * Envoi d'une trame
  * @todo implementation

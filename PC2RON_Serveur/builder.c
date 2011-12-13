@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "builder.h"
 #include "protocole.h"
+#include "trame.h"
+#include "factory.h"
+#include "joueur.h"
 
 Trame creer_trame_ack(int ok) {
     Trame trameAck = creer_trame(Ack);
@@ -46,12 +49,14 @@ Trame creer_trame_user(Joueur j) {
     Trame trameUser = creer_trame(User);
     Donnee id = creer_entierNonSigne2(j->id);
     Donnee nom = creer_chaine(j->nom);
-    Donnee r = creer_entierNonSigne1(j->r);
-    Donnee v = creer_entierNonSigne1(j->v);
-    Donnee b = creer_entierNonSigne1(j->b);
+    Donnee r = creer_entierNonSigne1(j->couleur.r);
+    Donnee v = creer_entierNonSigne1(j->couleur.v);
+    Donnee b = creer_entierNonSigne1(j->couleur.b);
     
-    Donnee x0 = creer_entierNonSigne2(j->x);
-    Donnee y0 = creer_entierNonSigne2(j->y);
+    /*@todo modifier pour la derniere position*/
+    Donnee x0 = creer_entierNonSigne2(j->positions[0].x);
+    Donnee y0 = creer_entierNonSigne2(j->positions[0].y);
+    
     Donnee dir = creer_entierNonSigne1(j->dir);
     Donnee speed = creer_entierNonSigne1(j->speed);
     
@@ -124,12 +129,12 @@ Trame creer_trame_turn(unsigned int t, Joueurs lesJoueurs) {
     Trame trameTurn = creer_trame(Turn);
     Donnee id, x, y, dir;
     /*int nbJoueurs = sizeof(j) / sizeof(Joueur);*/
-    int i;
+    size_t i;
     
     for(i=0; i < lesJoueurs->nbJoueurs; i++) {
         id = creer_entierNonSigne2(lesJoueurs->joueur[i]->id);
-        x = creer_entierNonSigne2(lesJoueurs->joueur[i]->x);
-        y = creer_entierNonSigne2(lesJoueurs->joueur[i]->y);
+        x = creer_entierNonSigne2(lesJoueurs->joueur[i]->positions[0].x);
+        y = creer_entierNonSigne2(lesJoueurs->joueur[i]->positions[0].y);
         dir = creer_entierNonSigne2(lesJoueurs->joueur[i]->dir);
         
         ajouter_donnee(trameTurn, id);

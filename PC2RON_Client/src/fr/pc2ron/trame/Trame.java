@@ -66,16 +66,26 @@ public class Trame implements ITrame {
 	
         @Override
 	public String toString() {
-            String s = ">>> { ";
-            s += "0x" + Integer.toHexString(getId()).toUpperCase();
+            String s = " { ";
+            ETypeFanion eTypeFanion = ETypeFanion.getTypeFanion(this.getTypeFanion());
+            
+            switch(eTypeFanion) {
+                case TrameSpeciale:
+                    s += eTypeFanion.toString();
+                    break;
+                    
+                case TrameNormale:
+                    s += "0x" + Integer.toHexString(getId()).toUpperCase();
 
-            for (int i = 0; i < getNbDonnees(); i++) {
-                    s += ", ";
-                    s += getDonnees().get(i).toString();
+                    for (int i = 0; i < getNbDonnees(); i++) {
+                            s += ", ";
+                            s += getDonnees().get(i).toString();
+                    }
+                    break;
             }
-
+            
             s += " }\n";
-
+            
             return s;
 	}
 }

@@ -12,26 +12,9 @@
 extern "C" {
 #endif
 
-#include "trame.h"
-#include "factory.h"
-#include "joueur.h"
+#include "protocole.h"
     
    /*  typedef enum {false, true} bool;  */ 
-
-typedef enum TypeTrame {
-	Ack = 0x41,
-	Connect = 0x43,
-        Death = 0x44,
-	End = 0x45,
-	Initiate = 0x49,
-        Order = 0x4F,
-	Pause = 0x50,
-	Registered = 0x52,
-	Start = 0x53,
-	User = 0x55,
-        Turn = 0x54,
-        Win = 0x57
-} TypeTrame;
 
 Trame creer_trame_ack(int ok);
 Trame creer_trame_registered_ok(unsigned short id);

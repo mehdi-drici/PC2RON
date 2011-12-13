@@ -5,22 +5,37 @@
  *      Author: mehdi
  */
 
+
+#include <unistd.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <sys/socket.h>
+#include <sched.h>
+#include <pthread.h>
+
 #include "main.h"
 #include "string.h"
+#include "protocole.h"
+#include "serveur.h"
 
-#define NB_MAX_JOUEURS 3
+#define NB_MAX_JOUEURS 20
 
-SOCKET sock;
-pthread_mutex_t MUTEX_accept = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t MUTEX_inscripton = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t MUTEX_instant = PTHREAD_MUTEX_INITIALIZER;
+extern int usleep (__useconds_t __useconds);
 
-pthread_cond_t COND_joueurs_inscrits = PTHREAD_COND_INITIALIZER;
-pthread_cond_t COND_instant = PTHREAD_COND_INITIALIZER;
+static int sock;
+static pthread_mutex_t MUTEX_accept = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t MUTEX_inscripton = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t MUTEX_instant = PTHREAD_MUTEX_INITIALIZER;
 
-int nbJoueursCo = 0;
-int nbJoueurs = 0;
+static pthread_cond_t COND_joueurs_inscrits = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t COND_instant = PTHREAD_COND_INITIALIZER;
 
+static int nbJoueursCo = 0;
+static int nbJoueurs = 0;
+
+/*Joueur lesJoueurs[NB_MAX_JOUEURS];*/
 Joueurs lesJoueurs;
 Joueur j;
 
@@ -30,38 +45,36 @@ void* THREAD_serveur(void *args) {
     int estConnecte = 0;
     Resultat* res;
     
-       /*   Déroulement d'une partie  */ 
+    /*   Déroulement d'une partie  */ 
     while (1) {
-           /*   init de la socket  */ 
+        /*   init de la socket  */ 
         pthread_mutex_lock(&MUTEX_accept);
         csock = accepter_client(sock);
-        printf("socket client : %d\n", csock);
-        /*init_joueur(csock, lesJoueurs->joueur[nbJoueurs]);*/
         nbJoueurs++;
         pthread_mutex_unlock(&MUTEX_accept);
         
         /* Connexion du joueur */
         do {
-            sleep(2);
+            usleep(750);
+            
             res = get_resultat_echange(csock, lesJoueurs);
             
-            printf("res->typeTrame = %d\n", res->typeTrame);
-            
             if(res != NULL && res->typeTrame == Initiate) {
+                printf("Le joueur est connecte !!!!!!!!!!!!!!!!!!!!\n");
                 estConnecte = 1;
             }
             
             /* Le joueur s'est deconnecte */
             if(res != NULL && res->typeTrame == NO_CONNECTED) {
                 printf("Le joueur n'est plus connecte\n");
+                pthread_exit(NULL);
             }
             
         } while (!estConnecte);
         
         /*   Inscription du joueur */ 
-        
         do {
-            sleep(2);
+            usleep(1000);
             res = get_resultat_echange(csock, lesJoueurs);
             
             if(res != NULL && res->typeTrame == Connect) {
@@ -78,7 +91,7 @@ void* THREAD_serveur(void *args) {
             }
         } while (!joueurInscrit);
         
-           /*   Attente de l'inscription de tous les joueurs  */ 
+        /* Attente de l'inscription de tous les joueurs  */ 
         pthread_mutex_lock(&MUTEX_inscripton);
 
         if(nbJoueursCo == NB_MAX_JOUEURS) {
@@ -86,6 +99,7 @@ void* THREAD_serveur(void *args) {
             pthread_cond_broadcast(&COND_joueurs_inscrits);
 
         } else {
+            printf("Attente...");
             pthread_cond_wait(&COND_joueurs_inscrits, &MUTEX_inscripton);
         }
         pthread_mutex_unlock(&MUTEX_inscripton);
@@ -140,8 +154,8 @@ void* THREAD_serveur(void *args) {
 void*  THREAD_instant(void *args) {
     int i = 1;
     while(1) {
-        sleep(2);
-        printf("---------------- instant %d ------------\n", i);
+        usleep(100000);
+        printf("\n---------------- instant %d ------------\n", i);
         pthread_mutex_lock(&MUTEX_instant);
         pthread_cond_broadcast(&COND_instant);
         i++;
@@ -156,15 +170,21 @@ int main(void) {
 
     void* status;
     long i;
+    size_t compteur;
     
-       /*  fprintf(stderr, "toto erreur");  */ 
-    fprintf(stderr, "Dans la fonction %s...\n", __func__);
-    
-       /*   Initialisation du protocole  */
-    lesJoueurs = malloc(sizeof(struct Joueurs));
-    lesJoueurs->nbMaxJoueurs = NB_MAX_JOUEURS;
-    lesJoueurs->joueur = malloc(NB_MAX_JOUEURS * sizeof(struct Joueur));
-    /*init_protocole(lesJoueurs);*/
+       /*   Initialisation des joueurs  */
+     
+     lesJoueurs = malloc(sizeof(struct Joueurs));
+     lesJoueurs->nbJoueurs = NB_MAX_JOUEURS;
+     lesJoueurs->joueur = malloc(NB_MAX_JOUEURS * sizeof(struct Joueur));
+     
+     for(compteur=0; compteur < lesJoueurs->nbJoueurs; compteur++) {
+        lesJoueurs->joueur[compteur] = creer_joueur();
+      }
+     
+     /*init_joueurs(lesJoueurs, NB_MAX_JOUEURS);*/
+     
+      /*init_protocole(lesJoueurs);*/
     
        /*   Création d'une socket  */ 
     sock = etablir_connexion();

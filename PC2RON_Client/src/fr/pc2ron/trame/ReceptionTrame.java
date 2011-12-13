@@ -56,9 +56,6 @@ public class ReceptionTrame implements IReceptionTrame {
 		
 		try {
 			type = in.readByte();
-                        
-                        System.out.println("type = " + type);
-                        
 			ETypeDonnee t = ETypeDonnee.getTypeDonnee(type);
 
 			switch (t) {
@@ -87,7 +84,6 @@ public class ReceptionTrame implements IReceptionTrame {
 					break;
 					
 				case CHAINE:
-                                        System.out.println("Chaine");
 					donnee = recevoirChaine(in);
 					break;
 					
