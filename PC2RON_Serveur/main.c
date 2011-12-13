@@ -26,7 +26,8 @@ Joueur j;
 
 void* THREAD_serveur(void *args) {
     SOCKET csock;
-    int joueurInscrit = 0, estConnecte = 0;
+    int joueurInscrit = 0;
+    int estConnecte = 0;
     Resultat* res;
     
        /*   Déroulement d'une partie  */ 
@@ -34,6 +35,7 @@ void* THREAD_serveur(void *args) {
            /*   init de la socket  */ 
         pthread_mutex_lock(&MUTEX_accept);
         csock = accepter_client(sock);
+        printf("socket client : %d\n", csock);
         /*init_joueur(csock, lesJoueurs->joueur[nbJoueurs]);*/
         nbJoueurs++;
         pthread_mutex_unlock(&MUTEX_accept);
@@ -43,12 +45,21 @@ void* THREAD_serveur(void *args) {
             sleep(2);
             res = get_resultat_echange(csock, lesJoueurs);
             
+            printf("res->typeTrame = %d\n", res->typeTrame);
+            
             if(res != NULL && res->typeTrame == Initiate) {
                 estConnecte = 1;
             }
+            
+            /* Le joueur s'est deconnecte */
+            if(res != NULL && res->typeTrame == NO_CONNECTED) {
+                printf("Le joueur n'est plus connecte\n");
+            }
+            
         } while (!estConnecte);
         
         /*   Inscription du joueur */ 
+        
         do {
             sleep(2);
             res = get_resultat_echange(csock, lesJoueurs);
@@ -59,8 +70,14 @@ void* THREAD_serveur(void *args) {
                 printf("Id de la socket %d : %d\n", csock, j->id);
                 nbJoueursCo++;
             }
+            
+            /* Le joueur s'est deconnecte */
+            if(res != NULL && res->typeTrame == NO_CONNECTED) {
+                printf("Le joueur n'est plus connecte\n");
+                pthread_exit(NULL);
+            }
         } while (!joueurInscrit);
-
+        
            /*   Attente de l'inscription de tous les joueurs  */ 
         pthread_mutex_lock(&MUTEX_inscripton);
 
@@ -131,6 +148,7 @@ void*  THREAD_instant(void *args) {
         pthread_mutex_unlock(&MUTEX_instant);
     }
 }
+
 
 int main(void) {
     pthread_t threads[NB_MAX_JOUEURS];

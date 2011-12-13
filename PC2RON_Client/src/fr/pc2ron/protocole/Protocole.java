@@ -33,7 +33,7 @@ public class Protocole implements IProtocole {
 	private static IProtocole instance;
 	
 	private Protocole() {
-    }
+        }
 	
 	public static IProtocole getInstance() {
 		if (null == instance) { // Premier appel

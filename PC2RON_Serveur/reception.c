@@ -31,11 +31,11 @@ Trame recevoir_trame(SOCKET sock){
         case TRAME_NORMALE:
             break;
 
-        /*   Fin de transmission  */ 
+        /* Fin de transmission */ 
         case TRAME_SPECIALE:
-            /*   Fermeture de connexion  */ 
+            /* Fermeture de connexion  */ 
             shutdown(sock, SHUT_RDWR);
-            return SUCCESS;
+            return trameRecue;
 
         default:
             PRINT_UNKNOWN_PENNANT(octet);

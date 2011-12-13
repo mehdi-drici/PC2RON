@@ -44,26 +44,31 @@ Resultat* get_resultat_echange(SOCKET sock, Joueurs lesJoueurs) {
     Trame trameRecue = recevoir_trame(sock);
        /*  recevoir_trame(sock, &trameRecue);  */ 
     
-       /*   Deconnexion brutale du joueur  */ 
+    /*  debug  */ 
+    printf("#Client : ");
+    afficher_trame(trameRecue);
+    /*  debug  */ 
+    
+    /*@todo modifier */
     if(trameRecue == NULL) {
         set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
         set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
-        free(res);
-        return NULL;
+        res->typeTrame = NO_CONNECTED;
+   
+        /*free(res);*/
+        return res;
     } 
     
-       /*  debug  */ 
-    printf("#Client : ");
-    afficher_trame(trameRecue);
-       /*  debug  */ 
-    
-       /*  @todo modifier Deconnexion du joueur  */ 
+    /*  @todo modifier Deconnexion du joueur  */ 
     if(trameRecue->fanion == TRAME_SPECIALE) {
+        printf("Fin de transmission !\n");
         set_connexion_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
         set_inscription_joueur(get_joueur_par_sock(sock, lesJoueurs), 0);
-        free(res);
+        res->typeTrame = NO_CONNECTED;
+        res->contenu = NULL;
+        /*free(res);*/
         
-        return NULL;
+        return res;
     }
     
     switch(trameRecue->id) {      
@@ -117,20 +122,24 @@ int repondre_initiate(SOCKET sock, Trame t, Joueurs lesJoueurs) {
     
        /*  @todo un joueur ne peut pas se connecter plus d'une fois  */ 
     if (j != NULL && j->estConnecte) {
+        printf("already connected\n");
         PRINT_ALREADY_CONNECTED(j);
     }
     
        /*   Verification de la trame Init recue  */ 
     else if(t->nbDonnees != 2) {
+        printf("wrong data size\n");
         PRINT_WRONG_DATA_SIZE(sock, S_INITIATE);
     } 
     
     else if(t->donnees[0]->type != CHAINE ||
        t->donnees[1]->type != CHAINE) {
+        printf("wrong format\n");
         PRINT_WRONG_FORMAT(S_INITIATE);
     } 
     
     else {
+        printf("COOCOOL\n");
            /*   Reponse a la requete Init  */ 
         char* sAppName = t->donnees[0]->chaine.texte;
            /*   On enlève le '?'  */ 
@@ -139,12 +148,15 @@ int repondre_initiate(SOCKET sock, Trame t, Joueurs lesJoueurs) {
         char* sAppVersion = t->donnees[1]->chaine.texte;
         
         if(strcmp(sAppName, NOM_APPLICATION) != 0) {
+            printf("wrong appname\n");
             PRINT_WRONG_APPNAME(sAppName);
             
         } else if(strcmp(sAppVersion, NOM_VERSION_PROTOCOLE) != 0) {
+            printf("unsupported version\n");
             PRINT_UNSUPPORTED_VERSION(sAppVersion);
             
-        } else {            
+        } else {
+            
             /* Connexion du nouveau joueur  */ 
             if(ajouter_joueur(lesJoueurs, creer_joueur(sock)) == SUCCESS) {
                 error = SUCCESS;

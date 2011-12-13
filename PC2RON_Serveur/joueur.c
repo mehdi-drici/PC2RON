@@ -42,11 +42,13 @@ Joueur creer_joueur(int sock) {
    /*   Récupération des informations d'un client à partir de sa socket  */ 
 Joueur get_joueur_par_sock(int sock, Joueurs lesJoueurs) {
     int i = 0;
-    printf("nbJoueurs = %d\n", lesJoueurs->nbJoueurs);
+    
     while (i < lesJoueurs->nbJoueurs) {
         if(lesJoueurs->joueur[i]->sock == sock) {
             return lesJoueurs->joueur[i];
         }
+        
+        i++;
     }
     
     return NULL;
@@ -60,6 +62,8 @@ Joueur get_joueur_par_id(unsigned short id, Joueurs lesJoueurs) {
         if(lesJoueurs->joueur[i]->id == id) {
             return lesJoueurs->joueur[i];
         }
+        
+        i++;
     }
     
     return NULL;
