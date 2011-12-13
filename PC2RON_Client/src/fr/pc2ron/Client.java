@@ -48,7 +48,7 @@ public class Client {
             ITrame t4 = trameFactory.getTrame(ETypeTrame.TrameStart.getType());
             ITrame t5 = trameFactory.getTrameEnd();
             
-            IDonnee d1 = new Chaine("PC2RONI?");
+            IDonnee d1 = new Chaine("PC2RON?");
             IDonnee d2 = new Chaine("PC2RON2011"); 
             IDonnee nom = new Chaine("Toto"); 
             IDonnee ordre = new Chaine("idle"); 
@@ -84,18 +84,23 @@ public class Client {
             System.out.println("Trame recue: " + recept.recevoirTrame(in));
             
             
-            envoi.visit(t1, out);
+            envoi.visit(t2, out);
             System.out.println("Trame recue: " + recept.recevoirTrame(in));
-            
+            /*
             envoi.visit(t2, out);
             System.out.println("Trame recue: " + recept.recevoirTrame(in));
             
             envoi.visit(t3, out);
             
             envoi.visit(t4, out);
-            /*System.out.println("Trame recue: " + recept.recevoirTrame(in));*/
+            //System.out.println("Trame recue: " + recept.recevoirTrame(in));
             
             envoi.visit(t5, out);
+            System.out.println("Trame recue: " + recept.recevoirTrame(in));
+            System.out.println("Trame recue: " + recept.recevoirTrame(in));
+            System.out.println("Trame recue: " + recept.recevoirTrame(in));
+            System.out.println("Trame recue: " + recept.recevoirTrame(in));*/
+            Thread.sleep(500000);
             //protocole.connexion("127.0.0.1", 5555);
             //protocole.inscription((short)56, (short)67, (short)350, "Mehdi");
             //protocole.inscription((short)56, (short)67, (short)350, "Mehdi");

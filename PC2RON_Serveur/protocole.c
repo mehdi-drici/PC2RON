@@ -9,8 +9,22 @@
 #include "reception.h"
 #include "envoi.h"
 
+/*
+ @todo
+ * check_connect_frame(Frame frame)
+ * check_initiate_frame(Frame frame)
+ * check_order_frame(Frame frame)
+ * 
+ * check_frame(Frame frame)
+ * 
+ * respond_frame
+ * respond_initiate_frame
+ * respond_connect_frame
+ * respond_order_frame
+ */
 /* Nombre courant de joueurs connectes */ 
-unsigned short nbJoueursConnectes = 0;
+static unsigned short nbJoueursConnectes = 0;
+static unsigned short nbJoueursInscrits = 0;
 
 /*   Requetes du client  */ 
 char* get_order(int sock, Trame t, Joueurs lesJoueurs) {
@@ -20,7 +34,7 @@ char* get_order(int sock, Trame t, Joueurs lesJoueurs) {
     
     /*   Un joueur ne peut envoyer d'ordre que s'il est inscrit  */ 
     if (j == NULL || !(j->estInscrit)) {
-        PRINT_NOT_CONNECTED(sock);
+        PRINT_NOT_REGISTERED(sock);
     }
     
     /*   Verification de la trame Init recue  */ 
@@ -56,9 +70,8 @@ Resultat* get_resultat_echange(int sock, Joueurs lesJoueurs) {
     
     /*  @todo modifier Deconnexion du joueur  */ 
     if(trameRecue->fanion == TRAME_SPECIALE) {
-        printf("Fin de connexion \n");
         deconnecter_joueur(get_joueur_par_sock(sock, lesJoueurs));
-        res->typeTrame = NO_CONNECTED;
+        res->typeTrame = NOT_CONNECTED;
         res->contenu = NULL;
  
         return res;
@@ -98,6 +111,8 @@ Resultat* get_resultat_echange(int sock, Joueurs lesJoueurs) {
             break;
     }
     
+    free_trame(trameRecue);
+    
     return res;
 }
 
@@ -111,6 +126,10 @@ int repondre_initiate(int sock, Trame t, Joueurs lesJoueurs) {
     /*   init de la trame à renvoyer par un ack negatif  */ 
     Trame trameAck = creer_trame_ack(0);
     
+    /*debug*/
+    printf("nbJoueursConnectes = %d\n", nbJoueursConnectes);
+    printf("lesJoueurs->nbJoueurs = %d\n", lesJoueurs->nbJoueurs);
+    
        /*  @todo un joueur ne peut pas se connecter plus d'une fois  */ 
     if (j != NULL && j->estConnecte) {
         PRINT_ALREADY_CONNECTED(j->sock);
@@ -120,6 +139,8 @@ int repondre_initiate(int sock, Trame t, Joueurs lesJoueurs) {
         PRINT_LIMIT_PLAYERS_CONNECTED_REACHED();
     
     /* Verification de la trame Init recue */ 
+    /*@todo creer fonction verifier_trame_init */   
+        
     } else if(t->nbDonnees != 2) {
         PRINT_WRONG_DATA_SIZE(sock, S_INITIATE);
         
@@ -146,6 +167,7 @@ int repondre_initiate(int sock, Trame t, Joueurs lesJoueurs) {
             error = SUCCESS;
             lesJoueurs->joueur[nbJoueursConnectes]->sock = sock;
             lesJoueurs->joueur[nbJoueursConnectes]->estConnecte = 1;
+            nbJoueursConnectes++;
             free_trame(trameAck);
             trameAck = creer_trame_ack(1);
         }
@@ -157,6 +179,7 @@ int repondre_initiate(int sock, Trame t, Joueurs lesJoueurs) {
     /*  debug  */ 
     
     envoyer_trame(sock, trameAck);
+    free_trame(trameAck);
     
     return error;
 }
@@ -173,27 +196,29 @@ Joueur repondre_connect(int sock, Trame t, Joueurs lesJoueurs) {
     j2 = get_joueur_par_sock(sock, lesJoueurs);
     
     if (j2 == NULL || !(j2->estConnecte)) {
-        trameReg = creer_trame_registered_no(NOT_CONNECTED);
+        trameReg = creer_trame_registered_no(S_NOT_CONNECTED);
     
        /*  @todo Un joueur ne peut pas s'inscrire plus d'une fois  */ 
     } else if (j2 != NULL && j2->estInscrit) {
-        trameReg = creer_trame_registered_no(ALREADY_CONNECTED);
-        
+        trameReg = creer_trame_registered_no(S_ALREADY_CONNECTED);
+    
+    /*@todo creer fonction verifier_trame_connect */
     } else if(t->nbDonnees != 4) {
-        trameReg = creer_trame_registered_no(WRONG_FRAME_FORMAT);
+        trameReg = creer_trame_registered_no(S_WRONG_FRAME_FORMAT);
            /*  fprintf(stderr, MSG_ERR_TRAME);  */ 
         
     } else if(t->donnees[0]->type != ENTIER_NON_SIGNE1 ||
             t->donnees[1]->type != ENTIER_NON_SIGNE1 ||
             t->donnees[2]->type != ENTIER_NON_SIGNE1) {
-        trameReg = creer_trame_registered_no(WRONG_RGB_FORMAT);
+        trameReg = creer_trame_registered_no(S_WRONG_RGB_FORMAT);
         
     } else if(t->donnees[3]->type != CHAINE) {
-        trameReg = creer_trame_registered_no(WRONG_NAME_FORMAT);
+        trameReg = creer_trame_registered_no(S_WRONG_NAME_FORMAT);
         
     } else {
            /*  j = malloc(sizeof(Joueur));  */ 
         j = get_joueur_par_sock(sock, lesJoueurs);
+        j->estInscrit = 1;
         
            /*   Reponse a la requete Connect  */ 
         r = t->donnees[0]->entierNonSigne1;
@@ -208,7 +233,7 @@ Joueur repondre_connect(int sock, Trame t, Joueurs lesJoueurs) {
         j->nom = nom;
         
            /*   Création de l'id du joueur  */ 
-        j->id = ++nbJoueursConnectes;
+        j->id = ++nbJoueursInscrits;
         
         trameReg = creer_trame_registered_ok(j->id);
     }
@@ -219,6 +244,8 @@ Joueur repondre_connect(int sock, Trame t, Joueurs lesJoueurs) {
        /*  debug  */ 
     
     envoyer_trame(sock, trameReg);
+    
+    free_trame(trameReg);
     
     return j;
 }
@@ -233,6 +260,8 @@ int envoyer_user(int sock, Joueur j) {
     printf(">>> ");
     afficher_trame(trameUser);
        /*  debug  */ 
+    
+    free_trame(trameUser);
     
     return error;
 }
@@ -249,7 +278,7 @@ int envoyer_users(int sock, Joueurs lesJoueurs) {
         }
         i++;
     }
-       
+    
     return envoyer_end(sock, lesJoueurs);
 }
 
@@ -263,6 +292,7 @@ int envoyer_end(int sock, Joueurs lesJoueurs) {
     afficher_trame(trameEnd);
        /*  debug  */ 
     
+    free_trame(trameEnd);
     return error;
 }
 
@@ -276,6 +306,7 @@ int envoyer_pause(int sock, const char* message, Joueurs lesJoueurs) {
     afficher_trame(tramePause);
        /*  debug  */ 
     
+    free_trame(tramePause);
     return error;
 }
 
@@ -288,6 +319,8 @@ int envoyer_start(int sock, const char* message, Joueurs lesJoueurs) {
     printf(">>> ");
     afficher_trame(trameStart);
        /*  debug  */ 
+    
+    free_trame(trameStart);
     
     return error;
 }
@@ -302,6 +335,8 @@ int envoyer_turn(int sock, Joueurs lesJoueurs) {
     printf(">>> ");
     afficher_trame(trameTurn);
        /*  debug  */ 
+    
+    free_trame(trameTurn);
     
     return error;
 }
@@ -321,6 +356,8 @@ int envoyer_death(int sock, unsigned short id, Joueurs lesJoueurs) {
     afficher_trame(trameDeath);
        /*  debug  */ 
     
+    free_trame(trameDeath);
+            
     return error;
 }
 
@@ -343,6 +380,8 @@ int envoyer_deaths(int sock, unsigned short id1,
     printf(">>> ");
     afficher_trame(trameDeath);
        /*  debug  */ 
+    
+    free_trame(trameDeath);
     
     return error;
 }

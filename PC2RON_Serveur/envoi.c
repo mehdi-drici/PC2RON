@@ -7,6 +7,20 @@
 #include "envoi.h"
 #include "erreur.h"
 
+/* @todo
+ * send_frame
+ * send_data
+ * 
+ * static send_int8
+ * static send_int16
+ * static send_int32
+ * static send_uint8
+ * static send_uint16
+ * static send_uint32
+ * static send_string
+ * static send_double 
+ */
+
 int envoyer_fin_transmission(SOCKET sock) {
     int nbOctetsEnvoyes = 0;
     int trameSpeciale = TRAME_SPECIALE;

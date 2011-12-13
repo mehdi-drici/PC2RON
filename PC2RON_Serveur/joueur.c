@@ -3,7 +3,18 @@
 
 #include "joueur.h"
 #include "erreur.h"
-
+/*
+ * @todo
+ * create_players
+ * create_player
+ * get_player_by_id
+ * get_player_by_sock
+ * 
+ * is_connected
+ * is_registered
+ * 
+*/
+ 
 void init_joueurs(Joueurs lesJoueurs, size_t taille) {
     size_t i = 0;
     lesJoueurs = malloc(sizeof(struct Joueurs));

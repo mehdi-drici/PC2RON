@@ -9,6 +9,20 @@
 #include <unistd.h>
  #include <netinet/in.h>
 
+/* @todo
+ * recv_frame
+ * recv_data
+ * 
+ * static recv_int8
+ * static recv_int16
+ * static recv_int32
+ * static recv_uint8
+ * static recv_uint16
+ * static recv_uint32
+ * static recv_string
+ * static recv_double 
+ */
+
 /**
  * Réception d'une trame ou d'une donnée
  */

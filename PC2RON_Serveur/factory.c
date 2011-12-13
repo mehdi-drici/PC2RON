@@ -2,6 +2,18 @@
 #include <string.h>
 #include "factory.h"
 
+/*@todo
+ * create_frame
+ * create_int8
+ * create_int16
+ * create_int32
+ * create_uint8
+ * create_uint16
+ * create_uint32
+ * create_string
+ * create_double 
+ */
+
 /**
  * Création d'une trame ou d'une donnée
  */

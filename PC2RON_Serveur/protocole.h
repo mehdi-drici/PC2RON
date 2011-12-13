@@ -13,7 +13,7 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-#define NO_CONNECTED -1
+#define NOT_CONNECTED -1
 
 #include "joueur.h"
 #include "trame.h"

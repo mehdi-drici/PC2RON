@@ -4,6 +4,12 @@
 
 #define NB_MAX_CLIENTS 10
 
+/*
+ * connect_server
+ * accept_client
+ * close_connection
+ */
+
 int etablir_connexion() {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     SOCKADDR_IN sin = { 0 };

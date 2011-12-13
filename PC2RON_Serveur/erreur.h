@@ -15,14 +15,15 @@ extern "C" {
 /* Code d'échec et de réussite d'une fonction */
 #define ERROR -1
 #define SUCCESS 0
+#define NOT_CONNECTED -1  
     
 /* Messages d'erreur pour la trame Registered (Client) */
-#define WRONG_FRAME_FORMAT "Le format de la trame n'est pas correct"
-#define WRONG_RGB_FORMAT "Le format RVB n'est pas correct"
-#define WRONG_NAME_FORMAT "Le nom doit etre une chaine de caracteres"
-#define NOT_CONNECTED "Vous n'etes pas connecte"
-#define ALREADY_CONNECTED "Vous etes deja connecte"
-#define LIMIT_PLAYERS_REGISTERED_REACHED "Le quota de joueurs inscrits a ete atteint"
+#define S_WRONG_FRAME_FORMAT "Le format de la trame n'est pas correct"
+#define S_WRONG_RGB_FORMAT "Le format RVB n'est pas correct"
+#define S_WRONG_NAME_FORMAT "Le nom doit etre une chaine de caracteres"
+#define S_NOT_CONNECTED "Vous n'etes pas connecte"
+#define S_ALREADY_CONNECTED "Vous etes deja connecte"
+#define S_LIMIT_PLAYERS_REGISTERED_REACHED "Le quota de joueurs inscrits a ete atteint"
     
    /*   Messages d'erreur pour le serveur  */
 #define PRINT_LIMIT_PLAYERS_CONNECTED_REACHED() \
@@ -51,6 +52,9 @@ extern "C" {
 
 #define PRINT_NOT_CONNECTED(sock) \
     fprintf(stderr, "Erreur: Le joueur lie a la socket %d n'est pas connecte\n", sock);
+
+#define PRINT_NOT_REGISTERED(sock) \
+    fprintf(stderr, "Erreur: Le joueur lie a la socket %d n'est pas inscrit\n", sock);
     
 #define PRINT_ALREADY_REGISTERED(player) \
     fprintf(stderr, "Erreur: Le joueur %s (id: %d) est deja inscrit\n", player->nom, player->id);

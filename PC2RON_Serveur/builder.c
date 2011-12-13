@@ -5,6 +5,20 @@
 #include "factory.h"
 #include "joueur.h"
 
+/*
+ * create_ack
+ * create_registered_ok
+ * create_registered_no
+ * create_user
+ * create_win
+ * create_death
+ * create_deaths
+ * create_pause
+ * create_start
+ * create_turn
+ * create_end
+ */
+
 Trame creer_trame_ack(int ok) {
     Trame trameAck = creer_trame(Ack);
     
