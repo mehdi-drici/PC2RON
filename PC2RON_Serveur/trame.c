@@ -3,115 +3,161 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void ajouter_donnee(Trame t, Donnee d) {
-    unsigned int taille = t->nbDonnees;
+/*
+*******************************************************************************
+ Author: Mehdi Drici
 
-    /* Premier ajout de donnée */
-    if (taille == 0) {
-        t->donnees = malloc(sizeof(struct Donnee));
+ File: frame.c
+ 
+ Description: Gestion d'une trame:
+              - ajout de donnees
+              - suppression
+              - affichage
+*******************************************************************************
+*/
 
-        /* On réalloue à chaque nouvel ajout */
-    } else {
-        t->donnees = realloc(t->donnees, (taille+1) * sizeof(struct Donnee));
+/**
+ * Ajouter une donnee dans une trame 
+ * @param frame trame concernee par l'ajout
+ * @param data Donnee a ajouter
+ */
+void add_data(Frame frame, Data data) {
+    uint32_t size = frame->size;
+    
+    /* Premiere allocation memoire pour la premiere donnee */
+    if(size == 0) {
+        frame->data = (Data*) malloc(sizeof(struct Data));
     }
-
-    t->donnees[taille] = d;
-    (t->nbDonnees)++;
+    
+    /* Reallocation dynamique du tableau de donnees a partir du 2eme ajout 
+     * Car le tableau est initialise a un seul element
+     */
+    else {
+        frame->data = (Data*) realloc(frame->data, (size+1) * sizeof(struct Data));
+    }
+    frame->data[size] = data;
+    frame->size++;
 }
 
-   /*   @todo implementation  */ 
-void ajouter_donnees(Trame t, Donnee d) {
+/**
+ * Ajouter un ensemble de donnee (tableau) dans une trame 
+ * @param frame trame concernee par l'ajout
+ * @param data_array Tableau de donnees a ajouter
+ */ 
+void add_data_array(Frame frame, Data* data_array) {
 
 }
 
 
 /**
- * Affichage d'une trame ou d'une donnée
+ * Affichage d'une trame
+ * @param frame Trame a afficher
  */
-void afficher_trame(Trame trame) {
+void print_frame(Frame frame) {
     int i = 0;
 
     printf("{ ");
 
-    switch(trame->fanion) {
-        case TRAME_NORMALE:
-               /*   Affichage de l'ID au format hexadecimal  */ 
-            printf("%#2.2X", trame->id);
+    switch(frame->pennant) {
+        case NORMAL_FRAME:
+            /* Affichage de l'ID au format hexadecimal  */ 
+            printf("%#2.2X", frame->id);
 
-               /*   Affichage des données  */ 
-            for (i=0; i < trame->nbDonnees; i++) {
+            /* Affichage des données  */ 
+            for (i=0; i < frame->size; i++) {
                 printf(", ");
-                afficher_donnee(trame->donnees[i]);
+                print_data(frame->data[i]);
             }
             break;
             
-        case TRAME_SPECIALE:
-            printf("%s", S_END);
+        case SPECIAL_FRAME:
+            printf("%s", STR_END);
             break;
           
         default:
-            PRINT_UNKNOWN_PENNANT(trame->fanion);
+            PRINT_UNKNOWN_PENNANT(frame->pennant);
     }
     
     printf(" }\n");
 }
 
-void afficher_donnee(Donnee donnee) {
+/**
+ * Affichage d'une donnee
+ * @param data Donnee a afficher
+ */
+void print_data(Data data) {
     int i = 0;
     
-    switch(donnee->type) {
-        case ENTIER_SIGNE1:
-            printf("%s %d", S_INT8, donnee->entierSigne1);
+    switch(data->type) {
+        case INT8:
+            /* { 0x01, n } */
+            printf("%s %d", STR_INT8, data->int8);
+            break;
+            
+        case INT16:
+            /* { 0x02, n | n} */
+            printf("%s %d", STR_INT16, data->int16);
             break;
 
-        case ENTIER_SIGNE2:
-            printf("%s %d", S_INT16, donnee->entierSigne2);
+        case INT32:
+            /* { 0x04, n | n | n | n} */
+            printf("%s %d", STR_INT32, data->int32);
             break;
 
-        case ENTIER_SIGNE4:
-            printf("%s %d", S_INT32, donnee->entierSigne4);
+        case UINT8:
+            /* { 0x11, n } */
+            printf("%s %u", STR_UINT8, data->uint8);
             break;
 
-        case ENTIER_NON_SIGNE1:
-            printf("%s %u", S_UINT8, donnee->entierNonSigne1);
+        case UINT16:
+            /* { 0x12, n | n} */
+            printf("%s %u", STR_UINT16, data->uint16);
             break;
 
-        case ENTIER_NON_SIGNE2:
-            printf("%s %u", S_UINT16, donnee->entierNonSigne2);
+        case UINT32:
+            /* { 0x14, n | n | n | n} */
+            printf("%s %u", STR_UINT32, data->uint32);
             break;
 
-        case ENTIER_NON_SIGNE4:
-            printf("%s %u", S_UINT32, donnee->entierNonSigne4);
-            break;
-
-        case CHAINE:
-            printf("%s \"", S_STRING);
-
-            for(i=0; i < donnee->chaine.taille; i++) {
-                if(donnee->chaine.texte[i] < 32 || donnee->chaine.texte[i] > 127) {
-                    printf("\\x%X", donnee->chaine.texte[i]);
+        case STRING:
+            /* { 0x02, s | s | texte } */
+            printf("%s \"", STR_STRING);
+            
+            /* Les octets < 32 et > 127 sont remplaces par \xHH
+             * ou HH est la represention hexadecimale de l'octet sur 2 caracteres
+             */
+            for(i=0; i < data->string.size; i++) {
+                if(data->string.content[i] < 32 || data->string.content[i] > 127) {
+                    printf("\\x%X", data->string.content[i]);
                 } else {
-                    printf("%c", donnee->chaine.texte[i]);
+                    printf("%c", data->string.content[i]);
                 }
             }
             printf("\"");
             break;
 
-        case FLOTTANT:
-            printf("%s %f", S_DOUBLE, donnee->flottant);
+        case DOUBLE:
+            /* { 0x02, f | f | f | f | f | f | f | f} */
+            printf("%s %f", STR_DOUBLE, data->dbl);
             break;
-
+        
+        /* Type de donnee inconnu */
         default:
-            PRINT_UNKNOWN_DATA_TYPE(donnee->type);
+            PRINT_UNKNOWN_DATA_TYPE(data->type);
     }
 }
 
-void free_trame(Trame t) {
+/**
+ * Liberation de l'espace memoire alloue a une trame
+ * @param frame Trame a liberer
+ */
+void free_frame(Frame frame) {
     int i;
     
-    for(i=0; i < t->nbDonnees; i++) {
-        free(t->donnees[i]);
+    /* Liberation de l'espace memoire alloue aux donnees */
+    for(i=0; i < frame->size; i++) {
+        free(frame->data[i]);
     }
     
-    free(t);
+    free(frame);
 }

@@ -2,101 +2,119 @@
 #include <string.h>
 #include "factory.h"
 
-/*@todo
- * create_frame
- * create_int8
- * create_int16
- * create_int32
- * create_uint8
- * create_uint16
- * create_uint32
- * create_string
- * create_double 
- */
+/*
+*******************************************************************************
+ Author: Mehdi Drici
+
+ File: factory.c
+ 
+ Description: Fabrique de trame et de donnees.
+              Ce pattern permet de garantir une meilleure independance
+              de la couche transport.
+*******************************************************************************/
 
 /**
- * Création d'une trame ou d'une donnée
+ * Creation d'une trame avec son id
  */
-Trame creer_trame(unsigned char id) {
-    Trame t = malloc(sizeof(struct Trame));
+Frame create_frame(uint8_t id) {
+    Frame frame_created = malloc(sizeof(struct Frame));
     
-    t->fanion = TRAME_NORMALE;
-    t->id = id;
-    t->nbDonnees = 0;
-    t->donnees = malloc(sizeof(struct Donnee));
+    frame_created->pennant = NORMAL_FRAME;
+    frame_created->id = id;
+    frame_created->size = 0;
+    frame_created->data = malloc(sizeof(struct Data));
 
-    return t;
+    return frame_created;
 }
 
-Donnee creer_entierSigne1(char entier) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = ENTIER_SIGNE1;
-    d->entierSigne1 = entier;
+/**
+ * Creation d'un entier signe sur 8 octets (int8)
+ */
+Data create_int8(int8_t int8) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = INT8;
+    data_created->int8 = int8;
 
-    return d;
+    return data_created;
 }
 
-Donnee creer_entierSigne2(short entier) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = ENTIER_SIGNE2;
-    d->entierSigne2 = entier;
+/**
+ * Creation d'un entier signe sur 16 octets (int16)
+ */
+Data create_int16(int16_t int16) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = INT16;
+    data_created->int16 = int16;
 
-    return d;
+    return data_created;
 }
 
-Donnee creer_entierSigne4(long entier) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = ENTIER_SIGNE4;
-    d->entierSigne4 = entier;
+/**
+ * Creation d'un entier signe sur 32 octets (int32)
+ */
+Data create_int32(int32_t int32) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = INT16;
+    data_created->int32 = int32;
 
-    return d;
+    return data_created;
 }
 
-Donnee creer_entierNonSigne1(unsigned char entier) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = ENTIER_NON_SIGNE1;
-    d->entierNonSigne1 = entier;
+/**
+ * Creation d'un entier non signe sur 8 octets (uint8)
+ */
+Data create_uint8(uint8_t uint8) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = UINT8;
+    data_created->uint8 = uint8;
 
-    return d;
+    return data_created;
 }
 
-Donnee creer_entierNonSigne2(unsigned short entier) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = ENTIER_NON_SIGNE2;
-    d->entierNonSigne2 = entier;
+/**
+ * Creation d'un entier non signe sur 16 octets (uint16)
+ */
+Data create_uint16(uint16_t uint16) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = UINT16;
+    data_created->uint16 = uint16;
 
-    return d;
+    return data_created;
 }
 
-Donnee creer_entierNonSigne4(unsigned long entier) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = ENTIER_NON_SIGNE4;
-    d->entierNonSigne4 = entier;
+/**
+ * Creation d'un entier non signe sur 32 octets (uint32)
+ */
+Data create_uint32(uint32_t uint32) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = UINT32;
+    data_created->uint32 = uint32;
 
-    return d;
+    return data_created;
 }
 
-Donnee creer_chaine(const char* texte) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = CHAINE;
-    d->chaine.taille = (unsigned short) strlen(texte);
-    /*d->chaine.texte = texte;*/
+/**
+ * Creation d'une chaine de caracteres (string)
+ */
+Data create_string(const char* string) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = STRING;
+    data_created->string.size = (uint16_t) strlen(string);
+     
+    /* Allocation dynamique pour le stockage de la chaine */
+    data_created->string.content = calloc(strlen(string), sizeof(char));
+    strcpy(data_created->string.content, string);
     
-
-       /*   allocation mémoire pour le stockage   */ 
-       /*   de taille+1 cacractères (caractère '\0')  */ 
-       /*  memmove(d->chaine.texte[0], texte, strlen(texte) + 1);  */ 
-
-    d->chaine.texte = calloc(strlen(texte), sizeof(char));
-    
-    strcpy(d->chaine.texte, texte);
-    return d;
+    return data_created;
 }
 
-Donnee creer_flottant(double flottant) {
-    Donnee d = malloc(sizeof(struct Donnee));
-    d->type = FLOTTANT;
-    d->flottant = flottant;
+/**
+ * Creation d'un flottant de double precision (double)
+ */
+Data create_double(double dbl) {
+    Data data_created = malloc(sizeof(struct Data));
+    data_created->type = DOUBLE;
+    data_created->dbl = dbl;
 
-    return d;
+    return data_created;
 }

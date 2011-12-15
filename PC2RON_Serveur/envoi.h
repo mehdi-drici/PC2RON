@@ -14,19 +14,24 @@ extern "C" {
 
 #include "trame.h"
 
+/* Envoi d'une trame de fin de transmission */    
+int send_EOT(SOCKET sock);
+
 /* Envoi d'une trame */
-int envoyer_fin_transmission(SOCKET sock);
-int envoyer_trame(SOCKET sock, Trame trameEnvoyee);
-   /*  char** convertir_trame_toBytes(Trame trame);  */ 
-int envoyer_donnee(SOCKET sock, Donnee donnee);
-int envoyer_entierSigne1(SOCKET sock, Donnee entier);
-int envoyer_entierSigne2(SOCKET sock, Donnee entier);
-int envoyer_entierSigne4(SOCKET sock, Donnee entier);
-int envoyer_entierNonSigne1(SOCKET sock, Donnee entier);
-int envoyer_entierNonSigne2(SOCKET sock, Donnee entier);
-int envoyer_entierNonSigne4(SOCKET sock, Donnee entier);
-int envoyer_chaine(SOCKET sock, Donnee chaine);
-int envoyer_flottant(SOCKET sock, Donnee flottant);
+int send_frame(SOCKET sock, Frame frame);
+
+/* Envoi d'une donnee quelconque */
+int send_data(SOCKET sock, Data data);
+
+/* Envpo d'une donnee specifique */
+int send_int8(SOCKET sock, Data data);
+int send_int16(SOCKET sock, Data data);
+int send_int32(SOCKET sock, Data data);
+int send_uint8(SOCKET sock, Data data);
+int send_uint16(SOCKET sock, Data data);
+int send_uint32(SOCKET sock, Data data);
+int send_string(SOCKET sock, Data data);
+int send_double(SOCKET sock, Data data);
 
 #ifdef	__cplusplus
 }

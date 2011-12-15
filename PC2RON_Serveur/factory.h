@@ -13,17 +13,19 @@ extern "C" {
 #endif
 
 #include "trame.h"
-    
-/* Création d'une trame ou d'une donnée */
-Trame creer_trame(unsigned char id);
-Donnee creer_entierSigne1(char entier);
-Donnee creer_entierSigne2(short entier);
-Donnee creer_entierSigne4(long entier);
-Donnee creer_entierNonSigne1(unsigned char entier);
-Donnee creer_entierNonSigne2(unsigned short entier);
-Donnee creer_entierNonSigne4(unsigned long entier);
-Donnee creer_chaine(const char* texte);
-Donnee creer_flottant(double flottant);
+
+/* Création d'une trame */
+Frame create_frame(uint8_t id);
+
+/* Creation d'une donnee specifique */
+Data create_int8(int8_t int8);
+Data create_int16(int16_t int16);
+Data create_int32(int32_t int32);
+Data create_uint8(uint8_t uint8);
+Data create_uint16(uint16_t uint16);
+Data create_uint32(uint32_t uint32);
+Data create_string(const char* string);
+Data create_double(double dbl);
 
 #ifdef	__cplusplus
 }

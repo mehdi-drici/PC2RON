@@ -7,257 +7,301 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
- #include <netinet/in.h>
+#include <netinet/in.h>
 
-/* @todo
- * recv_frame
- * recv_data
- * 
- * static recv_int8
- * static recv_int16
- * static recv_int32
- * static recv_uint8
- * static recv_uint16
- * static recv_uint32
- * static recv_string
- * static recv_double 
- */
+/*
+*******************************************************************************
+ Author: Mehdi Drici
+
+ File: receiver.c
+ 
+ Description: Reception d'une trame ou d'une donnee
+              Seule recv_frame est accessible de l'exterieur.
+              
+ Remarks: En cas de succes, ces fonctions renvoient SUCCES (0), ERROR (-1) sinon 
+*******************************************************************************/
 
 /**
- * Réception d'une trame ou d'une donnée
+ * Reception d'une trame
+ * @param sock Socket de la connexion
+ * @return Trame recue si succes, NULL sinon
  */
-
-   /*  @TODO implementer  */ 
-Trame recevoir_trame(SOCKET sock){
-    Trame trameRecue = malloc(sizeof(struct Trame));
-    unsigned char octet;
-    int i = 0;
-    int nbOctetsRecus = 0;
-    Donnee d;
-    int nbDonnees = 0;
-    trameRecue->nbDonnees = 0;
+Frame recv_frame(SOCKET sock) {
+    Frame frame_recv = malloc(sizeof(struct Frame));
+    Data data_recv;
+    uint8_t byte_recv;
+    ssize_t recv_size = 0;
+    int data_counter = 0;
     
-    nbOctetsRecus = recv(sock, &octet, 1, 0);
-    EXIT_IF_ERROR_RECV_FRAME(sock, nbOctetsRecus, trameRecue);
-    trameRecue->fanion = octet;
-        
-    switch (octet) {
-        case TRAME_NORMALE:
+    frame_recv->size = 0;
+    
+    recv_size = recv(sock, &byte_recv, 1, 0);
+    EXIT_IF_ERROR_RECV_FRAME(sock, recv_size, frame_recv);
+    frame_recv->pennant = byte_recv;
+    
+    /* Traitement suivant le type de fanion recu */
+    switch (byte_recv) {
+        case NORMAL_FRAME:
             break;
 
         /* Fin de transmission */ 
-        case TRAME_SPECIALE:
-            /* Fermeture de connexion  */ 
+        case SPECIAL_FRAME: 
             shutdown(sock, SHUT_RDWR);
-            return trameRecue;
-
+            return frame_recv;
+        
+        /* Fanion de trame inconnu */
         default:
-            PRINT_UNKNOWN_PENNANT(octet);
-            free_trame(trameRecue);
+            PRINT_UNKNOWN_PENNANT(byte_recv);
+            free_frame(frame_recv);
             return NULL;
     }
 
-       /*   Recuperation de l'id  */ 
-    nbOctetsRecus = recv(sock, &octet, 1, 0);
-    EXIT_IF_ERROR_RECV_FRAME(sock, nbOctetsRecus, trameRecue);
-    trameRecue->id = octet;
+    /* Reception de l'id */ 
+    recv_size = recv(sock, &byte_recv, 1, 0);
+    EXIT_IF_ERROR_RECV_FRAME(sock, recv_size, frame_recv);
+    frame_recv->id = byte_recv;
 
-       /*   Recuperation du nombre de donnees  */ 
-    nbOctetsRecus = recv(sock, &octet, 1, 0);
-    EXIT_IF_ERROR_RECV_FRAME(sock, nbOctetsRecus, trameRecue);
-    nbDonnees = octet;
+    /* Reception du nombre de donnees */ 
+    recv_size = recv(sock, &byte_recv, 1, 0);
+    EXIT_IF_ERROR_RECV_FRAME(sock, recv_size, frame_recv);
         
-    /*   Recuperation des donnees tant qu'il n'y a pas d'erreur  */ 
-    while (i < nbDonnees) {
-        d = recevoir_donnee(sock);
-        if(d == NULL) {
-            free_trame(trameRecue);
+    /* Reception des donnees
+     * Interruption lors d'une erreur de reception
+     */ 
+    while (data_counter < byte_recv) {
+        data_recv = recv_data(sock);
+        if(data_recv == NULL) {
+            free_frame(frame_recv);
             return NULL;
         }
-        ajouter_donnee(trameRecue, d);
-        i++;
+        add_data(frame_recv, data_recv);
+        data_counter++;
     }
     
-    return trameRecue;
+    return frame_recv;
 }
 
-Donnee recevoir_donnee(SOCKET sock) {
-       /*  Donnee donneeRecue = malloc(sizeof(struct Donnee));  */ 
-    unsigned char type;
-    int nbOctetsRecus;
-    
-       /*   Recuperation du type de donnee  */
-    nbOctetsRecus = recv(sock, &type, 1, 0);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, NULL);
 
-       /*   Ajout du type de donnee  */ 
-       /*  donneeRecue->type = type;  */ 
+/**
+ * Reception d'une donnee quelconque
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_data(SOCKET sock) {
+    uint8_t type;
+    ssize_t recv_size;
+    
+    /* Reception du type de donnee */
+    recv_size = recv(sock, &type, 1, 0);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, NULL);
+
+       /*   Ajout du type de data  */ 
+       /*  data_recv->type = type;  */ 
     
     switch(type) {
-        case ENTIER_SIGNE1:
-            return recevoir_entierSigne1(sock);
+        case INT8:
+            return recv_int8(sock);
 
-        case ENTIER_SIGNE2:
-            return recevoir_entierSigne2(sock);
+        case INT16:
+            return recv_int16(sock);
 
-        case ENTIER_SIGNE4:
-            return recevoir_entierSigne4(sock);
+        case INT32:
+            return recv_int32(sock);
 
-        case ENTIER_NON_SIGNE1:
-            return recevoir_entierNonSigne1(sock);
+        case UINT8:
+            return recv_uint8(sock);
 
-        case ENTIER_NON_SIGNE2:
-            return recevoir_entierNonSigne2(sock);
+        case UINT16:
+            return recv_uint16(sock);
 
-        case ENTIER_NON_SIGNE4:
-            return recevoir_entierNonSigne4(sock);
+        case UINT32:
+            return recv_uint32(sock);
 
-        case CHAINE:
-            return recevoir_chaine(sock);
+        case STRING:
+            return recv_string(sock);
 
-        case FLOTTANT:
-            return recevoir_flottant(sock);
+        case DOUBLE:
+            return recv_double(sock);
 
+        /* Type de donnee inconnu */
         default:
             PRINT_UNKNOWN_DATA_TYPE(type);
             return NULL;
     }
 }
 
-Donnee recevoir_entierSigne1(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    char entierRecu;
-    int nbOctetsRecus = 0;
+/**
+ * Reception d'un entier signe sur 8 octets (int8)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_int8(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    int8_t int8_recv;
+    ssize_t recv_size = 0;
 
-       /*   On récupère l'entier  */ 
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+    /* Reception de l'entier */ 
+    recv_size = recv(sock, (char*)&int8_recv, sizeof(int8_t), MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
 
-    donneeRecue->type = ENTIER_SIGNE1;
-    donneeRecue->entierSigne1 = entierRecu;
+    data_recv->type = INT8;
+    data_recv->int8 = int8_recv;
 
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_entierSigne2(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    short entierRecu;
-    int nbOctetsRecus = 0;
+/**
+ * Reception d'un entier signe sur 16 octets (int16)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_int16(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    int16_t int16_recv;
+    ssize_t recv_size = 0;
 
-       /*   On récupère l'entier en big-endian  */ 
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+    /* Reception de l'entier */  
+    recv_size = recv(sock, (char*)&int16_recv, sizeof(int16_t), MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
 
-    donneeRecue->type = ENTIER_SIGNE2;
-       /*   On convertit l'entier récupéré en little-endian si l'ordinateur  */ 
-       /*   stock les entiers en mémoire en little-endian, sinon s'il les  */ 
-       /*   stock en big-endian l'entier est convertit en big-endian  */ 
-    donneeRecue->entierSigne2 = ntohs(entierRecu);
+    data_recv->type = INT16;
+    
+    /* Conversion de l'entier en gros boutien */ 
+    data_recv->int16 = ntohs(int16_recv);
 
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_entierSigne4(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    int entierRecu;
-    int nbOctetsRecus = 0;
+/**
+ * Reception d'un entier signe sur 32 octets (int32)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_int32(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    int32_t int32_recv;
+    ssize_t recv_size = 0;
 
-       /*   On récupère l'entier en big-endian  */ 
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+    /* Reception de l'entier */ 
+    recv_size = recv(sock, (char*)&int32_recv, sizeof(int32_t), MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
     
-    donneeRecue->type = ENTIER_SIGNE4;
+    data_recv->type = INT32;
     
-    /*@todo modifier*/
-    donneeRecue->entierSigne4 = ntohl((uint32_t) entierRecu);
+    /* Conversion de l'entier en gros boutien */
+    data_recv->int32 = ntohl((uint32_t) int32_recv);
 
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_entierNonSigne1(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    unsigned char entierRecu;
-    int nbOctetsRecus = 0;
 
-       /*   On récupère l'entier en big-endian  */ 
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 1, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+/**
+ * Reception d'un entier non signe sur 8 octets (int8)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_uint8(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    uint8_t uint8_recv;
+    ssize_t recv_size = 0;
+
+    /* Reception de l'entier */ 
+    recv_size = recv(sock, (char*)&uint8_recv, 1, MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
     
-    donneeRecue->type = ENTIER_NON_SIGNE1;
-    donneeRecue->entierNonSigne1 = entierRecu;
+    data_recv->type = UINT8;
+    data_recv->uint8 = uint8_recv;
 
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_entierNonSigne2(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    unsigned short entierRecu;
-    int nbOctetsRecus = 0;
+/**
+ * Reception d'un entier non signe sur 16 octets (int16)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_uint16(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    uint16_t uint16_recv;
+    ssize_t recv_size = 0;
 
-       /*   On récupère l'entier en big-endian  */ 
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 2, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+    /* Reception de l'entier */  
+    recv_size = recv(sock, (char*)&uint16_recv, 2, MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
     
-    donneeRecue->type = ENTIER_NON_SIGNE2;
-    donneeRecue->entierNonSigne2 = ntohs(entierRecu);
+    data_recv->type = UINT16;
+    data_recv->uint16 = ntohs(uint16_recv);
 
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_entierNonSigne4(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    unsigned long int entierRecu;
-    int nbOctetsRecus = 0;
+/**
+ * Reception d'un entier non signe sur 32 octets (int32)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_uint32(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    uint32_t uint32_recv;
+    ssize_t recv_size = 0;
 
-       /*   On récupère l'entier en big-endian  */ 
-    nbOctetsRecus = recv(sock, (char*)&entierRecu, 4, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+    /* Reception de l'entier */ 
+    recv_size = recv(sock, (char*)&uint32_recv, 4, MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
     
-    donneeRecue->type = ENTIER_NON_SIGNE4;
-    donneeRecue->entierNonSigne4 = ntohl(entierRecu);
+    data_recv->type = UINT32;
+    data_recv->uint32 = ntohl(uint32_recv);
 
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_chaine(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    unsigned char* chaineRecue;
-    unsigned short taille, tailleConvertie;
+/**
+ * Reception d'une chaine de caracteres (string)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_string(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    unsigned char* string_recv;
+    uint16_t size, converted_size;
+    ssize_t recv_size = 0;
 
-    int nbOctetsRecus = 0;
-
-       /*   Reception de la taille de la chaine  */ 
-    nbOctetsRecus = recv(sock, (char*)&taille, 2, MSG_WAITALL);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
-    tailleConvertie = ntohs(taille);
+    /* Reception de la taille de la chaine de caracteres */ 
+    recv_size = recv(sock, (char*)&size, sizeof(uint16_t), MSG_WAITALL);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
+    converted_size = ntohs(size);
     
-       /*   Reception du contenu de la chaine  */ 
-    chaineRecue = calloc(tailleConvertie, sizeof(char));
-    nbOctetsRecus = recv(sock, chaineRecue, tailleConvertie, 0);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+    /* Reception du contenu de la chaine  */ 
+    string_recv = calloc(converted_size, sizeof(char));
+    recv_size = recv(sock, string_recv, converted_size, 0);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
     
-    donneeRecue->type = CHAINE;
-    (donneeRecue->chaine).taille = tailleConvertie;
-    (donneeRecue->chaine).texte = chaineRecue;
-       /*  strcpy((donneeRecue->chaine).texte, chaineRecue);  */ 
+    data_recv->type = STRING;
+    data_recv->string.size = converted_size;
+    data_recv->string.content = string_recv;
     
-    return donneeRecue;
+    return data_recv;
 }
 
-Donnee recevoir_flottant(SOCKET sock) {
-    Donnee donneeRecue = malloc(sizeof(struct Donnee));
-    double flottantRecu;
+/**
+ * Reception d'un flottant en double precision (double)
+ * @param sock Socket de la connexion
+ * @return Donnee recue si succes, NULL sinon
+ */
+Data recv_double(SOCKET sock) {
+    Data data_recv = malloc(sizeof(struct Data));
+    double double_recv;
     /*char buffer[8];*/
-    int nbOctetsRecus = 0;
+    ssize_t recv_size = 0;
     /*
     int i = 0;
     double temp = 0, resultat = 0;
      */
-       /*   On reçoit une suite de 8 octets, le premier octet reçu est toujours l'octet de poids fort  */ 
-    nbOctetsRecus = recv(sock, (char*)&flottantRecu, 8, 0);
-    EXIT_IF_ERROR_RECV_DATA(sock, nbOctetsRecus, donneeRecue);
+       /*   On reçoit une suite de 8 bytes, le premier byte reçu est toujours l'byte de poids fort  */ 
+    recv_size = recv(sock, (char*)&double_recv, 8, 0);
+    EXIT_IF_ERROR_RECV_DATA(sock, recv_size, data_recv);
 
-       /*   On rassemble les 8 octets séparé en une seul variable de 8 octets  */ 
+       /*   On rassemble les 8 bytes séparé en une seul variable de 8 bytes  */ 
 /*
     for (i=1; i < 8; i++)
     {
@@ -266,10 +310,10 @@ Donnee recevoir_flottant(SOCKET sock) {
     }
 */
     
-       /*   On fini par copier le résultat dans la donnee  */ 
-       /*  donneeRecue->flottant = resultat;  */ 
-    donneeRecue->type = FLOTTANT;
-    donneeRecue->flottant = flottantRecu;
+       /*   On fini par copier le résultat dans la data  */ 
+       /*  data_recv->flottant = resultat;  */ 
+    data_recv->type = DOUBLE;
+    data_recv->dbl = double_recv;
             
-    return donneeRecue;
+    return data_recv;
 }

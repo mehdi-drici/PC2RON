@@ -8,8 +8,8 @@
 #ifndef PROTOCOLE_H_
 #define PROTOCOLE_H_
 
-#define NOM_APPLICATION "PC2RON"
-#define NOM_VERSION_PROTOCOLE "PC2RON2011"
+#define STR_APPLI "PC2RON"
+#define STR_VERSION "PC2RON2011"
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
@@ -19,70 +19,80 @@
 #include "trame.h"
 
 /* Chaines de caracteres correspondant aux types de donnee */
-#define S_ACK "ACK"
-#define S_CONNECT "CONNECT"
-#define S_DEATH "DEATH"
-#define S_END_OF_LIST "END OF LIST"
-#define S_INITIATE "INITIATE"
-#define S_ORDER "ORDER"
-#define S_PAUSE "PAUSE"
-#define S_REGISTERED "REGISTERED"
-#define S_START "START"
-#define S_USER "USER"
-#define S_TURN "TURN"
-#define S_WIN "WIN"
+#define STR_ACK "ACK"
+#define STR_CONNECT "CONNECT"
+#define STR_DEATH "DEATH"
+#define STR_END_OF_LIST "END OF LIST"
+#define STR_INITIATE "INITIATE"
+#define STR_ORDER "ORDER"
+#define STR_PAUSE "PAUSE"
+#define STR_REGISTERED "REGISTERED"
+#define STR_START "START"
+#define STR_USER "USER"
+#define STR_TURN "TURN"
+#define STR_WIN "WIN"
 
-   /*   Ordres  */ 
-#define ORDRE_DROIT "idle"
-#define ORDRE_GAUCHE "left"
-#define ORDRE_DROITE "right"
-#define ORDRE_ABANDON "abandon"
+/* Ordres */ 
+#define STRAIGHT_ORDER "idle"
+#define LEFT_ORDER "left"
+#define RIGHT_ORDER "right"
+#define ABORT_ORDER "abandon"
 
-typedef enum TypeTrame {
-	Ack = 0x41,
-	Connect = 0x43,
-        Death = 0x44,
-	End = 0x45,
-	Initiate = 0x49,
-        Order = 0x4F,
-	Pause = 0x50,
-	Registered = 0x52,
-	Start = 0x53,
-	User = 0x55,
-        Turn = 0x54,
-        Win = 0x57
-} TypeTrame;
+/* Type d'une trame defini dans le protocole PC2RON2011 */
+typedef enum Frametype {
+    Ack = 0x41,
+    Connect = 0x43,
+    Death = 0x44,
+    End = 0x45,
+    Initiate = 0x49,
+    Order = 0x4F,
+    Pause = 0x50,
+    Registered = 0x52,
+    Start = 0x53,
+    User = 0x55,
+    Turn = 0x54,
+    Win = 0x57
+} Frametype;
 
-typedef struct Resultat {
-    int typeTrame;
-    void* contenu;
-} Resultat;
+/* Resultat d'un echange entre un client et le serveur */
+typedef struct Result {
+    int type;
+    void* content;
+} Result;
 
-/*void init_protocole(Joueurs j);*/
 
-   /*   Requetes du client  */ 
-Resultat* get_resultat_echange(int sock, Joueurs lesJoueurs);
-char* get_order(int sock, Trame t, Joueurs lesJoueurs);
+int check_frame(Frame frame);
 
-   /*   Reponses au client  */ 
-int repondre_initiate(int sock, Trame t, Joueurs lesJoueurs);
-Joueur repondre_connect(int sock, Trame t, Joueurs lesJoueurs);
+/* Verification du format d'une trame */
+const char* check_connect_format(Frame frame);
+int check_initiate_format(Frame frame);
+int check_order_format(Frame frame);
 
-   /*   Envoi au client  */ 
 
-/* @todo modifier*/
-int envoyer_user(int sock, Joueur j);
-int envoyer_users(int sock, Joueurs lesJoueurs);
+/* Verification des contraintes */
+const char* check_connect_constraint(int sock, Players the_players);
+int check_order_constraint(int sock, Players the_players);
+int check_initiate_constraint(int sock, size_t nb_connected_players, Players the_players);
 
-int envoyer_end(int sock, Joueurs lesJoueurs);
-int envoyer_pause(int sock, const char* message, Joueurs lesJoueurs);
-int envoyer_start(int sock, const char* message, Joueurs lesJoueurs);
-int envoyer_turn(int sock, Joueurs lesJoueurs);
+/* Verification du nom d'application et de la version du protocole */
+int check_appname(char* appname);
+int check_version(const char* version);
 
-int envoyer_win(int sock, unsigned short id, Joueurs lesJoueurs);
-int envoyer_death(int sock, unsigned short id, Joueurs lesJoueurs);
-int envoyer_deaths(int sock, unsigned short id1, unsigned short id2, 
-                                                    Joueurs lesJoueurs);
-void deconnecter_joueur(Joueur j);
+/* Reponses au client */
+Result* respond(int sock, Players the_players);
+Result* respond_initiate(int sock, Players the_players, Frame recv_frame);
+Result* respond_connect(int sock, Players the_players, Frame recv_frame);
+Result* respond_order(int sock, Players the_players, Frame recv_frame);
+
+/* Envoi de trames au client (la plupart en broadcast) */
+void send_broadcast(Players the_players, Frame frame);
+void send_pause(Players the_players, const char* msg);
+void send_start(Players the_players, const char* msg);
+void send_user(Players the_players);
+void send_turn(Players the_players, uint32_t elapsed_time);
+void send_end(Players the_players);
+void send_win(Players the_players, uint16_t uid);
+void send_death(Players the_players, uint16_t uid);
+void send_two_deaths(Players the_players, uint16_t uid1, uint16_t uid2);
 
 #endif /* PROTOCOLE_H_ */

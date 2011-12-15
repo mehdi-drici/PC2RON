@@ -4,13 +4,11 @@
 
 #define NB_MAX_CLIENTS 10
 
-/*
- * connect_server
- * accept_client
- * close_connection
+/**
+ * Etablissement de la connexion du serveur
+ * @return 
  */
-
-int etablir_connexion() {
+int connect_server() {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     SOCKADDR_IN sin = { 0 };
     int valeur_option = 1;
@@ -28,7 +26,6 @@ int etablir_connexion() {
 
        /*   lose the pesky "Address already in use" error message  */ 
     if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &valeur_option, sizeof(int)) == -1) {
-    	   /*  logger_errno("setsockopt");  */ 
         pthread_exit(NULL);
     }
 
@@ -39,7 +36,7 @@ int etablir_connexion() {
     	printf("La socket %d est maintenant ouverte en mode TCP/IP\n", sock);
     }
 
-       /*   Ecoute sur le port PORT  */ 
+    /* Ecoute sur le port 5555 */ 
     printf("Listage du port %d...\n", PORT);
 
     if(listen(sock, NB_MAX_CLIENTS) == SOCKET_ERROR) {
@@ -50,18 +47,18 @@ int etablir_connexion() {
     return sock;
 }
 
-int accepter_client(int sock) {
+/**
+ * Acceptation de la connexion d'un client au serveur
+ * @param sock Socket du serveur
+ * @return nouvelle socket reliant le client au serveur 
+ */
+int accept_client(int sock) {
     SOCKADDR_IN csin = {0};
     int csock;
-    int sinsize = sizeof csin;
-
-       /*   Connexion du client  */ 
-    /* Attente pendant laquelle le client se connecte */
-       /*  printf("Patientez pendant que le client se connecte sur le port %d...\n", PORT);  */ 
+    int sinsize = sizeof(csin);
+    
     csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
-       /*  printf("Un client se connecte avec la socket %d de %s:%d\n", csock, 
-                inet_ntoa(csin.sin_addr), htons(csin.sin_port));
-       */
+
     if(csock == INVALID_SOCKET) {
         perror("accept()");
         exit(errno);
@@ -70,7 +67,11 @@ int accepter_client(int sock) {
     return csock;
 }
 
-void fermer_connexion(int sock) {
+/**
+ * Fermeture de connexion d'une socket
+ * @param sock Socket a fermer
+ */
+void close_connection(int sock) {
     printf("Fermeture de la socket %d\n", sock);
     close(sock);
 }

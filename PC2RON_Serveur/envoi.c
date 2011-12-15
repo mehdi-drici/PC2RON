@@ -7,213 +7,283 @@
 #include "envoi.h"
 #include "erreur.h"
 
-/* @todo
- * send_frame
- * send_data
- * 
- * static send_int8
- * static send_int16
- * static send_int32
- * static send_uint8
- * static send_uint16
- * static send_uint32
- * static send_string
- * static send_double 
- */
+/*
+*******************************************************************************
+ Author: Mehdi Drici
 
-int envoyer_fin_transmission(SOCKET sock) {
-    int nbOctetsEnvoyes = 0;
-    int trameSpeciale = TRAME_SPECIALE;
+ File: sender.c
+ 
+ Description: Envoi d'une trame ou d'une donnee
+              Seules send_EOT et send_frame sont accessibles de l'exterieur.
+              
+ Remarks:    En cas de succes, elles renvoient SUCCES (0), ERROR (-1) sinon 
+*******************************************************************************
+*/
+
+
+/**
+ * Envoi d'une trame de fin de transmission
+ * @param sock Socket de la connexion
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_EOT(SOCKET sock) {
+    ssize_t sent_size = 0;
+    Pennant frame = SPECIAL_FRAME;
     
-    nbOctetsEnvoyes = send(sock, (char*)&(trameSpeciale), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    sent_size = send(sock, (char*)&(frame), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
     
     return SUCCESS;
 }
 
 /**
  * Envoi d'une trame
- * @todo implementation
+ * @param sock Socket de la connexion
+ * @param frame Trame a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
  */
-int envoyer_trame(SOCKET sock, Trame trameEnvoyee) {    
-    int nbOctetsEnvoyes = 0;
-    int i = 0;
+int send_frame(SOCKET sock, Frame frame) {    
+    ssize_t sent_size = 0;
+    int data_counter = 0;
     
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee->fanion), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    /* Envoi de l'entete */
+    sent_size = send(sock, (char*)&(frame->pennant), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
     
-    nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee->id), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    sent_size = send(sock, (char*)&(frame->id), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
     
-    nbOctetsEnvoyes = send(sock, (char*)&(trameEnvoyee->nbDonnees), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    sent_size = send(sock, (char*)&(frame->size), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
     
-       /*   Envoi des donnees tant qu'il n'y a pas d'erreur  */ 
-    while (i < trameEnvoyee->nbDonnees) {
-        if(envoyer_donnee(sock, trameEnvoyee->donnees[i]) == ERROR) {
+    /* Envoi des donnees
+     * Interruption lors d'une erreur d'envoi
+     */ 
+    while (data_counter < frame->size) {
+        if(send_data(sock, frame->data[data_counter]) == ERROR) {
             return ERROR;
         }
-        i++;
+        data_counter++;
     }
     
     return SUCCESS;
 }
 
-int envoyer_donnee(SOCKET sock, Donnee donneeEnvoyee) {
-    switch(donneeEnvoyee->type) {
-        case ENTIER_SIGNE1:
-            return envoyer_entierSigne1(sock, donneeEnvoyee);
+/**
+ * Envoi d'une donnee quelconque
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_data(SOCKET sock, Data data) {
+    switch(data->type) {
+        case INT8:
+            return send_int8(sock, data);
 
-        case ENTIER_SIGNE2:
-            return envoyer_entierSigne2(sock, donneeEnvoyee);
+        case INT16:
+            return send_int16(sock, data);
 
-        case ENTIER_SIGNE4:
-            return envoyer_entierSigne4(sock, donneeEnvoyee);
+        case INT32:
+            return send_int32(sock, data);
 
-        case ENTIER_NON_SIGNE1:
-            return envoyer_entierNonSigne1(sock, donneeEnvoyee);
+        case UINT8:
+            return send_uint8(sock, data);
 
-        case ENTIER_NON_SIGNE2:
-            return envoyer_entierNonSigne2(sock, donneeEnvoyee);
+        case UINT16:
+            return send_uint16(sock, data);
 
-        case ENTIER_NON_SIGNE4:
-            return envoyer_entierNonSigne4(sock, donneeEnvoyee);
+        case UINT32:
+            return send_uint32(sock, data);
 
-        case CHAINE:
-            return envoyer_chaine(sock, donneeEnvoyee);
+        case STRING:
+            return send_string(sock, data);
 
-        case FLOTTANT:
-            return  envoyer_flottant(sock, donneeEnvoyee);
-
+        case DOUBLE:
+            return send_double(sock, data);
+        
+        /* Le type de donnee est inconnu */
         default:
             return ERROR;
     }
 }
 
-int envoyer_entierSigne1(SOCKET sock, Donnee entier) {
-    int nbOctetsEnvoyes = 0;
+/**
+ * Envoi d'un entier signe de 8 octets (int8)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_int8(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
 
-       /*   On convertit data en entier big-endian  */ 
-       /*  long donnees = htons(entierEnvoye->entierSigne2);  */ 
+    /* Envoi du type donnee */ 
+    sent_size = send(sock, (char*)&(data->type), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
 
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(entier->type), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-       /*   Envoi de l'entier  */ 
-    nbOctetsEnvoyes = send(sock, &(entier->entierSigne1), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-    return SUCCESS;
-}
-
-int envoyer_entierSigne2(SOCKET sock, Donnee entier) {
-    int nbOctetsEnvoyes = 0;
-
-       /*   On convertit data en entier big-endian  */ 
-    short donnees = htons(entier->entierSigne2);
-
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(entier->type), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-       /*   Envoi de l'entier  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&donnees, 2, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    /* Envoi de l'entier */ 
+    sent_size = send(sock, &(data->int8), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
 
     return SUCCESS;
 }
 
-int envoyer_entierSigne4(SOCKET sock, Donnee entierEnvoye) {
-    int nbOctetsEnvoyes = 0;
+/**
+ * Envoi d'un entier signe sur 16 octets (int16)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_int16(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
 
-    /*   On convertit data en entier big-endian  */ 
+    /* Conversion de l'entier en gros boutien */ 
+    int16_t data_converted = htons(data->int16);
+
+    /* Envoi du type de donnee */ 
+    sent_size = send(sock, (char*)&(data->type), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    /* Envoi de l'entier */ 
+    sent_size = send(sock, (char*)&data_converted, sizeof(int16_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    return SUCCESS;
+}
+
+
+/**
+ * Envoi d'un entier signe sur 32 octets (int32)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_int32(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
+
+    /* Conversion de l'entier en gros boutien */     
+    long int32_converted = htonl((uint32_t) data->int32);
+
+    /* Envoi du type de donnee */ 
+    sent_size = send(sock, (char*)data->type, sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    /* Envoi de l'entier */ 
+    sent_size = send(sock, (char*)&int32_converted, sizeof(int32_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    return SUCCESS;
+}
+
+/**
+ * Envoi d'un entier non signe sur 8 octets (uint8)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_uint8(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
+
+    /* Envoi du type de donnee */ 
+    sent_size = send(sock, (char*)&(data->type), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    /* Envoi de l'entier */ 
+    sent_size = send(sock, &(data->uint8), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    return SUCCESS;
+}
+
+/**
+ * Envoi d'un entier non signe sur 16 octets (uint16)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_uint16(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
+
+    /* Conversion de l'entier en gros boutien */ 
+    uint16_t uint16_converted = htons(data->uint16);
+
+    /* Envoi du type de donnee */  
+    sent_size = send(sock, (char*)&(data->type), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    /* Envoi de l'entier */ 
+    sent_size = send(sock, (char*)&uint16_converted, sizeof(uint16_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    return SUCCESS;
+}
+
+/**
+ * Envoi d'un entier non signe sur 32 octets (uint32)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_uint32(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
+
+    /* Conversion de l'entier en gros boutien */
+    uint32_t uint32_converted = htonl(data->uint32);
+
+    /* Envoi du type de donnee */  
+    sent_size = send(sock, (char*)&(data->type), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    /* Envoi de l'entier */ 
+    sent_size = send(sock, (char*)&uint32_converted, sizeof(int32_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
+
+    return SUCCESS;
+}
+
+/**
+ * Envoi d'une chaine de caracteres (string)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ */
+int send_string(SOCKET sock, Data data) {
+    ssize_t sent_size = 0;
     
-    long donnees = htonl((uint32_t) entierEnvoye->entierSigne4);
-
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)entierEnvoye->type, 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-       /*   Envoi de l'entier  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&donnees, 4, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-    return SUCCESS;
-}
-
-int envoyer_entierNonSigne1(SOCKET sock, Donnee entier) {
-    int nbOctetsEnvoyes = 0;
-
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(entier->type), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-       /*   Envoi de l'entier  */ 
-    nbOctetsEnvoyes = send(sock, &(entier->entierNonSigne1), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-    return SUCCESS;
-}
-
-int envoyer_entierNonSigne2(SOCKET sock, Donnee entier) {
-    int nbOctetsEnvoyes = 0;
-
-       /*   On convertit data en entier big-endian  */ 
-    unsigned short donnees = htons(entier->entierSigne2);
-
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(entier->type), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-       /*   Envoi de l'entier  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&donnees, 2, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-    return SUCCESS;
-}
-
-int envoyer_entierNonSigne4(SOCKET sock, Donnee entier) {
-    int nbOctetsEnvoyes = 0;
-
-       /*   On convertit data en entier big-endian  */ 
-    unsigned long donnees = htonl(entier->entierNonSigne4);
-
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(entier->type), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-       /*   Envoi de l'entier  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&donnees, 4, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
-
-    return SUCCESS;
-}
-
-int envoyer_chaine(SOCKET sock, Donnee chaine) {
-    int nbOctetsEnvoyes = 0;
+    /* Conversion de l'entier en gros boutien */ 
+    uint16_t uint16_converted = htons(data->string.size);
     
-       /*   On convertit data en entier big-endian  */ 
-    unsigned short taille = htons(chaine->chaine.taille);
-    
-       /*   Envoi de l'entête  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&(chaine->type), 1, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    /* Envoi du type de donnee */   
+    sent_size = send(sock, (char*)&(data->type), sizeof(uint8_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
 
-       /*   Envoi de la taille de la chaine  */ 
-    nbOctetsEnvoyes = send(sock, (char*)&taille, 2, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    /* Envoi de la taille de la chaine */ 
+    sent_size = send(sock, (char*)&uint16_converted, sizeof(uint16_t), 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
 
        /*   Envoi de la chaine  */ 
-    nbOctetsEnvoyes = send(sock, chaine->chaine.texte, chaine->chaine.taille, 0);
-    EXIT_IF_ERROR_SEND(sock, nbOctetsEnvoyes);
+    sent_size = send(sock, data->string.content, data->string.size, 0);
+    EXIT_IF_ERROR_SEND(sock, sent_size);
         
     return SUCCESS;
 }
 
-   /*   @TODO Conversion Double en Octets  */ 
-int envoyer_flottant(SOCKET sock, Donnee flottantEnvoye) {
+/**
+ * Envoi d'un flottant en double precision (double)
+ * Cette fonction a une portee locale au fichier
+ * @param sock Socket de la connexion
+ * @param data Donnee a envoyer
+ * @return SUCCESS(0) ou ERROR(-1)
+ * @TODO Conversion Double en Octets
+ */
+int send_double(SOCKET sock, Data flottantEnvoye) {
     int nbOctetsEnvoyes = 0;
     char donnees[8];
 

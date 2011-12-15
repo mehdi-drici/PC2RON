@@ -8,76 +8,112 @@
 #ifndef JOUEUR_H
 #define	JOUEUR_H
 
+#include <stdint.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-typedef struct Point {
-    unsigned short x;
-    unsigned short y;
-} Point;
+/* Coordonnees d'une position */
+typedef struct Coord {
+    uint16_t x;
+    uint16_t y;
+} Coord;
 
-typedef struct RVB {
-    unsigned char r;
-    unsigned char v;
-    unsigned char b;
-} RVB;
+/* Composantes RVB d'une couleur */
+typedef struct RGB {
+    uint8_t r;
+    uint8_t v;
+    uint8_t b;
+} RGB;
 
-typedef enum Vitesse {
-    TRES_LENT = 3,
-    LENT = 5,
-    NORMAL = 10,
-    RAPIDE = 15,
-    TURBO = 20
-} Vitesse;
+/* Vitesse en nombre de pas par centieme de seconde */
+typedef enum Speed {
+    SLOW = 3,
+    NORMAL = 5,
+    SPEED = 10,
+    TURBO = 15,
+} Speed;
 
+/* 4 directions possibles */
 typedef enum Direction {
-    HAUT = 1,
-    BAS = 2,
-    GAUCHE = 3,
-    DROITE = 4
+    TOP = 1,
+    BOTTOM = 2,
+    LEFT = 3,
+    RIGHT = 4
 } Direction;
 
-typedef struct Joueur {
-    unsigned short id;
-    char* nom;
+typedef struct Player {
+    /* Identifiant unique du joueur */
+    uint16_t id;
+    
+    /* Pseudo unique du joueur */
+    char* name;
 
-    /* Couleur */
-    RVB couleur;
+    /* Couleur de la moto en RVB */
+    RGB color;
 
-    /* Positions  */ 
-    Point positions[0];
+    /* Positions du joueur */
+    struct positions {
+        Coord* point;
+        size_t size;
+    } positions;
 
-    /*   direction  */ 
+    /* Direction du joueur */ 
     Direction dir;
 
     /* Nombre de pas de grille en un centieme de seconde  */ 
-    unsigned char speed;
+    uint8_t speed;
     
+    /* Nombre de pas effectues par le joueur */
+    int nb_steps;
+    
+    /* Socket de donnexion */
     int sock;
-    int estInscrit;
-    int estConnecte;
-} *Joueur; 
+    
+    /* Etat d'inscription */
+    int is_registered;
+    
+    /* Etat de connexion */
+    int is_connected;
+    
+    /*  */
+    int is_winner;
+} *Player; 
 
 
+/* Liste de joueurs representee dans une structure
+ * afin de sauver le nombre de joueurs
+ */
+typedef struct Players {
+    Player* player;
+    size_t size;
+} *Players;
 
-typedef struct Joueurs {
-    Joueur* joueur;
-    size_t nbJoueurs;
-    int nbMaxJoueurs;
-} *Joueurs;
+/* Creation de joueurs */
+Players create_the_players(size_t size);
+Player create_player(void);
 
-/*void init_joueur(int sock, Joueur j);*/
-/*int ajouter_joueur(Joueurs lesJoueurs, Joueur j);*/
-void init_joueurs(Joueurs lesJoueurs, size_t taille);
-Joueur creer_joueur(void);
-Joueur get_joueur_par_id(unsigned short id, Joueurs lesJoueurs);
-Joueur get_joueur_par_sock(int sock, const Joueurs lesJoueurs);
-void set_inscription_joueur(Joueur j, int booleen);
-void set_connexion_joueur(Joueur j, int booleen);
-int est_inscrit(const Joueur j);
-int est_connecte(const Joueur j);
-/*int get_max_joueurs(const Joueurs lesJoueurs);*/
+/* Recherche d'un joueur (par socket, id ou nom) */
+Player get_player_by_id(uint16_t id, const Players the_players);
+Player get_player_by_sock(int sock, const Players the_players);
+Player get_player_by_name(const char* name, const Players the_players);
+
+/* Modification de l'etat d'un joueur */
+int register_player(int sock, uint16_t id, Players the_players);
+void remove_player_by_id(uint16_t uid, Players the_players, int hard_remove);
+void remove_player_by_sock(int sock, Players the_players, int hard_remove);
+
+/* Recupereration de l'etat d'un joueur */
+int is_registered(int sock, const Players the_players);
+int is_connected(int sock, const Players the_players);
+
+/* Contrainte sur l'unicite du nom de joueur */
+int is_unique_name(const char* name, const Players the_players);
+
+/* Compter le nombre de joueurs connectes ou inscrits */
+int count_connected_players(const Players the_players);
+int count_registered_players(const Players the_players);
 
 #ifdef	__cplusplus
 }

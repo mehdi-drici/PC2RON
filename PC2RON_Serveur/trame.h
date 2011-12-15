@@ -8,87 +8,84 @@
 #ifndef TRAME_H_
 #define TRAME_H_
 
+#include <stdint.h>
+
 typedef int SOCKET;
 
-/* Types de données */
-typedef enum TYPE_DONNEE {
-	ENTIER_SIGNE1 = 0x01,
-	ENTIER_SIGNE2 = 0X02,
-	ENTIER_SIGNE4 = 0x04,
-	ENTIER_NON_SIGNE1 = 0X11,
-	ENTIER_NON_SIGNE2 = 0x12,
-	ENTIER_NON_SIGNE4 = 0X14,
-	CHAINE = 0x20,
-	FLOTTANT = 0x30
-} TYPE_DONNEE;
+/* Types de donnees de la couche transport*/
+typedef enum Datatype {
+	INT8   = 0x01,
+	INT16  = 0X02,
+	INT32  = 0x04,
+	UINT8  = 0X11,
+	UINT16 = 0x12,
+	UINT32 = 0X14,
+	STRING = 0x20,
+	DOUBLE = 0x30
+} Datatype;
 
-/* Chaines de caracteres correspondant aux types de donnee */
-#define S_INT8 "int8"
-#define S_INT16 "int16"
-#define S_INT32 "int32"
-#define S_UINT8 "uint8"
-#define S_UINT16 "uint16"
-#define S_UINT32 "uint32"
-#define S_STRING "string"
-#define S_DOUBLE "double"
-#define S_END "END"
+/* Representation en chaine de caracteres des types de donnee */
+#define STR_INT8   "int8"
+#define STR_INT16  "int16"
+#define STR_INT32  "int32"
+#define STR_UINT8  "uint8"
+#define STR_UINT16 "uint16"
+#define STR_UINT32 "uint32"
+#define STR_STRING "string"
+#define STR_DOUBLE "double"
+#define STR_END    "END"
 
-/* Types de fanion */
-typedef enum TYPE_FANION {
-    TRAME_NORMALE = 0xFF,
-    TRAME_SPECIALE = 0x00
-} TYPE_FANION;
+/* Types de fanion d'une trame*/
+typedef enum Pennant {
+    NORMAL_FRAME  = 0xFF,
+    SPECIAL_FRAME = 0x00
+} Pennant;
 
-/* Structure d'une donnée */
-typedef struct Donnee {
-	TYPE_DONNEE type;
+/* Structure d'une donnee */
+typedef struct Data {
+	Datatype type;
         
 	union {
-            /* entier signés */
-            char entierSigne1;
-            short entierSigne2;
-            int entierSigne4;
+            /* Entiers signes */
+            int8_t int8;
+            int16_t int16;
+            int32_t int32;
 
-            /* entiers non signés */
-            unsigned char entierNonSigne1;
-            unsigned short entierNonSigne2;
-            unsigned int entierNonSigne4;
+            /* Entiers non signes */
+            uint8_t uint8;
+            uint16_t uint16;
+            uint32_t uint32;
 
-            /* chaîne de caractères */
-            struct chaine {
-                    unsigned short taille;
-                    char* texte; 
-            } chaine;
+            /* Chaine de caracteres */
+            struct string {
+                uint16_t size;
+                char* content; 
+            } string;
 
-            /* flottant */
-            /*
-            struct flottant {
-                    double f;
-                    unsigned char octets[8];
-            } flottant;
-            */
-            double flottant;
+            double dbl;
 	};
-} *Donnee;
+} *Data;
 
 
 /* Structure d'une trame */
-typedef struct Trame {
-    TYPE_FANION fanion;
-    unsigned char id;
-    unsigned char nbDonnees;
-    Donnee* donnees;
-} *Trame;
+typedef struct Frame {
+    Pennant pennant;
+    uint8_t id;
+    uint8_t size;
+    
+    /* Tableau de donnees alloue dynamiquement */
+    Data* data;
+} *Frame;
 
 /* Affichage d'une trame ou d'une donnee */
-void afficher_trame(Trame trame);
-void afficher_donnee(Donnee trame);
+void print_frame(Frame frame_to_print);
+void print_data(Data data_to_print);
 
 /* Ajout de donnees */
-void ajouter_donnee(Trame t, Donnee d);
-void ajouter_donnees(Trame t, Donnee d);
+void add_data(Frame frame, Data data_added);
+void add_data_array(Frame frame, Data* data_array);
 
-/* Libération de l'espace mémoire alloué à une trame et ses données */
-void free_trame(Trame t);
+/* Liberation de l'espace mémoire alloué */
+void free_frame(Frame frame);
 
 #endif /* TRAME_H_ */

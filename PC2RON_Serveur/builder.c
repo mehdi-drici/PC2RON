@@ -6,160 +6,238 @@
 #include "joueur.h"
 
 /*
- * create_ack
- * create_registered_ok
- * create_registered_no
- * create_user
- * create_win
- * create_death
- * create_deaths
- * create_pause
- * create_start
- * create_turn
- * create_end
- */
+*******************************************************************************
+ Author: Mehdi Drici
 
-Trame creer_trame_ack(int ok) {
-    Trame trameAck = creer_trame(Ack);
+ File: builder.c
+ 
+ Description: Constructeur des trames specifique au protocole PC2RON
+              Ce pattern permet d'assurer une meille independance 
+              de la couche transport
+*******************************************************************************
+*/
+
+/**
+ * Creation d'une trame Ack
+ * Il s'agit d'un acquittement à la trame Initiate
+ * @param boolean valeur de verite de l'acquittement
+ * @return 
+ */
+Frame create_ack(int boolean) {
+    Frame ack_frame = create_frame(Ack);
     
-    Donnee chaineOk = creer_chaine("OK");
-    Donnee chaineNo = creer_chaine("NO");
-    Donnee chaineNomVersion = creer_chaine(NOM_VERSION_PROTOCOLE);
+    Data ok = create_string("OK");
+    Data no = create_string("NO");
+    Data version = create_string(STR_VERSION);
     
-    if(ok) {
-        ajouter_donnee(trameAck, chaineOk); 
+    if(boolean) {
+        add_data(ack_frame, ok); 
     } else {
-        ajouter_donnee(trameAck, chaineNo);
+        add_data(ack_frame, no);
     }
     
-    ajouter_donnee(trameAck, chaineNomVersion);
+    add_data(ack_frame, version);
     
-    return trameAck;
+    return ack_frame;
 }
 
-Trame creer_trame_registered_ok(unsigned short id) {
-    Trame trameRegOk = creer_trame(Registered);
-    Donnee ok = creer_chaine("OK");
-    Donnee dId = creer_entierNonSigne2(id);
+/**
+ * Creation d'une trame Registered
+ * Il s'agit d'un acquittement positif à la trame Connect
+ * @param uid identifiant du joueur
+ * @return Trame Registered Ok
+ */
+Frame create_registered_ok(uint16_t uid) {
+    Frame reg_frame = create_frame(Registered);
+    Data ok = create_string("OK");
+    Data id = create_uint16(uid);
     
-    ajouter_donnee(trameRegOk, ok);
-    ajouter_donnee(trameRegOk, dId);
+    add_data(reg_frame, ok);
+    add_data(reg_frame, id);
     
-    return trameRegOk;
+    return reg_frame;
 }
 
-Trame creer_trame_registered_no(const char* message) {
-    Trame trameRegNo = creer_trame(Registered);
-    Donnee no = creer_chaine("NO");
-    Donnee  msgErr = creer_chaine(message);
+/**
+ * Creation d'une trame Registered
+ * Il s'agit d'un acquittement negatif à la trame Connect
+ * @param msg Message d'erreur d'inscription
+ * @return Trame Registered No
+ */
+Frame create_registered_no(const char* msg) {
+    Frame reg_frame = create_frame(Registered);
+    Data no = create_string("NO");
+    Data error = create_string(msg);
     
-    ajouter_donnee(trameRegNo, no);
-    ajouter_donnee(trameRegNo, msgErr);
+    add_data(reg_frame, no);
+    add_data(reg_frame, error);
     
-    return trameRegNo;
+    return reg_frame;
 }
 
-Trame creer_trame_user(Joueur j) {
-    Trame trameUser = creer_trame(User);
-    Donnee id = creer_entierNonSigne2(j->id);
-    Donnee nom = creer_chaine(j->nom);
-    Donnee r = creer_entierNonSigne1(j->couleur.r);
-    Donnee v = creer_entierNonSigne1(j->couleur.v);
-    Donnee b = creer_entierNonSigne1(j->couleur.b);
+/**
+ * Creation de la trame User 
+ * @param player Joueur dont les informations sont recuperees
+ * @return Trame User
+ */
+Frame create_user(Player player) {
+    Frame user_frame = create_frame(User);
+    Data id = create_uint16(player->id);
+    Data name = create_string(player->name);
     
-    /*@todo modifier pour la derniere position*/
-    Donnee x0 = creer_entierNonSigne2(j->positions[0].x);
-    Donnee y0 = creer_entierNonSigne2(j->positions[0].y);
+    /* Creation des donnees representant la couleur */
+    Data r = create_uint8(player->color.r);
+    Data g = create_uint8(player->color.v);
+    Data b = create_uint8(player->color.b);
     
-    Donnee dir = creer_entierNonSigne1(j->dir);
-    Donnee speed = creer_entierNonSigne1(j->speed);
+    /* Creation des donnees representant la position initiale du joueur
+     * @todo modifier pour la derniere position
+    */
+    Data x0 = create_uint16(player->positions.point[0].x);
+    Data y0 = create_uint16(player->positions.point[0].y);
     
-    ajouter_donnee(trameUser, id);
-    ajouter_donnee(trameUser, nom);
-    ajouter_donnee(trameUser, r);
-    ajouter_donnee(trameUser, v);
-    ajouter_donnee(trameUser, b);
+    Data dir = create_uint8(player->dir);
+    Data speed = create_uint8(player->speed);
     
-    ajouter_donnee(trameUser, x0);
-    ajouter_donnee(trameUser, y0);
-    ajouter_donnee(trameUser, dir);
-    ajouter_donnee(trameUser, speed);
+    /* Ajout des donnees a la trame User */
+    add_data(user_frame, id);
+    add_data(user_frame, name);
     
-    return trameUser;
+    add_data(user_frame, r);
+    add_data(user_frame, g);
+    add_data(user_frame, b);
+    
+    add_data(user_frame, x0);
+    add_data(user_frame, y0);
+    add_data(user_frame, dir);
+    add_data(user_frame, speed);
+    
+    return user_frame;
 }
 
-Trame creer_trame_win(unsigned short id) {
-    Trame trameWin = creer_trame(Win);
+/**
+ * Creation de la trame Win
+ * @param id Identifant du joueur gagnant
+ * @return Trame Win
+ */
+Frame create_win(uint16_t uid) {
+    Frame win_frame = create_frame(Win);
     
-    Donnee dId = creer_entierNonSigne2(id);
-    ajouter_donnee(trameWin, dId);
+    Data id = create_uint16(uid);
+    add_data(win_frame, id);
     
-    return trameWin;
+    return win_frame;
 }
 
    /*   Un participant meurt  */ 
-Trame creer_trame_death(unsigned short id1) {
-    Trame trameDeath = creer_trame(Death);
-       /*  int nbIds = sizeof(id) / sizeof(short);  */ 
-    Donnee id = creer_entierNonSigne2(id1);
-    ajouter_donnee(trameDeath, id);
+/**
+ * Creation d'une trame Death contenant l'id du joueur mort
+ * @param uid Identifiant d'un joueur perdant
+ * @return Trame Death
+ */
+Frame create_death(uint16_t uid) {
+    Frame death_frame = create_frame(Death);
+
+    Data id = create_uint16(uid);
+    add_data(death_frame, id);
     
-    return trameDeath;    
+    return death_frame;    
 }
 
-   /*   Personne ne gagne (collision entre deux survivants)  */ 
-Trame creer_trame_deaths(unsigned short id1, unsigned short id2) {
-    Trame trameDeath = creer_trame(Death);
-       /*  int nbIds = sizeof(id) / sizeof(short);  */ 
-    Donnee id;
+/**
+ * Creation d'une trame Death contenant les ids des 2 survivants
+ * @param uid1 Identifiant du joueur survivant 1 
+ * @param uid2 Identifiant du joueur survivant 2
+ * @return Trame Death
+ */
+Frame create_two_deaths(uint16_t uid1, uint16_t uid2) {
+    Frame death_frame = create_frame(Death);
+    Data id;
     
-    id = creer_entierNonSigne2(id1);
-    ajouter_donnee(trameDeath, id);
+    /* Creation des identifiants des survivants */
+    id = create_uint16(uid1);
+    add_data(death_frame, id);
     
-    id = creer_entierNonSigne2(id2);
-    ajouter_donnee(trameDeath, id);
+    id = create_uint16(uid2);
+    add_data(death_frame, id);
 
-    return trameDeath;    
+    return death_frame;    
 }
 
-Trame creer_trame_pause(const char* message) {
-    Trame tramePause = creer_trame(Pause);
-    Donnee chaine = creer_chaine(message);
-    ajouter_donnee(tramePause, chaine);
+/**
+ * Creation d'une trame Pause
+ * @param msg Message de pause
+ * @return Trame Pause
+ */
+Frame create_pause(const char* msg) {
+    Frame pause_frame = create_frame(Pause);
+    Data pause_msg = create_string(msg);
+    add_data(pause_frame, pause_msg);
     
-    return tramePause;
+    return pause_frame;
 }
 
-Trame creer_trame_start(const char* message) {
-    Trame trameStart = creer_trame(Start);
-    Donnee chaine = creer_chaine(message);
-    ajouter_donnee(trameStart, chaine);
+/**
+ * Creation d'une trame Start
+ * @param msg Message de Start
+ * @return Trame Start
+ */
+Frame create_start(const char* msg) {
+    Frame FrameStart = create_frame(Start);
+    Data start_msg = create_string(msg);
+    add_data(FrameStart, start_msg);
     
-    return trameStart;
+    return FrameStart;
 }
 
-   /*  @todo modifier  */ 
-Trame creer_trame_turn(unsigned int t, Joueurs lesJoueurs) {
-    Trame trameTurn = creer_trame(Turn);
-    Donnee id, x, y, dir;
-    /*int nbJoueurs = sizeof(j) / sizeof(Joueur);*/
+/**
+ * Creation d'une trame Turn
+ * Il s'agit d'une mise a jour des positions et directions pour les joueurs
+ * @param time Temps ecoule depuis le debut de la partie
+ * @param lesJoueurs
+ * @return Trame Turn 
+ */ 
+Frame create_turn(uint32_t time, Players the_players) {
+    Frame turn_frame = create_frame(Turn);
+    Data id, x, y, dir, elapsed_time;
     size_t i;
+    size_t nb_positions = 0;
+    Player current_player;
     
-    for(i=0; i < lesJoueurs->nbJoueurs; i++) {
-        id = creer_entierNonSigne2(lesJoueurs->joueur[i]->id);
-        x = creer_entierNonSigne2(lesJoueurs->joueur[i]->positions[0].x);
-        y = creer_entierNonSigne2(lesJoueurs->joueur[i]->positions[0].y);
-        dir = creer_entierNonSigne2(lesJoueurs->joueur[i]->dir);
+    /* Creation de la donnee representant le temps ecoule */
+    elapsed_time = create_uint32(time);
+    add_data(turn_frame, elapsed_time);
+    
+    /* Creation des donnees representant 
+     * les positions et directions des joueurs
+     */
+    for(i=0; i < the_players->size; i++) {
+        current_player = the_players->player[i];
         
-        ajouter_donnee(trameTurn, id);
-        ajouter_donnee(trameTurn, x);
-        ajouter_donnee(trameTurn, y);
-        ajouter_donnee(trameTurn, dir);
+        /* Seuls les joueurs encore vivants sont pris en compte*/
+        if(current_player->is_registered) {
+            nb_positions = current_player->positions.size;
+
+            id = create_uint16(current_player->id);
+            x = create_uint16(current_player->positions.point[nb_positions-1].x);
+            y = create_uint16(current_player->positions.point[nb_positions-1].y);
+            dir = create_uint16(current_player->dir);
+
+            add_data(turn_frame, id);
+            add_data(turn_frame, x);
+            add_data(turn_frame, y);
+            add_data(turn_frame, dir);
+        }
     }
     
-    return trameTurn;
+    return turn_frame;
 }
 
-Trame creer_trame_end() {
-    return creer_trame(End);
+/**
+ * Creation d'une trame de fin
+ * Dans la version de base, elle correspond a la fin de la liste des joueurs
+ * @return Trame End
+ */
+Frame create_end() {
+    return create_frame(End);
 }

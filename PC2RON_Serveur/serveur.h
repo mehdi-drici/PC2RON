@@ -21,12 +21,12 @@
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 
-   /*  typedef int SOCKET;  */ 
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
-int etablir_connexion(void);
-int accepter_client(int sock);
-void fermer_connexion(int sock);
+int connect_server(void);
+int accept_client(int sock);
+void close_connection(int sock);
+
 #endif /* SERVEUR_H_ */
