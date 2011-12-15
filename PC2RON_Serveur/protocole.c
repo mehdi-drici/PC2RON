@@ -358,6 +358,7 @@ Result* respond_connect(int sock, Players the_players, Frame frame) {
         if(is_unique_name(frame->data[3]->string.content, the_players)) {
             player->name = frame->data[3]->string.content;
         } else {
+            /* @todo gerer le renommage en cas de conflit de nom de joueur */
             int i = 0;
             char* old_name = frame->data[3]->string.content;
             char* new_name = malloc(frame->data[3]->string.size + (size_t)3);

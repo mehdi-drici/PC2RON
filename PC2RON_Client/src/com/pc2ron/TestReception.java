@@ -1,6 +1,6 @@
 package com.pc2ron;
 
-import com.pc2ron.interfaces.IString;
+import com.pc2ron.interfaces.IDataString;
 import com.pc2ron.interfaces.IData;
 import com.pc2ron.interfaces.IProtocol;
 import java.io.DataInputStream;
@@ -17,16 +17,16 @@ public class TestReception {
     public static void main(String[] argv) {        
         try {
             IProtocol proto = Protocol.getInstance();
-            proto.connexion("127.0.0.1", 5555);
+            proto.connect("127.0.0.1", 5555);
             
             // start
-            proto.getContenuTrame();
+            proto.readFrame();
 
             // pause
-            proto.getContenuTrame();
+            proto.readFrame();
             
             // joueurs
-            proto.getContenuTrame();
+            proto.readFrame();
         } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();

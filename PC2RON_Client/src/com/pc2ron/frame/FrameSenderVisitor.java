@@ -4,191 +4,264 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.pc2ron.interfaces.IString;
-import com.pc2ron.interfaces.IUint8;
-import com.pc2ron.interfaces.IUint16;
-import com.pc2ron.interfaces.IUInt32;
-import com.pc2ron.interfaces.IInt8;
-import com.pc2ron.interfaces.IInt16;
-import com.pc2ron.interfaces.IInt32;
-import com.pc2ron.interfaces.IDouble;
-import com.pc2ron.interfaces.IFrame;
-import com.pc2ron.interfaces.IVisitable;
-import com.pc2ron.interfaces.IVisitor;
-import com.pc2ron.frame.data.ETypeDonnee;
+import com.pc2ron.interfaces.*;
+import com.pc2ron.frame.data.EDataType;
 
+/**
+ * Envoi d'une trame et de ses donnees (niveau transport)
+ * L'instance de ce sender de trame etant unique
+ * on utilise le pattern Singleton 
+ * @author mehdi
+ */
 public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable>{
-   
-    @Override
-    public IVisitable visit(IFrame trame, DataOutputStream out) {
-            try {
-                out.writeByte(trame.getTypeFanion());
-
-                EPennant typeFanion = EPennant.getTypeFanion(
-                                                     trame.getTypeFanion());
-                switch(typeFanion) {
-                    case TrameNormale:
-                        out.writeByte(trame.getId());
-                        out.writeByte(trame.getNbDonnees());
-
-                        for (int i=0; i < trame.getNbDonnees(); i++) {
-                            trame.getDonnees().get(i).accept(this, out);
-                        }
-                        break;
-
-                    case TrameSpeciale:
-                        break;
-
-                    default:
-                        //@todo envoyer une exception
-                        System.out.println("Fanion de la trame envoyee incorrect");
-                }
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-
-            // TODO Auto-generated method stub
-            return null;
+    // Unique instance de l'emetteur
+    private static IVisitor instance;
+	
+    private FrameSenderVisitor() {
     }
 
-    @Override
-    public IVisitable visit(IInt8 donnee, DataOutputStream out) {
-            try {
-                    out.writeByte(ETypeDonnee.ENTIER_SIGNE1.getType());
-                    out.writeByte(donnee.getEntier());
+    /**
+    * Recuperer l'instance du singleton
+    * @return L'unique instance du constructeur 
+    */
+    public static IVisitor getInstance() {
+        if (null == instance) { // Premier appel
+            instance = new FrameSenderVisitor();
+        }
 
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-            return null;
+        return instance;
     }
-
+    
+    /**
+     * Envoi d'une trame
+     * Il s'agit du point d'entree de cette classe
+     * @param frame Trame a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return null
+     * @throws IncorrectFrameException 
+     */
     @Override
-    public IVisitable visit(IInt16 donnee, DataOutputStream out) {
-            try {
-                    out.writeByte(ETypeDonnee.ENTIER_SIGNE2.getType());
-                    out.writeShort(donnee.getEntier());
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+    public IVisitable visit(IFrame frame, DataOutputStream out) 
+                                                throws IncorrectFrameException {
+        try {
+            out.writeByte(frame.getPennant());
+
+            EPennant typeFanion = EPennant.getPennant(
+                                                 frame.getPennant());
+            switch(typeFanion) {
+                case NormalFrame:
+                    // Envoi de l'identifiant
+                    out.writeByte(frame.getId());
+                    
+                    // Envoi du nombre de donnees
+                    out.writeByte(frame.getDataSize());
+                    
+                    // Envoi des donnees
+                    for (int i=0; i < frame.getDataSize(); i++) {
+                        frame.getData().get(i).accept(this, out);
+                    }
+                    break;
+
+                case SpecialFrame:
+                    break;
+
+                default:
+                    throw new IncorrectFrameException("Unknown pennant");
             }
-            return null;
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+
+        return null;
     }
-
+    
+    /**
+     * Envoi d'une donnee d'une entier signe sur 8 octets
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
     @Override
-    public IVisitable visit(IInt32 donnee, DataOutputStream out) {
-            try {
-                    out.writeByte(ETypeDonnee.ENTIER_SIGNE4.getType());
-                    out.writeInt(donnee.getEntier());
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-            return null;
+    public IVisitable visit(IDataInt8 data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.writeByte(EDataType.ENTIER_SIGNE1.getType());
+            
+            // Envoi de la donnee
+            out.writeByte(data.getValue());
+
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        return null;
     }
-
+    
+    /**
+     * Envoi d'une donnee d'une entier signe sur 16 octets
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
     @Override
-    public IVisitable visit(IUint8 donnee, DataOutputStream out) {
-            try {
-                    out.write(ETypeDonnee.ENTIER_NON_SIGNE1.getType());
-                    //out.writeShort(donnee.getEntier());
-
-                    // Conversion en entier non signe
-                    short entierNonSigne = donnee.getEntier();
-
-                    out.writeByte((byte)entierNonSigne);
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-            return null;
+    public IVisitable visit(IDataInt16 data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.writeByte(EDataType.ENTIER_SIGNE2.getType());
+            
+            // Envoi de la donnee
+            out.writeShort(data.getValue());
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        return null;
     }
-
+    
+    /**
+     * Envoi d'une donnee d'une entier signe sur 32 octets
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
     @Override
-    public IVisitable visit(IUint16 donnee, DataOutputStream out) {
-            try {
-                    out.write(ETypeDonnee.ENTIER_NON_SIGNE2.getType());
-                    //out.writeInt(donnee.getEntier());
-
-                    int entierNonSigne = donnee.getEntier();
-
-                    //@todo tester
-                    //out.writeShort((short) entierNonSigne);
-
-                    ArrayList<Byte> listeOctets = new ArrayList<Byte>();
-
-                    // Valeur
-                    listeOctets.add((byte) (entierNonSigne >>> 8));
-                    listeOctets.add((byte) (entierNonSigne));
-
-                    for(int i=0; i < listeOctets.size(); i++){	
-                            out.writeByte(listeOctets.get(i));
-            }
-
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-            return null;
+    public IVisitable visit(IDataInt32 data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.writeByte(EDataType.ENTIER_SIGNE4.getType());
+            
+            // Envoi de la donnee
+            out.writeInt(data.getValue());
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        return null;
     }
-
+    
+    /**
+     * Envoi d'une donnee d'une entier non signe sur 8 octets
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
     @Override
-    public IVisitable visit(IUInt32 donnee, DataOutputStream out) {
-            try {
-                    out.write(ETypeDonnee.ENTIER_NON_SIGNE4.getType());
-                    //out.writeLong(donnee.getEntier());
+    public IVisitable visit(IDataUint8 data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.write(EDataType.ENTIER_NON_SIGNE1.getType());
 
-                    long entierNonSigne = donnee.getEntier();
-                    ArrayList<Byte> listeOctets = new ArrayList<Byte>();
+            // Conversion de l'entier en entier non signe
+            short entierNonSigne = data.getValue();
 
-                    //@todo tester
-                    //out.writeInt((int) entierNonSigne);
-
-                    // Valeur		
-                    listeOctets.add((byte)(entierNonSigne >>> 24));
-                    listeOctets.add((byte)(entierNonSigne >>> 16));
-                    listeOctets.add((byte)(entierNonSigne >>>  8));
-                    listeOctets.add((byte)(entierNonSigne));
-
-                    for(int i=0; i < listeOctets.size(); i++){	
-                            out.writeByte(listeOctets.get(i));
-            }
-
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
-            return null;
+            out.writeByte((byte)entierNonSigne);
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+        return null;
     }
-
+    
+    /**
+     * Envoi d'une donnee d'une entier non signe sur 16 octets
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
     @Override
-    public IVisitable visit(IString donnee, DataOutputStream out) {
-            try {
-                    short taille = (short) donnee.getChaine().getBytes("UTF-8").length;
+    public IVisitable visit(IDataUint16 data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.write(EDataType.ENTIER_NON_SIGNE2.getType());
+            
+            // Codage du nombre en octets
+            int entierNonSigne = data.getValue();
+            ArrayList<Byte> listeOctets = new ArrayList<Byte>();
+            
+            listeOctets.add((byte) (entierNonSigne >>> 8));
+            listeOctets.add((byte) (entierNonSigne));
 
-                    out.write(ETypeDonnee.CHAINE.getType());
-                    //out.writeShort(donnee.getChaine().getBytes("UTF-8").length);
-                    out.writeShort(taille);
-                    out.write(donnee.getChaine().getBytes());
-                    //out.writeUTF(donnee.getChaine());
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+            // Envoi de la donnee
+            for(int i=0; i < listeOctets.size(); i++){	
+                out.writeByte(listeOctets.get(i));
             }
-            return null;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
-
+    
+    /**
+     * Envoi d'une donnee d'une entier non signe sur 32 octets
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
     @Override
-    public IVisitable visit(IDouble donnee, DataOutputStream out) {
-            try {
-                    out.write(ETypeDonnee.FLOTTANT.getType());
-                    out.writeDouble(donnee.getFlottant());
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+    public IVisitable visit(IDataUInt32 data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.write(EDataType.ENTIER_NON_SIGNE4.getType());
+
+            // Codage du nombre en octets
+            long entierNonSigne = data.getValue();
+            ArrayList<Byte> listeOctets = new ArrayList<Byte>();
+            
+            listeOctets.add((byte)(entierNonSigne >>> 24));
+            listeOctets.add((byte)(entierNonSigne >>> 16));
+            listeOctets.add((byte)(entierNonSigne >>>  8));
+            listeOctets.add((byte)(entierNonSigne));
+            
+            // Envoi de la donnee
+            for(int i=0; i < listeOctets.size(); i++){	
+                out.writeByte(listeOctets.get(i));
             }
-            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Envoi d'une donnee d'une chaine de caracteres
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
+    @Override
+    public IVisitable visit(IDataString data, DataOutputStream out) {
+        try {
+            //short taille = (short) donnee.getContent().getBytes("UTF-8").length;
+            
+            // Envoi du type de donnee
+            out.write(EDataType.CHAINE.getType());
+            
+            // Envoi de la taille de la chaine
+            out.writeShort(data.getContent().getBytes("UTF-8").length);
+            
+            // Envoi de la chaine
+            out.write(data.getContent().getBytes());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Envoi d'une donnee d'un flottant en double precision
+     * @param data Donnee a envoyer
+     * @param out Flux d'envoi des donnees au serveur
+     * @return
+     */
+    @Override
+    public IVisitable visit(IDataDouble data, DataOutputStream out) {
+        try {
+            // Envoi du type de donnee
+            out.write(EDataType.FLOTTANT.getType());
+            
+            // Envoi de la donnee
+            out.writeDouble(data.getDouble());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

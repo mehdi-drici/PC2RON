@@ -6,10 +6,14 @@ import java.util.List;
 import com.pc2ron.interfaces.IData;
 import com.pc2ron.interfaces.IFrame;
 
+/**
+ * Representation d'une trame conformement a la specification 
+ * de la couche transport de PC2RON
+ * @author Mehdi Drici
+ */
 public class Frame implements IFrame {
 	private ArrayList<IData> donnees = null;
         
-        // Entiers non signes 1
 	private short typeFanion;
 	private short id;
 	
@@ -19,23 +23,31 @@ public class Frame implements IFrame {
 	
 	public Frame(short id) {
 		this();
-                typeFanion = EPennant.TrameNormale.getType();
+                typeFanion = EPennant.NormalFrame.getType();
 		this.setId(id);
 	}
 	
+        /**
+         * Ajouter une donnee
+         * @param data Donnee
+         */
         @Override
-	public void ajouterDonnee(IData donnee) {
-		this.donnees.add(donnee);
+	public void addData(IData data) {
+            this.donnees.add(data);
 	}
-
+        
+        /**
+         * Ajouter une liste de donnees
+         * @param dataArray Liste de donnees
+         */
         @Override
-	public void ajouterDonnees(List<IData> donnees) {
-		this.donnees.addAll(donnees);
+	public void addData(List<IData> dataArray) {
+            this.donnees.addAll(dataArray);
 	}
 	
         @Override
-	public List<IData> getDonnees() {
-		return this.donnees;
+	public List<IData> getData() {
+            return this.donnees;
 	}
 
         @Override
@@ -44,42 +56,56 @@ public class Frame implements IFrame {
 	}
 	
         @Override
-	public short getTypeFanion() {
+	public short getPennant() {
 		return typeFanion;
 	}
 	
+        /**
+         * Recuperer le nombre de donnees de la trame
+         * @return Nombre de donnees
+         */
 	@Override
-	public short getNbDonnees() {
+	public short getDataSize() {
 		return (short) this.donnees.size();
 	}
     
-        //@todo conversion en entier non signe
-        @Override
+        /**
+         * Modifier l'id d'une trame
+         * La conversion en entier non signe est effectue 
+         * lors de cette modification
+         * @param id Nouvel id de la trame courante
+         */
 	public void setId(short id) {
-		this.id = (short) (id & 0xff);
+            this.id = (short) (id & 0xff);
 	}
-
+        
+        /**
+         * Modifier le fanion d'une trame
+         * La conversion en entier non signe est effectue 
+         * lors de cette modification
+         * @param pennantType Nouveau fanion de la trame courante
+         */
         @Override
-	public void setTypeFanion(short typeFanion) {
-		this.typeFanion = (short) (typeFanion & 0xff);
+	public void setPennant(short pennantType) {
+            this.typeFanion = (short) (pennantType & 0xff);
 	}
 	
         @Override
 	public String toString() {
             String s = " { ";
-            EPennant eTypeFanion = EPennant.getTypeFanion(this.getTypeFanion());
+            EPennant eTypeFanion = EPennant.getPennant(this.getPennant());
             
             switch(eTypeFanion) {
-                case TrameSpeciale:
+                case SpecialFrame:
                     s += eTypeFanion.toString();
                     break;
                     
-                case TrameNormale:
+                case NormalFrame:
                     s += "0x" + Integer.toHexString(getId()).toUpperCase();
 
-                    for (int i = 0; i < getNbDonnees(); i++) {
+                    for (int i = 0; i < getDataSize(); i++) {
                             s += ", ";
-                            s += getDonnees().get(i).toString();
+                            s += getData().get(i).toString();
                     }
                     break;
             }

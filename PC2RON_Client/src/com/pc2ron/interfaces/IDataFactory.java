@@ -1,18 +1,26 @@
 package com.pc2ron.interfaces;
 
+/**
+ * Interface de la fabrique de trames et de donnees
+ * @author Mehdi Drici
+ */
 public interface IDataFactory {
-	public IData getDonnee(byte type);
+        // Donnee generique
+	public IData createData(byte type);
 	
-	public IInt8 getEntierSigne1(byte valeur);
-	public IInt16 getEntierSigne2(short valeur);
-	public IInt32 getEntierSigne4(int valeur);
+        // Entiers signes
+	public IDataInt8 createInt8(byte int8);
+	public IDataInt16 createInt16(short int16);
+	public IDataInt32 createInt32(int int32);
 	
-	public IUint8 getEntierNonSigne1(short valeur);
-	public IUint16 getEntierNonSigne2(int valeur);
-	public IUInt32 getEntierNonSigne4(long valeur);
+        // Entiers non signes
+	public IDataUint8 createUint8(short uint8);
+	public IDataUint16 createUint16(int uint16);
+	public IDataUInt32 createUint32(long uint32);
 	
-	public IDouble getFlottant(double flottant);
+        // Flottant
+	public IDataDouble createDouble(double myDouble);
 	
-	// En UTF-8
-	public IString getChaine(String chaine);
+	// Chaine de caracteres en UTF-8
+	public IDataString createString(String myString);
 }

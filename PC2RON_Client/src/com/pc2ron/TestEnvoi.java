@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 public class TestEnvoi {
     public static void main(String[] argv) {        
+        /*
         try {
             short r=10;
             short v=10;
@@ -18,26 +19,26 @@ public class TestEnvoi {
             ArrayList contenu;
             
             // Init
-            pro.connexion("127.0.0.1", 5555);
-            int id = pro.inscription(r, v, b, nom);
+            pro.connect("127.0.0.1", 5555);
+            int id = pro.register(r, v, b, nom);
             System.out.println("ID : " + id);
             
-            pro.envoyerOrdre(EOrder.DROIT);
+            pro.sendOrder(EOrder.STRAIGHT);
             
             //start
-            contenu = pro.getContenuTrame();
+            contenu = pro.readFrame();
             System.out.println("{Contenu} : " + contenu.toString());
             
             //pause
-            contenu = pro.getContenuTrame();
+            contenu = pro.readFrame();
             System.out.println("{Contenu} : " + contenu.toString());
             
             //users
-            contenu = pro.getContenuTrame();
+            contenu = pro.readFrame();
             System.out.println("{Contenu} : " + contenu.toString());
             
             //Thread.sleep(1000);
-            pro.deconnexion();
+            pro.disconnect();
         } catch (UnknownHostException e) {
             System.out.println("Unkonw exception " + e.getMessage());
 
@@ -47,5 +48,6 @@ public class TestEnvoi {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } 
+        */
     }
 }

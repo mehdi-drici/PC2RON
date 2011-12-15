@@ -1,24 +1,28 @@
 package com.pc2ron.protocol;
 
+/**
+ * Les differents ordres d'un joueur
+ * @author Mehdi Drici
+ */
 public enum EOrder {
-	DROIT(1, "idle"),
-	GAUCHE(2, "left"),
-	DROITE(3, "right"),
-	ABANDON(4, "abandon");
-	
-	private final int ordre;
-	private final String sOrdre;
-	
-	EOrder(int ordre, String sOrdre) {
-		this.ordre = ordre;
-		this.sOrdre = sOrdre;
-	}
-	
-	public int getOrdre() {
-		return ordre;
-	}
-	
-	public String getStringOrdre() {
-		return sOrdre;
-	}
+    STRAIGHT(1, "idle"),
+    LEFT(2, "left"),
+    RIGHT(3, "right"),
+    ABORT(4, "abandon");
+
+    private final int order;
+    private final String stringOrder;
+
+    EOrder(int order, String stringOrder) {
+        this.order = order;
+        this.stringOrder = stringOrder;
+    }
+
+    public int getOrder() {
+        return this.order;
+    }
+
+    public String getStringOrder() {
+        return stringOrder;
+    }
 }

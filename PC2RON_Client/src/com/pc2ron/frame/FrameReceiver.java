@@ -3,245 +3,320 @@ package com.pc2ron.frame;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.pc2ron.interfaces.IString;
+import com.pc2ron.interfaces.IDataString;
 import com.pc2ron.interfaces.IData;
 import com.pc2ron.interfaces.IDataFactory;
-import com.pc2ron.interfaces.IUint8;
-import com.pc2ron.interfaces.IUint16;
-import com.pc2ron.interfaces.IUInt32;
-import com.pc2ron.interfaces.IInt8;
-import com.pc2ron.interfaces.IInt16;
-import com.pc2ron.interfaces.IInt32;
-import com.pc2ron.interfaces.IDouble;
+import com.pc2ron.interfaces.IDataUint8;
+import com.pc2ron.interfaces.IDataUint16;
+import com.pc2ron.interfaces.IDataUInt32;
+import com.pc2ron.interfaces.IDataInt8;
+import com.pc2ron.interfaces.IDataInt16;
+import com.pc2ron.interfaces.IDataInt32;
+import com.pc2ron.interfaces.IDataDouble;
 import com.pc2ron.interfaces.IFrameReceiver;
 import com.pc2ron.interfaces.IFrame;
 import com.pc2ron.interfaces.IFrameFactory;
-import com.pc2ron.frame.data.DonneeFactory;
-import com.pc2ron.frame.data.ETypeDonnee;
+import com.pc2ron.frame.data.DataFactory;
+import com.pc2ron.frame.data.EDataType;
 
-//@todo Gestion des erreurs
+/**
+ * Reception d'une trame et de ses donnees (niveau transport)
+ * L'instance de ce recepteur de trame etant unique
+ * on utilise le pattern Singleton 
+ * @author Mehdi Drici
+ */
 public class FrameReceiver implements IFrameReceiver {
+    // Unique instance du recepteur
+    private static IFrameReceiver instance;
+	
+    private FrameReceiver() {
+    }
 
-	@Override
-	public IString recevoirChaine(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-        
-		IString chaine = null;
-                IUint16 nbOctets;
-                byte[] buffer ;
+    /**
+    * Recuperer l'instance du singleton
+    * @return L'unique instance du constructeur 
+    */
+    public static IFrameReceiver getInstance() {
+        if (null == instance) { // Premier appel
+            instance = new FrameReceiver();
+        }
 
-		try {
-                    int temp = in.readUnsignedShort();
-                    nbOctets = donneeFactory.getEntierNonSigne2(temp);
-                    
-                    //nbOctets = this.recevoirEntierNonSigne2(in);
-
-                    buffer = new byte[nbOctets.getEntier()];
-                    in.read(buffer, 0, nbOctets.getEntier());
-                    
-                    chaine = donneeFactory.getChaine(new String(buffer, IString.CHARSET));
-                    
-		} catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-		}
-		return chaine;
-	}
+        return instance;
+    }
     
-    //@todo types de donnee a mettre en unsigned
-	@Override
-	public IData recevoirDonnee(DataInputStream in) {
-		byte type;
-		IData donnee = null;
-		
-		try {
-			type = in.readByte();
-			ETypeDonnee t = ETypeDonnee.getTypeDonnee(type);
+    /**
+     * Reception d'une trame
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La trame recue
+     * @throws IncorrectFrameException Exception envoyee lorsque la trame 
+     *         recue est incorrecte
+     */
+    @Override
+    public IFrame readFrame(DataInputStream in) throws IncorrectFrameException {
+        IFrameFactory trameFactory = FrameFactory.getInstance();
+        IFrame trameRecue = trameFactory.createFrame();
 
-			switch (t) {
-				case ENTIER_SIGNE1:
-					donnee = recevoirEntierSigne1(in);
-					break;
-					
-				case ENTIER_SIGNE2:
-					donnee = recevoirEntierSigne2(in);
-					break;
-					
-				case ENTIER_SIGNE4:
-					donnee = recevoirEntierSigne4(in);
-					break;
-					
-				case ENTIER_NON_SIGNE1:
-					donnee = recevoirEntierNonSigne1(in);
-					break;
-					
-				case ENTIER_NON_SIGNE2:
-					donnee = recevoirEntierNonSigne2(in);
-					break;
-					
-				case ENTIER_NON_SIGNE4:
-					donnee = recevoirEntierNonSigne4(in);
-					break;
-					
-				case CHAINE:
-					donnee = recevoirChaine(in);
-					break;
-					
-				case FLOTTANT:
-					donnee = recevoirFlottant(in);
-					break;
-					
-				default:
-					System.out.println("Mauvais type de donnee !");
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return donnee;
-	}
-
-	@Override
-	public IUint8 recevoirEntierNonSigne1(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IUint8 entier = null;
-		try {
-			entier = donneeFactory.getEntierNonSigne1((short) in.readUnsignedByte());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return entier;
-	}
-
-	@Override
-	public IUint16 recevoirEntierNonSigne2(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IUint16 entier = null;
-		try {
-			entier = donneeFactory.getEntierNonSigne2(in.readUnsignedShort());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return entier;
-	}
-
-	@Override
-	public IUInt32 recevoirEntierNonSigne4(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IUInt32 entier = null;
-		try {
-			long entierSigne = in.readInt();
-			long entierNonSigne = entierSigne & 0xffffffffL;
-			entier = donneeFactory.getEntierNonSigne4(entierNonSigne);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return entier;
-	}
-
-	@Override
-	public IInt8 recevoirEntierSigne1(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IInt8 entier = null;
-		try {
-			entier = donneeFactory.getEntierSigne1(in.readByte());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return entier;
-	}
-
-	@Override
-	public IInt16 recevoirEntierSigne2(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IInt16 entier = null;
-		try {
-			entier = donneeFactory.getEntierSigne2(in.readShort());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return entier;
-	}
-
-	@Override
-	public IInt32 recevoirEntierSigne4(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IInt32 entier = null;
-		try {
-			entier = donneeFactory.getEntierSigne4(in.readInt());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return entier;
-	}
-
-	@Override
-	public IDouble recevoirFlottant(DataInputStream in) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
-		IDouble flottant = null;
-		try {
-			flottant = donneeFactory.getFlottant(in.readDouble());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return flottant;
-	}
-
-	@Override
-	//@todo gestion des erreurs
-	public IFrame recevoirTrame(DataInputStream in) {
-		IFrameFactory trameFactory = FrameFactory.getInstance();
-		IFrame trameRecue = trameFactory.getTrame();
-		
-		try {
-                        byte typeFanion = in.readByte();
-                        
-			trameRecue.setTypeFanion(typeFanion);
-                        short t = 255;
-                        
-                        EPennant eTypeFanion = EPennant.getTypeFanion(typeFanion);
-                        
-                        switch(eTypeFanion) {
-                            case TrameNormale:
-                                byte id = in.readByte();
-                                trameRecue.setId(id);
-
-                                byte nbDonnees = in.readByte();
-                                
-                                
-                                //IDonneeFactory donneeFactory = DonneeFactory.getInstance();
-                                IData donneeRecue;
-
-                                // Reception des donnees
-                                for(int i=0; i < nbDonnees; i++) {  
-                                    donneeRecue = recevoirDonnee(in);             
-                                    trameRecue.ajouterDonnee(donneeRecue);   
-                                }
-                                break;
-                             
-                            case TrameSpeciale:
-                                return trameRecue;
-                                
-                            default:
-                                System.out.println("Erreur de fanion !");
-				return null;         
-                        }
+        try {
+            // Reception du fanion
+            byte typeFanion = in.readByte();
+            trameRecue.setPennant(typeFanion);
+            EPennant eTypeFanion = EPennant.getPennant(typeFanion);
             
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-                
-		return trameRecue;
-	}
+            // Traitement adapte au fanion recu
+            switch(eTypeFanion) {
+                case NormalFrame:
+                    // Reception de l'identifiant de la trame
+                    byte id = in.readByte();
+                    trameRecue.setId(id);
+                    
+                    // Reception du nombre de donnees
+                    byte nbDonnees = in.readByte();
 
+                    // Reception des donnees
+                    IData donneeRecue;
+                    for(int i=0; i < nbDonnees; i++) {  
+                        donneeRecue = readData(in);             
+                        trameRecue.addData(donneeRecue);   
+                    }
+                    break;
+
+                case SpecialFrame:
+                    return trameRecue;
+                
+                // Fanion inconnu
+                default:
+                    throw new IncorrectFrameException("Unknown pennant");
+            }
+
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+
+        return trameRecue;
+    }
+    
+    /***
+     * Reception d'une donnee quelconque
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IData readData(DataInputStream in) throws IncorrectFrameException {
+        byte type;
+        IData donnee = null;
+
+        try {
+            // Reception du type de donnee
+            type = in.readByte();
+            EDataType t = EDataType.getTypeDonnee(type);
+
+            // Reception adaptee au type de donnee recu
+            switch (t) {
+                case ENTIER_SIGNE1:
+                    donnee = readInt8(in);
+                    break;
+
+                case ENTIER_SIGNE2:
+                    donnee = readInt16(in);
+                    break;
+
+                case ENTIER_SIGNE4:
+                    donnee = readInt32(in);
+                    break;
+
+                case ENTIER_NON_SIGNE1:
+                    donnee = readUInt8(in);
+                    break;
+
+                case ENTIER_NON_SIGNE2:
+                    donnee = readUInt16(in);
+                    break;
+
+                case ENTIER_NON_SIGNE4:
+                    donnee = readUInt32(in);
+                    break;
+
+                case CHAINE:
+                    donnee = readString(in);
+                    break;
+
+                case FLOTTANT:
+                    donnee = readDouble(in);
+                    break;
+
+                // Type de donnee inconnu
+                default:
+                    throw new IncorrectFrameException("Data type unknown");
+            }
+
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+
+        return donnee;
+    }
+    
+    /***
+     * Reception d'une donnee contenant une chaine de caracteres
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee de la chaine de caracteres recue
+     */
+    @Override
+    public IDataString readString(DataInputStream in) {
+            IDataFactory donneeFactory = DataFactory.getInstance();
+
+            IDataString chaine = null;
+            IDataUint16 nbOctets;
+            byte[] buffer ;
+
+            try {
+                // Reception de la taille de la chaine de caracteres
+                int temp = in.readUnsignedShort();
+                nbOctets = donneeFactory.createUint16(temp);
+
+                // Reception de la chaine
+                buffer = new byte[nbOctets.getValue()];
+                in.read(buffer, 0, nbOctets.getValue());
+                chaine = donneeFactory.createString(new String(buffer, IDataString.CHARSET));
+
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            return chaine;
+    }
+
+    
+    /***
+     * Reception d'une donnee contenant un entier non signe sur 8 octets
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataUint8 readUInt8(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataUint8 entier = null;
+        try {
+                entier = donneeFactory.createUint8((short) in.readUnsignedByte());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return entier;
+    }
+    
+    
+    /***
+     * Reception d'une donnee contenant un entier non signe sur 16 octets
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataUint16 readUInt16(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataUint16 entier = null;
+        try {
+                entier = donneeFactory.createUint16(in.readUnsignedShort());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return entier;
+    }
+    
+    /***
+     * Reception d'une donnee contenant un entier non signe sur 32 octets
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataUInt32 readUInt32(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataUInt32 entier = null;
+        try {
+                long entierSigne = in.readInt();
+
+                // Conversion de l'entier recu en entier non signe
+                long entierNonSigne = entierSigne & 0xffffffffL;
+                entier = donneeFactory.createUint32(entierNonSigne);
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return entier;
+    }
+    
+    /***
+     * Reception d'une donnee contenant un entier signe sur 8 octets
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataInt8 readInt8(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataInt8 entier = null;
+        try {
+                entier = donneeFactory.createInt8(in.readByte());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return entier;
+    }
+    
+    /***
+     * Reception d'une donnee contenant un entier signe sur 16 octets
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataInt16 readInt16(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataInt16 entier = null;
+        try {
+                entier = donneeFactory.createInt16(in.readShort());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return entier;
+    }
+    
+    /***
+     * Reception d'une donnee contenant un entier signe sur 32 octets
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataInt32 readInt32(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataInt32 entier = null;
+        try {
+                entier = donneeFactory.createInt32(in.readInt());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return entier;
+    }
+    
+    /***
+     * Reception d'une donnee contenant un flottant en double precision
+     * @param in Flux de reception des donnees provenant du serveur
+     * @return La donnee recue
+     */
+    @Override
+    public IDataDouble readDouble(DataInputStream in) {
+        IDataFactory donneeFactory = DataFactory.getInstance();
+        IDataDouble flottant = null;
+        try {
+                flottant = donneeFactory.createDouble(in.readDouble());
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return flottant;
+    }
 }

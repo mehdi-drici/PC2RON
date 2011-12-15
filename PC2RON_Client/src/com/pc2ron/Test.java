@@ -7,26 +7,26 @@ import com.pc2ron.interfaces.IDataFactory;
 import com.pc2ron.interfaces.IFrame;
 import com.pc2ron.interfaces.IFrameFactory;
 import com.pc2ron.frame.FrameFactory;
-import com.pc2ron.frame.data.DonneeFactory;
+import com.pc2ron.frame.data.DataFactory;
 
 public class Test {
 	public static void main(String[] args) {
-		IDataFactory donneeFactory = DonneeFactory.getInstance();
+		IDataFactory donneeFactory = DataFactory.getInstance();
 		IFrameFactory trameFactory = FrameFactory.getInstance();
 		
 		// Création des données
-		IData chaine = donneeFactory.getChaine("OK");
+		IData chaine = donneeFactory.createString("OK");
 		byte b = 7;
 		
-		IData entier1 = donneeFactory.getEntierSigne1(b);
-		IData entier2 = donneeFactory.getEntierSigne2((short) 7);
-		IData entier4 = donneeFactory.getEntierSigne4(7);
+		IData entier1 = donneeFactory.createInt8(b);
+		IData entier2 = donneeFactory.createInt16((short) 7);
+		IData entier4 = donneeFactory.createInt32(7);
 		
-		IData entierNonSigne1 = donneeFactory.getEntierNonSigne1((short) -59);
-		IData entierNonSigne2 = donneeFactory.getEntierNonSigne2((char) 127);
-		IData entierNonSigne4 = donneeFactory.getEntierNonSigne4((long) -77);
+		IData entierNonSigne1 = donneeFactory.createUint8((short) -59);
+		IData entierNonSigne2 = donneeFactory.createUint16((char) 127);
+		IData entierNonSigne4 = donneeFactory.createUint32((long) -77);
 		
-		IData flottant = donneeFactory.getFlottant((double)2.78);
+		IData flottant = donneeFactory.createDouble((double)2.78);
 		
 		/* Ajout des données*/
 		ArrayList<IData> donnees = new ArrayList<IData>();
@@ -42,11 +42,11 @@ public class Test {
 		donnees.add(flottant);
 		
 		// Création de la trame
-		IFrame trame = trameFactory.getTrame((byte)50, donnees);
+		IFrame trame = trameFactory.createFrame((byte)50, donnees);
 		
-		IFrame trame2 = trameFactory.getTrame((byte)50);
-		trame2.ajouterDonnee(chaine);
-		trame2.ajouterDonnee(entier1);
+		IFrame trame2 = trameFactory.createFrame((byte)50);
+		trame2.addData(chaine);
+		trame2.addData(entier1);
 		
 		/*trame2.ajouterDonnee(entier2);
 		trame2.ajouterDonnee(entier4);
@@ -55,14 +55,14 @@ public class Test {
 		trame2.ajouterDonnee(entierNonSigne4);
 		trame2.ajouterDonnee(flottant);*/
 		
-		System.out.println("Nombre de données (getDonnees().size())= " + trame.getDonnees().get(0).toString());
+		System.out.println("Nombre de données (getDonnees().size())= " + trame.getData().get(0).toString());
 		
-		System.out.println("Nombre de données (getNbDonnees) = " + trame.getNbDonnees());
-		System.out.println("Nombre de données (getDonnees().size())= " + trame.getDonnees().size());
+		System.out.println("Nombre de données (getNbDonnees) = " + trame.getDataSize());
+		System.out.println("Nombre de données (getDonnees().size())= " + trame.getData().size());
 		System.out.println("Trame : " + trame.toString() + "\n\n");
 		
-		System.out.println("Nombre de données (getNbDonnees) = " + trame2.getNbDonnees());
-		System.out.println("Nombre de données (getDonnees().size())= " + trame2.getDonnees().size());
+		System.out.println("Nombre de données (getNbDonnees) = " + trame2.getDataSize());
+		System.out.println("Nombre de données (getDonnees().size())= " + trame2.getData().size());
 		System.out.println("Trame2 : " + trame2.toString());
 	}
 }
