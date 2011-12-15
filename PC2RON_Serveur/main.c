@@ -20,7 +20,7 @@
 #include "protocole.h"
 #include "serveur.h"
 
-#define NB_MAX_JOUEURS 4
+#define NB_MAX_JOUEURS 2
 #define NB_MAX_THREADS 10
 
 extern int usleep (__useconds_t __useconds);

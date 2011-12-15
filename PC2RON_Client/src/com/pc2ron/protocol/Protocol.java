@@ -276,7 +276,11 @@ public class Protocol implements IProtocol {
         // Nom du joueur recu
         IDataString name = (IDataString) data.get(1);
         playerReceived.setName(name.getContent());
-
+        
+        //debug
+        System.out.println("Toto");
+        //debug
+        
         // Couleur de la moto du joueur recu
         IDataUint8 red = (IDataUint8) data.get(2);
         IDataUint8 green = (IDataUint8) data.get(3);
