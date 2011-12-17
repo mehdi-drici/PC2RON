@@ -85,7 +85,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataInt8 data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.writeByte(EDataType.ENTIER_SIGNE1.getType());
+            out.writeByte(EDataType.INT8.getType());
             
             // Envoi de la donnee
             out.writeByte(data.getValue());
@@ -106,7 +106,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataInt16 data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.writeByte(EDataType.ENTIER_SIGNE2.getType());
+            out.writeByte(EDataType.INT16.getType());
             
             // Envoi de la donnee
             out.writeShort(data.getValue());
@@ -126,7 +126,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataInt32 data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.writeByte(EDataType.ENTIER_SIGNE4.getType());
+            out.writeByte(EDataType.INT32.getType());
             
             // Envoi de la donnee
             out.writeInt(data.getValue());
@@ -146,7 +146,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataUint8 data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.write(EDataType.ENTIER_NON_SIGNE1.getType());
+            out.write(EDataType.UINT8.getType());
 
             // Conversion de l'entier en entier non signe
             short entierNonSigne = data.getValue();
@@ -168,7 +168,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataUint16 data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.write(EDataType.ENTIER_NON_SIGNE2.getType());
+            out.write(EDataType.UINT16.getType());
             
             // Codage du nombre en octets
             int entierNonSigne = data.getValue();
@@ -198,7 +198,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataUInt32 data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.write(EDataType.ENTIER_NON_SIGNE4.getType());
+            out.write(EDataType.UINT32.getType());
 
             // Codage du nombre en octets
             long entierNonSigne = data.getValue();
@@ -231,7 +231,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
             //short taille = (short) donnee.getContent().getBytes("UTF-8").length;
             
             // Envoi du type de donnee
-            out.write(EDataType.CHAINE.getType());
+            out.write(EDataType.STRING.getType());
             
             // Envoi de la taille de la chaine
             out.writeShort(data.getContent().getBytes("UTF-8").length);
@@ -255,7 +255,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     public IVisitable visit(IDataDouble data, DataOutputStream out) {
         try {
             // Envoi du type de donnee
-            out.write(EDataType.FLOTTANT.getType());
+            out.write(EDataType.DOUBLE.getType());
             
             // Envoi de la donnee
             out.writeDouble(data.getDouble());

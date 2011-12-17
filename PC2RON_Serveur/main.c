@@ -20,7 +20,7 @@
 #include "protocole.h"
 #include "serveur.h"
 
-#define NB_MAX_JOUEURS 2
+#define NB_MAX_JOUEURS 1
 #define NB_MAX_THREADS 10
 
 extern int usleep (__useconds_t __useconds);
@@ -66,7 +66,7 @@ void handle_player_registration(int player_sock) {
         result = respond(player_sock, the_players);
         
         if(result != NULL && result->type == NOT_CONNECTED) {
-            /*pthread_exit(NULL);*/
+            pthread_exit(NULL);
         }
     } while (result == NULL || result->type != Connect);
 }   
@@ -165,7 +165,7 @@ void*  THREAD_instant(void *args) {
     int i = 1;
     while(1) {
         usleep(1000000);
-        printf("\n---------------- instant %d ------------\n", i);
+        /*printf("\n---------------- instant %d ------------\n", i);*/
         pthread_mutex_lock(&MUTEX_instant);
         pthread_cond_broadcast(&COND_instant);
         i++;

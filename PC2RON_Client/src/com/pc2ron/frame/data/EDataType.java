@@ -7,55 +7,55 @@ package com.pc2ron.frame.data;
  * @author Mehdi Drici
  */
 public enum EDataType {
-    ENTIER_SIGNE1(0x01, 1, "int8"), 
-    ENTIER_SIGNE2(0x02, 2, "int16"),
-    ENTIER_SIGNE4(0x04, 4, "int32"),
+    INT8(0x01, 1, "int8"), 
+    INT16(0x02, 2, "int16"),
+    INT32(0x04, 4, "int32"),
 
-    ENTIER_NON_SIGNE1(0x11, 1, "uint8"),
-    ENTIER_NON_SIGNE2(0x12, 2, "uint16"),
-    ENTIER_NON_SIGNE4(0x14, 4, "uint32"),
+    UINT8(0x11, 1, "uint8"),
+    UINT16(0x12, 2, "uint16"),
+    UINT32(0x14, 4, "uint32"),
 
-    CHAINE(0x20, "string"),
-    FLOTTANT(0x30, 8, "double");
+    STRING(0x20, "string"),
+    DOUBLE(0x30, 8, "double");
 
     private final byte type;
-    private final int taille;
-    private final String sType;
+    private final int size;
+    private final String typeString;
 
     EDataType(int type) {
         this.type = (byte) type;
-        this.taille = 0;
-        this.sType = "";
+        this.size = 0;
+        this.typeString = "";
     }
 
-    EDataType(int type, int taille) {
+    EDataType(int type, int size) {
         this.type = (byte) type;
-        this.taille = taille;
-        this.sType = "";
+        this.size = size;
+        this.typeString = "";
     }
 
-    EDataType(int type, String sType) {
+    EDataType(int type, String typeString) {
         this.type = (byte) type;
-        this.taille = 0;
-        this.sType = sType;
+        this.size = 0;
+        this.typeString = typeString;
     }
 
-    EDataType(int type, int taille, String sType) {
+    EDataType(int type, int size, String typeString) {
         this.type = (byte) type;
-        this.taille = taille;
-        this.sType = sType;
+        this.size = size;
+        this.typeString = typeString;
     }
 
     public byte getType() {
         return this.type;
     }
 
-    public int getTaille() {
-        return taille;
+    public int getSize() {
+        return size;
     }
 
-    public String getStringType() {
-        return sType;
+    public String getTypeString() {
+        return typeString;
     }
     
     /**
@@ -66,16 +66,16 @@ public enum EDataType {
      * @param data Donnee a traiter
      * @return 
      */
-    public static EDataType getTypeDonnee(short type) {
+    public static EDataType getDataType(short type) {
         EDataType eTypes[] = EDataType.values();
-        EDataType eType = null;
+        EDataType result = null;
         
         for(EDataType typeCourant : eTypes) {
             if(typeCourant.getType() == type) {
-                eType = typeCourant;
+                result = typeCourant;
             }
         }
         
-        return eType;
+        return result;
     }
 }

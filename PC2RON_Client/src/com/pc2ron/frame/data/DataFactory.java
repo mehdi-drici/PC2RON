@@ -20,38 +20,38 @@ public class DataFactory implements IDataFactory {
 	@Override
 	public IData createData(byte type) {
 		IData donnee = null;
-		EDataType eType = EDataType.getTypeDonnee(type);
+		EDataType eType = EDataType.getDataType(type);
                 
                 switch(eType) {
-                    case ENTIER_SIGNE1:
+                    case INT8:
                         donnee = new DataInt8();
                         break;
                     
-                    case ENTIER_SIGNE2:
+                    case INT16:
                         donnee = new DataInt16();
                         break;
                         
-                    case ENTIER_SIGNE4:
+                    case INT32:
                         donnee = new DataInt32();
                         break;
                     
-                    case ENTIER_NON_SIGNE1:
+                    case UINT8:
                         donnee = new DataUint8();
                         break;
                         
-                    case ENTIER_NON_SIGNE2:
+                    case UINT16:
                         donnee = new DataUint16();
                         break;
                         
-                    case ENTIER_NON_SIGNE4:
+                    case UINT32:
                         donnee = new DataUint32();
                         break;
                         
-                    case CHAINE:
+                    case STRING:
                         donnee = new DataString();
                         break;
                         
-                    case FLOTTANT:
+                    case DOUBLE:
                         donnee = new DataDouble();
                         break;
                 }

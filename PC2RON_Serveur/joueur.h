@@ -110,6 +110,7 @@ int is_connected(int sock, const Players the_players);
 
 /* Contrainte sur l'unicite du nom de joueur */
 int is_unique_name(const char* name, const Players the_players);
+char* rename_if_not_unique(char* name, size_t name_size, Players the_players);
 
 /* Compter le nombre de joueurs connectes ou inscrits */
 int count_connected_players(const Players the_players);

@@ -97,12 +97,12 @@ extern "C" {
         close (sock); \
         perror(__func__); \
         return ERROR;  \
-    } else if (nb_sent_bytes == 0) { \
+    }/* else if (nb_sent_bytes == 0) { \
         close (sock); \
         fprintf(stderr, "Erreur: %s >> %s: Deconnexion brutale du client (socket: %d)\n", \
         __FILE__, __func__, sock); \
         return ERROR; \
-    };
+    }*/;
     
 #define PRINT_UNKNOWN_PENNANT(pennant) fprintf(stderr, "Erreur: %s >> %s : Le fanion %2.2x est \
 inconnu\n", __FILE__, __func__, pennant);

@@ -42,7 +42,7 @@ public class DataString implements IDataString {
 
         try {
             byte[] octets = this.getContent().getBytes(CHARSET);
-            s = EDataType.CHAINE.getStringType() + " \"";
+            s = EDataType.STRING.getTypeString() + " \"";
             short octetNonSigne;
 
             for(int i=0; i < octets.length; i++) {

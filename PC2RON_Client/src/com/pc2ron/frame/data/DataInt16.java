@@ -29,7 +29,7 @@ public class DataInt16 implements IDataInt16 {
     }
 
     public String toString() {
-        return EDataType.ENTIER_SIGNE2.getStringType() + " " + getValue();
+        return EDataType.INT16.getTypeString() + " " + getValue();
     }
 	
     /**

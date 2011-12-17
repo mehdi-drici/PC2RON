@@ -26,7 +26,7 @@ public class DataDouble implements IDataDouble {
     
     @Override
     public String toString() {
-        return EDataType.FLOTTANT.getStringType() + " " + getDouble();
+        return EDataType.DOUBLE.getTypeString() + " " + getDouble();
     }
     
     /**

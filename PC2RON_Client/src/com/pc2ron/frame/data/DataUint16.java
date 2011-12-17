@@ -26,7 +26,7 @@ public class DataUint16 implements IDataUint16 {
     
     @Override
     public String toString() {
-        return EDataType.ENTIER_NON_SIGNE2.getStringType() + " " + getValue();
+        return EDataType.UINT16.getTypeString() + " " + getValue();
     }
     
     /**

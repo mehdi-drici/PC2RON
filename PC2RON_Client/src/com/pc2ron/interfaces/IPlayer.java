@@ -1,9 +1,10 @@
 package com.pc2ron.interfaces;
 
-import com.pc2ron.frame.data.*;
 import com.pc2ron.game.EDirection;
 import com.pc2ron.game.ESpeed;
+import java.awt.Color;
 import java.awt.Point;
+import java.util.ArrayList;
 
 /**
  * Interface representant un joueur
@@ -16,16 +17,26 @@ public interface IPlayer {
         
         // Couleur de la moto au format RGB
         // {Red, Green, Blue}
-        public int[] getRGB();
+        public Color getRGB();
         
-        public Point getPosition();
+        public ArrayList<Point> getPositions();
         public EDirection getDir();
         public ESpeed getSpeed();
         
-        public void setRGB(int[] color);
+        // Recuperer la derniere position du joueur
+        public Point getLastPosition();
+        
+        public void setRGB(Color color);
 	public void setName(String name);
 	public void setId(int id);
-	public void setPosition(Point pt);
 	public void setDir(EDirection dir);
 	public void setSpeed(ESpeed speed);
+        
+        /* Methodes de deplacement */
+        public void goDown();
+        public void goUp();
+        public void goLeft();
+        public void goRight();
+        
+        
 }

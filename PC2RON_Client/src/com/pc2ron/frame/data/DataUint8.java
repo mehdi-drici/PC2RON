@@ -26,7 +26,7 @@ public class DataUint8 implements IDataUint8 {
 
     @Override
     public String toString() {
-        return EDataType.ENTIER_NON_SIGNE1.getStringType() + " " + getValue();
+        return EDataType.UINT8.getTypeString() + " " + getValue();
     }
     
     /**

@@ -14,6 +14,7 @@ import com.pc2ron.frame.data.*;
 import com.pc2ron.game.EDirection;
 import com.pc2ron.game.ESpeed;
 import com.pc2ron.game.Player;
+import java.awt.Color;
 import java.awt.Point;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -162,7 +163,7 @@ public class Protocol implements IProtocol {
     @Override
     public ArrayList readFrame() throws Exception {
         IFrame receivedFrame = receiver.readFrame(in);
-
+        
         EFrameType frameType = EFrameType.getFrameType(receivedFrame.getId());
         
         // Resultat correspondant aux donnees extraites de la trame recue
@@ -176,13 +177,13 @@ public class Protocol implements IProtocol {
         
         switch(frameType) {
             case User:
-                result.add(readUser(receivedFrame));
+                ArrayList<IPlayer> players = new ArrayList<IPlayer>();
                 do {
-                    result.add(readUser(receivedFrame));
+                    players.add(readUser(receivedFrame));
                     receivedFrame = receiver.readFrame(in);
                     frameType = EFrameType.getFrameType(receivedFrame.getId());
                 } while (frameType != EFrameType.End);
-                
+                result.add(players);
                 break;
 
             case Start:
@@ -277,26 +278,22 @@ public class Protocol implements IProtocol {
         IDataString name = (IDataString) data.get(1);
         playerReceived.setName(name.getContent());
         
-        //debug
-        System.out.println("Toto");
-        //debug
-        
         // Couleur de la moto du joueur recu
         IDataUint8 red = (IDataUint8) data.get(2);
         IDataUint8 green = (IDataUint8) data.get(3);
         IDataUint8 blue = (IDataUint8) data.get(4);
-        int[] color = {red.getValue(), green.getValue(), blue.getValue()};
+        Color color = new Color(red.getValue(), green.getValue(), blue.getValue());
         playerReceived.setRGB(color);
-
+        
         // Coordonnees initiales du joueur recu
         IDataUint16 x0 = (DataUint16) data.get(5);
         IDataUint16 y0 = (DataUint16) data.get(6);
-        playerReceived.setPosition(new Point(x0.getValue(), y0.getValue()));
-
+        playerReceived.getPositions().add(new Point(x0.getValue(), y0.getValue()));
+        
         // Vitesse du joueur recu
         IDataUint8 speed = (IDataUint8) data.get(7);
         playerReceived.setSpeed(ESpeed.getESpeed(speed.getValue()));
-
+        
         return playerReceived;
     }
     
@@ -351,7 +348,7 @@ public class Protocol implements IProtocol {
             dir = (IDataUint16) turnFrame.getData().get((i*PLAYER_DATA_SIZE) + 4);
             
             players[i].setId(id.getValue());
-            players[i].setPosition(position);
+            players[i].getPositions().add(position);
             players[i].setDir(EDirection.getEDirection(dir.getValue()));
             
         }
@@ -379,8 +376,4 @@ public class Protocol implements IProtocol {
     public void startGame() {
         
     }
-    
-    
-
-    
 }

@@ -30,7 +30,7 @@ public class DataUint32 implements IDataUInt32 {
     
     @Override
     public String toString() {
-        return EDataType.ENTIER_NON_SIGNE4.getStringType() + " " + getValue();
+        return EDataType.UINT32.getTypeString() + " " + getValue();
     }
     
     /**

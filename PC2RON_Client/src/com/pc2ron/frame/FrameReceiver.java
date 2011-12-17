@@ -3,19 +3,7 @@ package com.pc2ron.frame;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import com.pc2ron.interfaces.IDataString;
-import com.pc2ron.interfaces.IData;
-import com.pc2ron.interfaces.IDataFactory;
-import com.pc2ron.interfaces.IDataUint8;
-import com.pc2ron.interfaces.IDataUint16;
-import com.pc2ron.interfaces.IDataUInt32;
-import com.pc2ron.interfaces.IDataInt8;
-import com.pc2ron.interfaces.IDataInt16;
-import com.pc2ron.interfaces.IDataInt32;
-import com.pc2ron.interfaces.IDataDouble;
-import com.pc2ron.interfaces.IFrameReceiver;
-import com.pc2ron.interfaces.IFrame;
-import com.pc2ron.interfaces.IFrameFactory;
+import com.pc2ron.interfaces.*;
 import com.pc2ron.frame.data.DataFactory;
 import com.pc2ron.frame.data.EDataType;
 
@@ -108,39 +96,39 @@ public class FrameReceiver implements IFrameReceiver {
         try {
             // Reception du type de donnee
             type = in.readByte();
-            EDataType t = EDataType.getTypeDonnee(type);
+            EDataType t = EDataType.getDataType(type);
 
             // Reception adaptee au type de donnee recu
             switch (t) {
-                case ENTIER_SIGNE1:
+                case INT8:
                     donnee = readInt8(in);
                     break;
 
-                case ENTIER_SIGNE2:
+                case INT16:
                     donnee = readInt16(in);
                     break;
 
-                case ENTIER_SIGNE4:
+                case INT32:
                     donnee = readInt32(in);
                     break;
 
-                case ENTIER_NON_SIGNE1:
+                case UINT8:
                     donnee = readUInt8(in);
                     break;
 
-                case ENTIER_NON_SIGNE2:
+                case UINT16:
                     donnee = readUInt16(in);
                     break;
 
-                case ENTIER_NON_SIGNE4:
+                case UINT32:
                     donnee = readUInt32(in);
                     break;
 
-                case CHAINE:
+                case STRING:
                     donnee = readString(in);
                     break;
 
-                case FLOTTANT:
+                case DOUBLE:
                     donnee = readDouble(in);
                     break;
 

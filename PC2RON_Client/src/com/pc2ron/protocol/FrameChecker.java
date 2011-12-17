@@ -45,10 +45,6 @@ public class FrameChecker implements IFrameChecker {
      */
     @Override
     public void check(IFrame frame) throws FormatException {
-        //debug
-        System.out.println(frame.toString());
-        //debug
-        
         EPennant pennant = EPennant.getPennant(frame.getPennant());
         
         switch(pennant) {
@@ -88,10 +84,6 @@ public class FrameChecker implements IFrameChecker {
                         break;
                         
                     case User:
-                        //debug
-                        System.out.println("User");
-                        //debug
-                        
                         checkUser(frame);
                         break;
                         
@@ -170,7 +162,7 @@ public class FrameChecker implements IFrameChecker {
         }
         
         // Verification du champ de l'identifiant (ou de message d'erreur)
-        field = frame.getData().get(0);
+        field = frame.getData().get(1);
         
         if( !(field instanceof DataString) && !(field instanceof DataUint16)) {
             throw new FormatException(frameType.toString(), 
@@ -343,6 +335,12 @@ public class FrameChecker implements IFrameChecker {
     public void checkUser(IFrame frame) throws FormatException {
         EFrameType frameType = EFrameType.User;
         IData field;
+        
+        // Verification du nombre de donnees
+        if(frame.getDataSize() != 9) {
+            throw new FormatException(frameType.toString(), 
+                                      "Nombre de donnees incorrect");
+        }
         
         // Verification de l'identifiant du joueur
         field = frame.getData().get(0);

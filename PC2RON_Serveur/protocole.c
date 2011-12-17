@@ -220,6 +220,9 @@ Result* respond(int sock, Players the_players) {
     Result* result = NULL;
     Frame frame = recv_frame(sock);
     
+    /*debug*/
+    print_frame(frame);
+    
     if(check_frame(frame) == SUCCESS) {
         
         /* Deconnexion du joueur */
@@ -354,24 +357,9 @@ Result* respond_connect(int sock, Players the_players, Frame frame) {
         player->color.r = frame->data[0]->uint8;
         player->color.v = frame->data[1]->uint8;
         player->color.b = frame->data[2]->uint8;
-        
-        if(is_unique_name(frame->data[3]->string.content, the_players)) {
-            player->name = frame->data[3]->string.content;
-        } else {
-            /* @todo gerer le renommage en cas de conflit de nom de joueur */
-            int i = 0;
-            char* old_name = frame->data[3]->string.content;
-            char* new_name = malloc(frame->data[3]->string.size + (size_t)3);
-            /*strcat(new_name, "_1");*/
-            
-            while(!is_unique_name(new_name, the_players)) {
-                printf("%s\n", new_name);
-                sprintf(new_name, "%s_%d", old_name, i);
-                i++;
-            }
-
-            player->name = new_name;
-        }
+        player->name = rename_if_not_unique(frame->data[3]->string.content,
+                                            frame->data[3]->string.size,
+                                            the_players);
         
         player->id = nb_registered_players;
         
@@ -421,6 +409,9 @@ void send_broadcast(Players the_players, Frame frame) {
     size_t i = 0;
     Player current_player;
     
+    /*debug*/
+    print_frame(frame);
+    
     for(i=0; i < the_players->size; i++) {
         current_player = the_players->player[i];
         
@@ -429,6 +420,9 @@ void send_broadcast(Players the_players, Frame frame) {
          */
         if(current_player->is_registered) {
             if(send_frame(current_player->sock, frame) == ERROR) {
+                /*debug*/
+                printf("Suppression d'un joueurs");
+                
                 remove_player_by_sock(current_player->sock, the_players, 1);
             }
         }
@@ -467,7 +461,8 @@ void send_user(Players the_players) {
     Player current_player;
     
     /* Envoi a tous les clients de la trame User 
-     * qui decrit chaque joueur connecte */
+     * qui decrit chaque joueur connecte 
+     */
     for(i=0; i < the_players->size; i++) {
         current_player = the_players->player[i];
         

@@ -30,7 +30,7 @@ public class DataInt32 implements IDataInt32 {
     }
 
     public String toString() {
-        return EDataType.ENTIER_SIGNE4.getStringType() + " " + getValue();
+        return EDataType.INT32.getTypeString() + " " + getValue();
     }
     
     /**

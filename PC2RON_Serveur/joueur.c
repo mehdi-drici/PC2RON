@@ -130,9 +130,6 @@ Player get_player_by_name(const char* name, const Players the_players) {
     while (i < the_players->size) {
         current_player = the_players->player[i];
         
-        printf("current_player->name = %s\n", current_player->name);
-        printf("name = %s\n", name);
-        
         if(current_player->name != NULL && 
            0 == strcmp(current_player->name, name)) {
             return the_players->player[i];
@@ -293,4 +290,33 @@ int count_connected_players(const Players the_players) {
     }
     
     return connected_counter;
+}
+
+/**
+ * Renommer un nom s'il existe deja
+ * @param name Nom dont l'unicite est a verifier
+ * @param name_size Taille du nom
+ * @param the_players Liste de joueurs ou s'effectue la verification
+ * @return Nouveau nom si le renommage a ete effectue
+ */
+char* rename_if_not_unique(char* name, size_t name_size, Players the_players) {
+    size_t sizeof_suffix = 2;
+    
+    char* new_name;
+    int i = 1;
+    
+    if(is_unique_name(name, the_players)) {
+        return name;
+    } 
+
+    new_name = malloc(name_size + sizeof_suffix);
+
+    do {
+        printf("%s\n", new_name);
+        sprintf(new_name, "%s_%d", name, i);
+        i++;
+    } while(!is_unique_name(new_name, the_players));
+
+    
+    return new_name;
 }

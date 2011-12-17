@@ -1,7 +1,8 @@
 package com.pc2ron.game;
 
 import com.pc2ron.interfaces.IPlayer;
-import java.awt.Point;
+import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * Representation d'un joueur avec les caracteristiques telles que
@@ -9,17 +10,34 @@ import java.awt.Point;
  * @author Mehdi Drici
  */
 public class Player implements IPlayer {
+    //Identifiant unique
     private int id;
+    
+    // Nom du joueur
     private String name;
-    private int[] color;
-    private Point position;
+    
+    // Couleur au format RGB
+    private Color color;
+    
+    // Ensemble des positions du joueurs
+    private ArrayList<Point> positions;
+    
+    // Direction du joueur
     private EDirection dir;
+    
+    // Vitesse du joueur
     private ESpeed speed;
     
+    // Score du joueur
+    private int score;
+    
     public Player() {
-        this.color = new int[3];
-        this.position = new Point();
+        this.color = new Color(0);
+        this.positions = new ArrayList<Point>();
         this.name = "No name";
+        this.dir = EDirection.RIGHT;
+        this.speed = ESpeed.NORMAL;
+        this.score = 0;
     }
     
     public Player(int id) {
@@ -39,15 +57,24 @@ public class Player implements IPlayer {
     }
 
     @Override
-    public int[] getRGB() {
+    public Color getRGB() {
         return this.color;
     }
 
     @Override
-    public Point getPosition() {
-        return this.position;
+    public ArrayList<Point> getPositions() {
+        return this.positions;
     }
-
+    
+    @Override
+    public Point getLastPosition() {
+        if(this.positions.isEmpty()) {
+            return null;
+        } else {
+            return positions.get(positions.size() - 1);
+        }
+    }
+    
     @Override
     public EDirection getDir() {
         return this.dir;
@@ -60,10 +87,8 @@ public class Player implements IPlayer {
     
     /* Setters */
     @Override
-    public void setRGB(int[] color) {
-        this.color[0] = color[0];
-        this.color[1] = color[1];
-        this.color[2] = color[2];
+    public void setRGB(Color color) {
+        this.color = color;
     }
 
     @Override
@@ -75,20 +100,68 @@ public class Player implements IPlayer {
     public void setId(int id) {
         this.id = id;
     }
-
-    @Override
-    public void setPosition(Point pt) {
-        this.position.setLocation(pt);
-    }
-
+    
     @Override
     public void setDir(EDirection dir) {
-        this.setDir(dir);
+        this.dir = dir;
     }
 
     @Override
     public void setSpeed(ESpeed speed) {
         this.speed = speed;
+    }
+    
+    /* Les deplacements d'un joueur 
+     * @todo mettre a jour le score du joueur
+     *       et prendre en compte la vitesse du joueur
+     */
+    
+    /**
+     * Le joueur descend
+     * Seule la derniere ordonnee est changee
+     */
+    @Override
+    public void goDown() {
+        Point newPosition = new Point(getLastPosition());
+        
+        newPosition.y++;
+        this.positions.add(newPosition);
+    }
+    
+    /**
+     * Le joueur monte
+     * Seule la derniere ordonnee est changee
+     */
+    @Override
+    public void goUp() {
+        Point newPosition = new Point(getLastPosition());
+        
+        newPosition.y--;
+        this.positions.add(newPosition);
+    }
+    
+    /**
+     * Le joueur tourne a gauche
+     * Seule la derniere abscisse est changee
+     */
+    @Override
+    public void goLeft() {
+        Point newPosition = new Point(getLastPosition());
+        
+        newPosition.x--;
+        this.positions.add(newPosition);
+    }
+    
+    /**
+     * Le joueur tourne a droite
+     * Seule la derniere abscisse est changee
+     */
+    @Override
+    public void goRight() {
+        Point newPosition = new Point(getLastPosition());
+        
+        newPosition.x++;
+        this.positions.add(newPosition);
     }
     
     @Override
@@ -97,8 +170,9 @@ public class Player implements IPlayer {
         
         playerString += "Nom: " + getName() + "\n";
         playerString += "Id: " + getId() + "\n";
-        playerString += "Position: " + getPosition().toString() + "\n";
-
+        playerString += "Position: " + getLastPosition().x + "\n";
+        playerString += "Couleur: " + getRGB().toString() + "\n";
+        
         return playerString;
     }
 }
