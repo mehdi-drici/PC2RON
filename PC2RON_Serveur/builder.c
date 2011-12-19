@@ -154,7 +154,7 @@ Frame create_two_deaths(uint16_t uid1, uint16_t uid2) {
     Frame death_frame = create_frame(Death);
     Data id;
     
-    /* Creation des identifiants des survivants */
+    /* Creation des identifiants des deux (derniers) morts */
     id = create_uint16(uid1);
     add_data(death_frame, id);
     
@@ -217,7 +217,7 @@ Frame create_turn(uint32_t time, Players the_players) {
         /* Seuls les joueurs encore vivants sont pris en compte*/
         if(current_player->is_registered) {
             nb_positions = current_player->positions.size;
-
+            
             id = create_uint16(current_player->id);
             x = create_uint16(current_player->positions.point[nb_positions-1].x);
             y = create_uint16(current_player->positions.point[nb_positions-1].y);

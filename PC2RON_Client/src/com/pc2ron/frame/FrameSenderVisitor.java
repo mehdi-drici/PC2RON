@@ -15,7 +15,7 @@ import com.pc2ron.frame.data.EDataType;
  */
 public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable>{
     // Unique instance de l'emetteur
-    private static IVisitor instance;
+    private static IVisitor<DataOutputStream, IVisitable> instance;
 	
     private FrameSenderVisitor() {
     }
@@ -24,7 +24,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
     * Recuperer l'instance du singleton
     * @return L'unique instance du constructeur 
     */
-    public static IVisitor getInstance() {
+    public static IVisitor<DataOutputStream, IVisitable> getInstance() {
         if (null == instance) { // Premier appel
             instance = new FrameSenderVisitor();
         }
@@ -69,7 +69,7 @@ public class FrameSenderVisitor implements IVisitor<DataOutputStream, IVisitable
                     throw new IncorrectFrameException("Unknown pennant");
             }
         } catch (IOException e) {
-                e.printStackTrace();
+            e.printStackTrace();
         }
 
         return null;

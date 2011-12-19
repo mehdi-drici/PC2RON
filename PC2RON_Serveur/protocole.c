@@ -133,9 +133,6 @@ int check_order_format(Frame frame) {
     if(frame->size == 1 &&
        frame->data[0]->type == STRING) {
         check = SUCCESS;
-        
-    } else {
-        check = SUCCESS;
     }
      
     return check;
@@ -171,7 +168,9 @@ const char* check_connect_constraint(int sock, Players the_players) {
 int check_order_constraint(int sock, Players the_players) {
     int check = ERROR;
     
-    check = is_registered(sock, the_players);
+    if(is_registered(sock, the_players)) {
+        check = SUCCESS;
+    }
     
     return check;
 }

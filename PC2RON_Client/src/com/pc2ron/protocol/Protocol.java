@@ -32,7 +32,7 @@ public class Protocol implements IProtocol {
 
     // Sender et Receiver de trame
     private IFrameReceiver receiver;
-    private IVisitor sender;
+    private IVisitor<DataOutputStream, IVisitable> sender;
 
     // Constructeur de trame
     private IFrameBuilder builder;
@@ -172,43 +172,53 @@ public class Protocol implements IProtocol {
         // Verification de la trame
         checker.check(receivedFrame);
         
-        // Initialisation du resultat avec le type de trame
-        result.add(frameType);
-        
-        switch(frameType) {
-            case User:
-                ArrayList<IPlayer> players = new ArrayList<IPlayer>();
-                do {
-                    players.add(readUser(receivedFrame));
-                    receivedFrame = receiver.readFrame(in);
-                    frameType = EFrameType.getFrameType(receivedFrame.getId());
-                } while (frameType != EFrameType.End);
-                result.add(players);
-                break;
+        // En cas de fin de transmission, on renseigne dans le resultat
+        // qu'il s'agit d'une trame speciale
+        // afin de permettre a la classe utilisant ce protocole de faire
+        // le traitement adequat
+        if(receivedFrame.getPennant() == EPennant.SpecialFrame.getType()) {
+            this.sock.close();
+            result.add(EPennant.SpecialFrame);
 
-            case Start:
-                result.add(readStart(receivedFrame));
-                break;
+        } else {
+            // Initialisation du resultat avec le type de trame
+            result.add(frameType);
 
-            case Pause:
-                result.add(readPause(receivedFrame));
-                break;
+            switch(frameType) {
+                case User:
+                    ArrayList<IPlayer> players = new ArrayList<IPlayer>();
+                    do {
+                        players.add(readUser(receivedFrame));
+                        receivedFrame = receiver.readFrame(in);
+                        frameType = EFrameType.getFrameType(receivedFrame.getId());
+                    } while (frameType != EFrameType.End);
+                    result.add(players);
+                    break;
 
-            case Turn:
-                result.add(readTurn(receivedFrame));
-                break;
+                case Start:
+                    result.add(readStart(receivedFrame));
+                    break;
 
-            case Death:
-                result.add(readDeath(receivedFrame));
-                break;
+                case Pause:
+                    result.add(readPause(receivedFrame));
+                    break;
 
-            case Win:
-                result.add(readWin(receivedFrame));
-                break;
+                case Turn:
+                    result.add(readTurn(receivedFrame));
+                    break;
 
-            default:;
+                case Death:
+                    result.add(readDeath(receivedFrame));
+                    break;
+
+                case Win:
+                    result.add(readWin(receivedFrame));
+                    break;
+
+                default:
+                    throw new Exception("Ce code ne doit pas etre atteint !");
+            }
         }
-
         return result;
     }
     
@@ -324,7 +334,8 @@ public class Protocol implements IProtocol {
         
         int DataSize = turnFrame.getDataSize();
         int playersSize = (DataSize-1) / PLAYER_DATA_SIZE;
-        IPlayer[] players = new Player[playersSize];
+        
+        ArrayList<IPlayer> players = new ArrayList<IPlayer>(playersSize);
         
         Point position = new Point();
         IDataUInt32 elapsedTime =  (IDataUInt32) turnFrame.getData().get(0);
@@ -336,6 +347,7 @@ public class Protocol implements IProtocol {
          * Ajout des informations des joueurs recus dans la trame Turn
          */
         for(int i = 0; i < playersSize; i++) {
+            
             // Identifiant du joueur
             id = (IDataUint16) turnFrame.getData().get((i*PLAYER_DATA_SIZE) + 1);
             
@@ -344,19 +356,30 @@ public class Protocol implements IProtocol {
             y = (IDataUint16) turnFrame.getData().get((i*PLAYER_DATA_SIZE) + 3);
             position.setLocation(x.getValue(), y.getValue());
             
+            //test
+            System.out.println("position = " + position);
+            
             // Direction du joueur
             dir = (IDataUint16) turnFrame.getData().get((i*PLAYER_DATA_SIZE) + 4);
             
+            IPlayer player = new Player();
+            player.setId(id.getValue());
+            player.getPositions().add(position);
+            player.setDir(EDirection.getEDirection(dir.getValue()));
+            
+            players.add(i, player);
+            /*
+            players[i] = new Player();
             players[i].setId(id.getValue());
             players[i].getPositions().add(position);
             players[i].setDir(EDirection.getEDirection(dir.getValue()));
-            
+            */
         }
         
 	// Construction du resultat de la lecture
         result.add(elapsedTime.getValue());
         result.add(players);
-        
+
         return result;
     }
     
@@ -373,7 +396,7 @@ public class Protocol implements IProtocol {
      * Signaler que le joueur est pret
      * @todo implement
      */
+    @Override
     public void startGame() {
-        
     }
 }

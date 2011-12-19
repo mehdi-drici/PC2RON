@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public interface IProtocol {
     
-    // Nombre d'informations d'un joueur
+    // Nombre d'informations relatives a un joueur
     // conformement a la structure d'une trame Turn
     public static final int PLAYER_DATA_SIZE = 4;
 

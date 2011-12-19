@@ -44,7 +44,7 @@ typedef enum Direction {
 } Direction;
 
 typedef struct Player {
-    /* Identifiant unique du joueur */
+    /* Identifiant unique (> 0) du joueur */
     uint16_t id;
     
     /* Pseudo unique du joueur */
@@ -115,6 +115,14 @@ char* rename_if_not_unique(char* name, size_t name_size, Players the_players);
 /* Compter le nombre de joueurs connectes ou inscrits */
 int count_connected_players(const Players the_players);
 int count_registered_players(const Players the_players);
+
+/* Operations sur les positions des joueurs */
+void update_positions(Players the_players);
+void add_position(Player player, Coord coord);
+
+/* Detection d'une collision */
+uint16_t get_id_collision(Players the_players);
+int is_collision(Player player1, Player player2);
 
 #ifdef	__cplusplus
 }

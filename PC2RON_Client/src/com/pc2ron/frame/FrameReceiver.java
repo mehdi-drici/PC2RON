@@ -67,8 +67,10 @@ public class FrameReceiver implements IFrameReceiver {
                         trameRecue.addData(donneeRecue);   
                     }
                     break;
-
+                
+                // Fin de transmission
                 case SpecialFrame:
+                    in.close();
                     return trameRecue;
                 
                 // Fanion inconnu

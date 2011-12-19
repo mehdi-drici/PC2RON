@@ -42,7 +42,7 @@ Players create_the_players(size_t size) {
 }
 
 /**
- * Creation d'un joueur
+ * Creation et initialisation d'un joueur
  * @return Le joueur cree
  */
 Player create_player() {
@@ -51,15 +51,16 @@ Player create_player() {
     player_created->sock = -1;
     
     player_created->name = NULL;
-    player_created->dir = TOP;
+    player_created->dir = RIGHT;
     player_created->id = 0;
     
     /* Initialisation de la position du joueur 
      * @todo position aleatoire
      */
+    player_created->positions.size = 1;
     player_created->positions.point = malloc(sizeof(Coord));
-    player_created->positions.point[0].x = 0;
-    player_created->positions.point[0].y = 0;
+    player_created->positions.point[0].x = 50;
+    player_created->positions.point[0].y = 50;
     
     /* Initialisation de la couleur RGB du joueur */
     player_created->color.r = 0;
@@ -319,4 +320,159 @@ char* rename_if_not_unique(char* name, size_t name_size, Players the_players) {
 
     
     return new_name;
+}
+
+/**
+ * Mise a jour des positions des joueurs
+ * en fonction de leur direction et de leur precedente position
+ * Le nombre de positions ajoutees se fait en fonction de la vitesse du joueur
+ * 
+ * NOTA: Le repere graphique choisi est le meme que celui de Java
+ *       A savoir l'axe des ordonnees vers le bas
+ *       et l'axe des abscisses vers la droite
+ * @param the_players Liste de joueurs
+ */
+void update_positions(Players the_players) {
+    size_t i, j;
+    
+    Player current_player;
+    Coord new_position;
+    Coord old_position;
+    size_t size;
+    Speed speed;
+    
+    for(i = 0; i < the_players->size; i++) {
+        current_player = the_players->player[i];
+        size = current_player->positions.size;
+        old_position = current_player->positions.point[size-1];
+        speed = current_player->speed;
+        
+        /* Initialisation de la nouvelle position */
+        new_position.x = old_position.x;
+        new_position.y = old_position.y;
+        
+        switch(current_player->dir) {
+            case TOP:
+                /* Ajout d'un nombre de positions proportionnel a la vitesse */
+                for(j = 0; j < speed; j++) {
+                    new_position.y--;
+                    /*add_position(current_player, new_position);*/
+                }
+                break;
+            
+            case BOTTOM:
+                for(j = 0; j < speed; j++) {
+                    new_position.y++;
+                    /*add_position(current_player, new_position);*/
+                }
+                break;
+                
+            case LEFT:
+                for(j = 0; j < speed; j++) {
+                    new_position.x--;
+                    /*add_position(current_player, new_position);*/
+                }
+                break;
+                
+            case RIGHT:
+                for(j = 0; j < speed; j++) {
+                    new_position.x++;
+                    add_position(current_player, new_position);
+                }
+                break;
+        }
+    }
+}
+
+/**
+ * Ajouter une position a un joueur
+ * @param player Le joueur dont on s'interesse
+ * @param coord Les coordonnees de la nouvelle position
+ */
+void add_position(Player player, Coord coord) {
+    /*size_t size = player->positions.size;*/
+    Coord* positions = player->positions.point;
+    
+    /* Reallocation memoire pour une nouvelle position */
+    /*positions = realloc(positions, 300 * sizeof(Coord));*/
+    
+    /* Ajout de la nouvelle position */
+    /*positions[size] = coord;*/
+    positions[0] = coord;
+    
+    /* Mise a jour de la taille */
+    /*player->positions.size = size + 1;*/
+}
+
+/**
+ * Recuperer l'identifiant du joueur en collision avec un engin
+ * @param the_players Liste de joueurs
+ * @return L'id du joueur en cas de collision, 0 sinon
+ *         (l'identifiant d'un joueur etant strictement superieur a zero)
+ */
+uint16_t get_id_collision(Players the_players) {
+    int collision = 0;
+    Player player1, player2;
+    size_t i = 0;
+    size_t j = 0;
+    
+    while(!collision && i < the_players->size) {
+        player1 = the_players->player[i];
+
+        while(!collision && j < the_players->size) {
+            player2 = the_players->player[j];
+
+            collision = is_collision(player1, player2);
+        }
+    }
+    
+    if(collision) {
+        return player1->id;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Detection d'une collision entre deux joueurs
+ * @param player1 Joueur a tester 
+ * @param player2 Joueur a comparer
+ * @return TRUE(1) si le joueur est inscrit, FALSE(0) sinon
+ */
+int is_collision(Player player1, Player player2) {
+    int collision = 0;
+    size_t i = 0;
+    size_t j = 0;
+    Coord current_position1;
+    Coord current_position2;
+    size_t size;
+    
+    /* En cas de verification de collision avec soi meme
+     * (avec son mur d'energie)
+     * on ne compare pas les dernieres positions
+     */
+    size = player2->positions.size;
+    if(player1->id == player2->id) {
+        size -= player2->speed;
+    }
+    
+    /* Recherche de la presence d'une collision du player 1 avec le player 2
+     * Seules les dernieres positions du player1 sont prises compte
+     * car elles correspondent a la tete de l'engin
+     */
+    while(!collision && i < player1->positions.size && i < player1->speed) {
+        current_position1 = player1->positions.point[i];
+        
+        while(!collision && j < size) {
+            current_position2 = player2->positions.point[j];
+
+            /* Detection d'une collision */
+            if(current_position1.x == current_position2.x &&
+               current_position1.y == current_position2.y) {
+                collision = 1;
+            }
+        }
+    }
+    
+    return collision;
 }

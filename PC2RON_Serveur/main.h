@@ -8,11 +8,14 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+void handle_winner(void);
+void handle_loosers(void);
 void handle_player_connection(int sock);
 void handle_player_registration(int sock);
 void handle_order(int sock);
 void send_countdown(int max_number);
 
+void* THREAD_main(void* args) __attribute__((noreturn));
 void* THREAD_serveur(void *args) __attribute__((noreturn));
 void* THREAD_instant(void *args) __attribute__((noreturn));
 

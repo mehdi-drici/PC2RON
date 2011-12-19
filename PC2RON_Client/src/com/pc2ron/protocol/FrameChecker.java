@@ -87,7 +87,9 @@ public class FrameChecker implements IFrameChecker {
                         checkUser(frame);
                         break;
                         
-                    default:;
+                    default:
+                        // Type de trame inconnu
+                        throw new FormatException();
                 }
                 break;
             
@@ -95,6 +97,8 @@ public class FrameChecker implements IFrameChecker {
                 break;
              
             // Fanion inconnu
+            // Ce code ne doit jamais etre atteint
+            // Une erreur de fanion est reportee par la couche transport
             default:
                 throw new FormatException();
         }
@@ -287,18 +291,17 @@ public class FrameChecker implements IFrameChecker {
      *                         au protocole PC2RON
      */
     @Override
-    public void checkTurn(IFrame frame) throws FormatException {
-        // Nombre d'informations relatives a un joueur
-        // id, x, y et dir
-        final int DataUserSize = 4;
-        
+    public void checkTurn(IFrame frame) throws FormatException {        
         EFrameType frameType = EFrameType.Turn;
         IData field;
         
         // Verification du nombre de donnees
         // Le calcul est effectue en conformite avec la structure 
         // d'une trame Turn
-        if(frame.getDataSize() > 1 && (frame.getDataSize()-1) % IProtocol.PLAYER_DATA_SIZE != 0) {
+        // La trame Turn doit au minimum contenir les informations
+        // d'un joueur
+        if(frame.getDataSize() <= 1 || (frame.getDataSize()-1) % 
+                                         IProtocol.PLAYER_DATA_SIZE != 0) {
             throw new FormatException(frameType.toString(), 
                                       "Nombre de donnees incorrect");
         }
@@ -310,11 +313,12 @@ public class FrameChecker implements IFrameChecker {
                                       "Le temps ecoule est incorrect");
         }
         
-        int playersSize = (frame.getDataSize()-1) / DataUserSize;
+        int playersSize = (frame.getDataSize()-1) / IProtocol.PLAYER_DATA_SIZE;
+        
         for(int i=0; i < playersSize; i++) {
             
             // Verification des informations de chaque joueur
-            for(int j=1; j < IProtocol.PLAYER_DATA_SIZE; j++) {
+            for(int j=1; j <= IProtocol.PLAYER_DATA_SIZE; j++) {
                 field = frame.getData().get((IProtocol.PLAYER_DATA_SIZE * i) + j);
                 
                 if(! (field instanceof DataUint16)) {
